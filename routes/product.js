@@ -1,5 +1,7 @@
 import express from "express"
+import productModel from "../models/product.js"
 const router = express.Router()
+
 
 router.get("/", (req, res) => {
     res.json({
@@ -8,16 +10,25 @@ router.get("/", (req, res) => {
 })
 
 router.post("/create", (req, res) => {
-    const newProduct = {
+    const newProduct = new productModel({
         name: req.body.productName,
         price: req.body.productPrice,
         desc: req.body.content
-    }
-
-    res.json({
-        msg: "post new product.js",
-        newProductInfo: newProduct
     })
+    newProduct
+        .save()
+        .then(result => {
+            res.json({
+                msg: "post new product.js",
+                newProductInfo: {
+                    name: result.name,
+                    price: result.price
+                }
+            })
+        })
+        .catch(err => console.log(err.message))
+
+
 })
 
 router.put("/update", (req, res) => {

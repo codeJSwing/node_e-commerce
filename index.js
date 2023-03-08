@@ -22,7 +22,7 @@ app.use(morgan("dev"))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: false}))
 
-app.use("/product.js", productRouter)
+app.use("/product", productRouter)
 app.use("/order", orderRouter)
 
 
