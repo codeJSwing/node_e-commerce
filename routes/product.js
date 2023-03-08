@@ -18,10 +18,6 @@ router.get("/", (req, res) => {
                 msg: err.message
             })
         })
-    // res.json({
-    //     msg: "get all products"
-    // })
-
 })
 
 // 상세(특정) product를 불러오는 API
@@ -29,6 +25,12 @@ router.get("/:id", (req, res) => {
     productModel
         .findById(req.params.id)
         .then(product => {
+            // 데이터가 없으면
+            if(product == null){
+                res.json({
+                    msg: "no data"
+                })
+            }
             res.json({
                 msg: `successful get product ${req.params.id}`,
                 product: product
@@ -75,10 +77,36 @@ router.put("/update", (req, res) => {
     })
 })
 
-router.delete("/delete", (req, res) => {
-    res.json({
-        msg: "delete data"
-    })
+// 전체 삭제
+router.delete("/", (req, res) => {
+    productModel
+        .deleteMany()
+        .then(() => {
+            res.json({
+                msg: "successful delete data"
+            })
+        })
+        .catch(err => {
+            res.status(404).json({
+                msg: err.message
+            })
+        })
+})
+
+// 특정 제품 삭제
+router.delete("/:id", (req, res) =>{
+    productModel
+        .findByIdAndDelete(req.params.id)
+        .then(() => {
+            res.json({
+                msg: "successful delete product"
+            })
+        })
+        .catch(err => {
+            res.status(404).json({
+                msg: err.message
+            })
+        })
 })
 
 export default router
