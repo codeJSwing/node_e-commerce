@@ -15,7 +15,7 @@ router.post("/create", (req, res) => {
     }
 
     res.json({
-        msg: "post new product",
+        msg: "post new product.js",
         newProductInfo: newProduct
     })
 })
