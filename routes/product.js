@@ -71,10 +71,32 @@ router.post("/create", (req, res) => {
         })
 })
 
-router.put("/update", (req, res) => {
-    res.json({
-        msg: "update data"
-    })
+router.put("/:id", (req, res) => {
+    // 업데이트 할 대상자
+    // 업데이트 할 내용
+    // 데이터가 담겨져 있는 그릇
+    const updateOps = {};
+    for (const ops of req.body){
+        updateOps[ops.propName] = ops.value;
+    }
+    productModel
+        .findByIdAndUpdate(req.params.id, {$set: updateOps})
+        .then(_ => {
+            res.json({
+                msg: `updated product by ${req.params.id}`
+            })
+        })
+        .catch(err => {
+            res.status(404).json({
+                msg: err.message
+            })
+        })
+
+
+
+    // res.json({
+    //     msg: "update data"
+    // })
 })
 
 // 전체 삭제
