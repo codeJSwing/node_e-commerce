@@ -55,7 +55,7 @@ router.post("/create", (req, res) => {
         .save()
         .then(result => {
             res.json({
-                msg: "post new product.js",
+                msg: "post new product",
                 newProductInfo: {
                     id: result._id,
                     name: result.name,
@@ -92,11 +92,6 @@ router.put("/:id", (req, res) => {
             })
         })
 
-
-
-    // res.json({
-    //     msg: "update data"
-    // })
 })
 
 // 전체 삭제

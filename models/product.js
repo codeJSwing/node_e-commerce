@@ -5,9 +5,20 @@ import mongoose from "mongoose";
 // 2.
 const productSchema = mongoose.Schema({
     id: mongoose.Schema.Types.ObjectId,
-    name: String,
-    price: Number,
-    desc: String
+    name: {
+      type: String,
+      required: true
+    },
+    price: {
+        type: Number,
+        required: true,
+        default: 1000
+    },
+    desc: {
+        type: String,
+        minLength: 10,
+        maxLength: 300
+    }
 })
 
 // 3.
