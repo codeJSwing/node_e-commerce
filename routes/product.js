@@ -1,74 +1,126 @@
 import express from "express"
 import productModel from "../models/product.js"
+import product from "../models/product.js";
 const router = express.Router()
 
 // 전체 products 불러오는 API
-router.get("/", (req, res) => {
-    productModel
-        .find()
-        .then(products => {
-            res.json({
-                msg: "successful all products",
-                count: products.length,
-                products: products
-            })
+router.get("/", async (req, res) => {
+    // productModel
+    //     .find()
+    //     .then(products => {
+    //         res.json({
+    //             msg: "successful all products",
+    //             count: products.length,
+    //             products: products
+    //         })
+    //     })
+    //     .catch(err => {
+    //         res.status(404).json({
+    //             msg: err.message
+    //         })
+    //     })
+    try {
+        const products = await productModel.find()
+        return res.json({
+            msg: "successful get products",
+            products: products.map(product => ({
+                name: product.name,
+                price: product.price,
+                id: product._id
+            }))
         })
-        .catch(err => {
-            res.status(404).json({
-                msg: err.message
-            })
+    } catch (err) {
+        res.status(500).json({
+            msg: err.message
         })
+    }
+
 })
 
 // 상세(특정) product를 불러오는 API
-router.get("/:id", (req, res) => {
-    productModel
-        .findById(req.params.id)
-        .then(product => {
-            // 데이터가 없으면
-            if(product == null){
-                res.json({
-                    msg: "no data"
-                })
-            }
-            res.json({
-                msg: `successful get product ${req.params.id}`,
-                product: product
+router.get("/:id", async (req, res) => {
+    // const product = await productModel.findById(req.params.id)
+    const {id} = req.params
+    // const {id, orderId} = req.params // 2개 이상인 경우
+    try{
+        const product = await productModel.findById(id)
+        if(!product){
+            return res.json({
+                msg: "no data"
             })
+        }
+        res.json({
+            msg: "get data",
+            product // 키와 value가 같으면 value를 생략 가능
         })
-        .catch(err => {
-            res.status(404).json({
-                msg: err.message
-            })
+    } catch(err) {
+        res.status(500).json({
+            msg: err.message
         })
+    }
+
+    // productModel
+    //     .findById(req.params.id)
+    //     .then(product => {
+    //         // 데이터가 없으면
+    //         if(product == null){
+    //             res.json({
+    //                 msg: "no data"
+    //             })
+    //         }
+    //         res.json({
+    //             msg: `successful get product ${req.params.id}`,
+    //             product: product
+    //         })
+    //     })
+    //     .catch(err => {
+    //         res.status(404).json({
+    //             msg: err.message
+    //         })
+    //     })
 
 
 })
 
-router.post("/create", (req, res) => {
-    const newProduct = new productModel({
-        name: req.body.productName,
-        price: req.body.productPrice,
-        desc: req.body.content
-    })
-    newProduct
-        .save()
-        .then(result => {
-            res.json({
-                msg: "post new product",
-                newProductInfo: {
-                    id: result._id,
-                    name: result.name,
-                    price: result.price,
-                    desc: result.desc
-                }
-            })
+router.post("/", async (req, res) => {
+    const {name, price, desc} = req.body
+
+    try {
+        const newProduct = new productModel({
+            name,
+            price,
+            desc // test할때 desc
         })
-        .catch(err => {
-             res.status(404).json({
-                 msg: err.message
-             })
+        const createdProduct = await newProduct.save()
+        return res.json({
+            msg: "completed product",
+            product: createdProduct
         })
+
+    } catch(err) {
+        res.status(500).json({
+            msg: err.message
+        })
+    }
+
+    // newProduct
+    //     .save()
+    //     .then(result => {
+    //         res.json({
+    //             msg: "post new product",
+    //             newProductInfo: {
+    //                 id: result._id,
+    //                 name: result.name,
+    //                 price: result.price,
+    //                 desc: result.desc
+    //             }
+    //         })
+    //     })
+    //     .catch(err => {
+    //          res.status(404).json({
+    //              msg: err.message
+    //          })
+    //     })
 })
 
 router.put("/:id", (req, res) => {
