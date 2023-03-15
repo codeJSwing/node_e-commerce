@@ -7,6 +7,7 @@ const app = express()
 
 import productRouter from "./routes/product.js"
 import orderRouter from "./routes/order.js"
+import userRouter from "./routes/user.js"
 import mongoose from "mongoose";
 
 dotenv.config()
@@ -24,6 +25,7 @@ app.use(bodyParser.urlencoded({extended: false}))
 
 app.use("/product", productRouter)
 app.use("/order", orderRouter)
+app.use("/user", userRouter)
 
 
 
