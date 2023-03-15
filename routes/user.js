@@ -1,5 +1,6 @@
 import express from "express";
 import bcrypt from "bcrypt"
+import jwt from "jsonwebtoken"
 import userModel from "../models/user.js";
 const router = express.Router()
 
@@ -60,9 +61,15 @@ router.post("/login", async (req, res) => {
                 msg: `password is not matched`
             })
         }
+        // 3. generate jwt
+        const token = await jwt.sign(
+            { userId: user._id }, // 내용
+            process.env.SECRET_KEY, // 민감정보이기 때문에 환경변수화
+            { expiresIn: "1h"} // 만료 기한
+        )
         res.json({
             msg: `successful login`,
-            user
+            token
         })
     } catch (err) {
         res.status(500).json({
