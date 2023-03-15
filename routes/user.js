@@ -39,9 +39,31 @@ router.post("/signup", async (req, res) => {
 
 // login
 router.post("/login", async (req, res) => {
-    const {email, password} = req.body
-    try {
+    // 1. email 유무 체크
+    // 2. password 복호화(디코딩)
+    // 3. jsonwebtoken으로 리턴
 
+    const {email, password} = req.body
+
+    try {
+        // 1. email 유무 체크
+        const user = await userModel.findOne({email})
+        if (!user){
+           return res.status(400).json({
+               msg: `no user`
+           })
+        }
+        // 2. password 매칭
+        const isMatching = await bcrypt.compare(password, user.password)
+        if (!isMatching) {
+            return res.status(408).json({
+                msg: `password is not matched`
+            })
+        }
+        res.json({
+            msg: `successful login`,
+            user
+        })
     } catch (err) {
         res.status(500).json({
             msg: err.message
