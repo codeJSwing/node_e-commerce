@@ -1,63 +1,65 @@
 import express from "express"
 import orderModel from "../models/order.js";
+import checkAuth from "../middleware/check-auth.js";
+import userModel from "../models/user.js";
 const router = express.Router()
 
-router.get("/", (req, res) => {
-    orderModel
-        .find()
-        .populate("product", ["name", "price"])
-        .then(orders => {
-            res.json({
-                msg: "successful all orders",
-                orders: orders
-            })
+router.get("/", checkAuth, async (req, res) => {
+    try {
+        const order = await orderModel
+            .find()
+            .populate("product", ["name", "price"])
+            .populate("user")
+        res.json({
+            msg: `successful get order`,
+            order
         })
-        .catch(err => {
-            res.status(404).json({
-                msg: err.message
-            })
+    } catch (err) {
+        res.status(500).json({
+            msg: err.message
         })
+    }
 })
 
-router.get("/:id", (req, res) => {
-    orderModel
-        .findById(req.params.id)
-        .then(order => {
-            if(order == null){
-                res.json({
-                    msg: "no data"
-                })
-            }
-            res.json({
-                msg: `successful get order ${req.params.id}`,
-                order: order
+router.get("/:id", checkAuth, async (req, res) => {
+    const {id} = req.params
+    try {
+        const order = await orderModel.findById(id)
+        if (!order) {
+            return res.json({
+                msg: `no order`
             })
+        }
+        res.json({
+            msg: `successful get order by ${id}`,
+            order
         })
-        .catch(err => {
-            res.status(404).json({
-                msg: err.message
-            })
+
+    } catch (e) {
+        res.status(500).json({
+            msg: e.message
         })
+    }
 })
 
-router.post("/", (req, res) => {
-    const newOrder = new orderModel({
-        product: req.body.orderProduct,
-        quantity: req.body.orderQuantity
-    })
-    newOrder
-        .save()
-        .then(result => {
-            res.json({
-                msg: "post new order",
-                newOrderInfo: result
-            })
+router.post("/", checkAuth, async (req, res) => {
+    try {
+        const {userId} = req.user
+        const newOrder = new orderModel({
+            product: req.body.product,
+            quantity: req.body.quantity,
+            user: userId
         })
-        .catch(err => {
-            res.status(404).json({
-                msg: err.message
-            })
+        const order = newOrder.save()
+        res.json({
+            msg: `successful create new order`,
+            order
         })
+    } catch (e) {
+        res.status(500).json({
+            msg: e.message
+        })
+    }
 })
 
 router.put("/update", (req, res) => {
