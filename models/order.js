@@ -12,6 +12,11 @@ const orderSchema = schema({
     quantity: {
         type: Number,
         default: 1
+    },
+    user: {
+        type: schema.ObjectId,
+        ref: 'User',
+        required: true
     }
 })
 

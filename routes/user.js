@@ -2,6 +2,7 @@ import express from "express";
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import userModel from "../models/user.js";
+import checkAuth from "../middleware/check-auth.js";
 const router = express.Router()
 
 // sign up
@@ -76,6 +77,16 @@ router.post("/login", async (req, res) => {
             msg: err.message
         })
     }
+})
+
+// profile 정보 가져오기
+router.get("/", checkAuth, async (req, res) => {
+    const {userId} = req.user
+    const user = await userModel.findById(userId)
+    res.json({
+        msg: `get profile info`,
+        user
+    })
 })
 
 export default router

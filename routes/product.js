@@ -1,24 +1,11 @@
 import express from "express"
 import productModel from "../models/product.js"
 import product from "../models/product.js";
+import checkAuth from "../middleware/check-auth.js";
 const router = express.Router()
 
 // 전체 products 불러오는 API
 router.get("/", async (req, res) => {
-    // productModel
-    //     .find()
-    //     .then(products => {
-    //         res.json({
-    //             msg: "successful all products",
-    //             count: products.length,
-    //             products: products
-    //         })
-    //     })
-    //     .catch(err => {
-    //         res.status(404).json({
-    //             msg: err.message
-    //         })
-    //     })
     try {
         const products = await productModel.find()
         return res.json({
@@ -38,10 +25,8 @@ router.get("/", async (req, res) => {
 })
 
 // 상세(특정) product를 불러오는 API
-router.get("/:id", async (req, res) => {
-    // const product = await productModel.findById(req.params.id)
+router.get("/:id", checkAuth, async (req, res) => {
     const {id} = req.params
-    // const {id, orderId} = req.params // 2개 이상인 경우
     try{
         const product = await productModel.findById(id)
         if(!product){
@@ -147,7 +132,7 @@ router.put("/:id", (req, res) => {
 })
 
 // 전체 삭제
-router.delete("/", (req, res) => {
+router.delete("/", checkAuth, (req, res) => {
     productModel
         .deleteMany()
         .then(() => {
