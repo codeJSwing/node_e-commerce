@@ -1,13 +1,14 @@
 import productModel from "../models/product.js";
 
 const getAllProducts = async (req, res) => {
+    const {name, price} = req.body
     try {
         const products = await productModel.find()
         return res.json({
             msg: "successful get products",
             products: products.map(product => ({
-                name: product.name,
-                price: product.price,
+                name,
+                price,
                 id: product._id
             }))
         })
@@ -16,7 +17,6 @@ const getAllProducts = async (req, res) => {
             msg: err.message
         })
     }
-
 }
 
 const getProduct = async (req, res) => {
@@ -24,35 +24,32 @@ const getProduct = async (req, res) => {
     try{
         const product = await productModel.findById(id)
         if(!product){
-            return res.json({
+            return res.status(404).json({
                 msg: "no data"
             })
         }
         res.json({
-            msg: "get data",
-            product // 키와 value가 같으면 value를 생략 가능
+            msg: `successful get data`,
+            product
         })
     } catch(err) {
         res.status(500).json({
             msg: err.message
         })
     }
-
-
 }
 
 const createProduct = async (req, res) => {
     const {name, price, desc} = req.body
-
     try {
         const newProduct = new productModel({
             name,
             price,
-            desc // test할때 desc
+            desc
         })
         const createdProduct = await newProduct.save()
         return res.json({
-            msg: "completed product",
+            msg: `successfully created new product`,
             product: createdProduct
         })
 
@@ -64,56 +61,51 @@ const createProduct = async (req, res) => {
 }
 
 const updateProduct = async (req, res) => {
-    // 업데이트 할 대상자
-    // 업데이트 할 내용
-    // 데이터가 담겨져 있는 그릇
-    const updateOps = {};
-    for (const ops of req.body){
-        updateOps[ops.propName] = ops.value;
+    const {id} = req.params
+    try {
+        const updateOps = {};
+        for (const ops of req.body){
+            updateOps[ops.propName] = ops.value;
+        }
+        const updateProduct = await productModel.findByIdAndUpdate(id, {$set: updateOps})
+        res.json({
+            msg: `successfully updated product by ${req.params.id}`,
+            updateProduct
+        })
+    } catch (err) {
+        res.status(500).json({
+            msg: err.message
+        })
     }
-    productModel
-        .findByIdAndUpdate(req.params.id, {$set: updateOps})
-        .then(_ => {
-            res.json({
-                msg: `updated product by ${req.params.id}`
-            })
-        })
-        .catch(err => {
-            res.status(404).json({
-                msg: err.message
-            })
-        })
-
 }
 
 const deleteProducts = async (req, res) => {
-    productModel
-        .deleteMany()
-        .then(() => {
-            res.json({
-                msg: "successful delete data"
-            })
+    try {
+        const orders = await productModel.deleteMany()
+        res.json({
+            msg: `successfully deleted all data`,
+            orders
         })
-        .catch(err => {
-            res.status(404).json({
-                msg: err.message
-            })
+    } catch (e) {
+        res.status(500).json({
+            msg: e.message
         })
+    }
 }
 
 const deleteProduct = async (req, res) =>{
-    productModel
-        .findByIdAndDelete(req.params.id)
-        .then(() => {
-            res.json({
-                msg: "successful delete product"
-            })
+    const {id} = req.params
+    try {
+        const product = await productModel.findByIdAndDelete(id)
+        res.json({
+            msg: `successfully deleted data`,
+            product
         })
-        .catch(err => {
-            res.status(404).json({
-                msg: err.message
-            })
+    } catch (e) {
+        res.status(500).json({
+            msg: e.message
         })
+    }
 }
 
 export {
