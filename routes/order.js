@@ -1,100 +1,26 @@
 import express from "express"
-import orderModel from "../models/order.js";
 import checkAuth from "../middleware/check-auth.js";
-import userModel from "../models/user.js";
+import {
+    getAllOrders,
+    getOrder,
+    createOrder,
+    updateOrder,
+    deleteAllOrders,
+    deleteOrder
+} from "../controller/order.js";
+
 const router = express.Router()
 
-router.get("/", checkAuth, async (req, res) => {
-    try {
-        const order = await orderModel
-            .find()
-            .populate("product", ["name", "price"])
-            .populate("user")
-        res.json({
-            msg: `successful get order`,
-            order
-        })
-    } catch (err) {
-        res.status(500).json({
-            msg: err.message
-        })
-    }
-})
+router.get("/", checkAuth, getAllOrders)
 
-router.get("/:id", checkAuth, async (req, res) => {
-    const {id} = req.params
-    try {
-        const order = await orderModel.findById(id)
-        if (!order) {
-            return res.json({
-                msg: `no order`
-            })
-        }
-        res.json({
-            msg: `successful get order by ${id}`,
-            order
-        })
+router.get("/:id", checkAuth, getOrder)
 
-    } catch (e) {
-        res.status(500).json({
-            msg: e.message
-        })
-    }
-})
+router.post("/", checkAuth, createOrder)
 
-router.post("/", checkAuth, async (req, res) => {
-    try {
-        const {userId} = req.user
-        const newOrder = new orderModel({
-            product: req.body.product,
-            quantity: req.body.quantity,
-            user: userId
-        })
-        const order = newOrder.save()
-        res.json({
-            msg: `successful create new order`,
-            order
-        })
-    } catch (e) {
-        res.status(500).json({
-            msg: e.message
-        })
-    }
-})
+router.put("/:id", updateOrder)
 
-router.put("/update", (req, res) => {
-})
+router.delete("/", deleteAllOrders)
 
-// 전체 삭제
-router.delete("/", (req, res) => {
-    orderModel
-        .deleteMany()
-        .then(() => {
-            res.json({
-                msg: "successful all data delete"
-            })
-        })
-        .catch(err => {
-            res.status(404).json({
-                msg: err.message
-            })
-        })
-})
-
-// 일부 삭제
-router.delete("/:id", (req, res) =>{
-    orderModel
-        .findByIdAndRemove(req.params.id)
-        .then(() => {
-            res.json({
-                msg: "successful delete a data"
-            })
-        })
-        .catch(err => {
-            res.json({
-                msg: err.message
-            })
-        })
-})
+router.delete("/:id", deleteOrder)
 
 export default router
