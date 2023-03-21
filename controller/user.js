@@ -2,7 +2,10 @@ import userModel from "../models/user.js";
 import jwt from "jsonwebtoken";
 import user from "../models/user.js";
 import nodemailer from "nodemailer"
-import sendEmail from "../config/sendEmail.js";
+import {
+    sendEmail,
+    signupTemplete
+} from "../config/sendEmail.js";
 
 const createSignup = async (req, res) => {
     const {email, username, password, birth} = req.body
@@ -26,7 +29,7 @@ const createSignup = async (req, res) => {
         })
         const createUser = await newUser.save()
         // email 전송
-        await sendEmail(createUser.email)
+        await sendEmail(createUser.email, "가입확인메일", signupTemplete)
 
         res.json({
             msg: `successful new User`,
