@@ -1,6 +1,8 @@
 import userModel from "../models/user.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import checkAuth from "../middleware/check-auth.js";
+import user from "../models/user.js";
 
 const createSignup = async (req, res) => {
     const {email, password, username, birth} = req.body
@@ -83,8 +85,34 @@ const getProfile = async (req, res) => {
     })
 }
 
+const updatePassword = async (req, res) => {
+    // 로직은 id 찾기, id에 해당되는 유저의 패스워드 변경
+    const {userId} = req.user
+    const {password} = req.body
+    try {
+        const passwordField = {}
+
+        // password 암호화
+        if (password) {
+            const hashedPassword = await bcrypt.hash(password, 10)
+            passwordField.password = hashedPassword
+        }
+        // user를 찾고 해당되는 user의 패스워드 변경
+        await userModel.findByIdAndUpdate(userId, {password: passwordField.password})
+        return res.json({
+            msg: `updated password`,
+            user
+        })
+    } catch (e) {
+        res.status(500).json({
+            msg: e.message
+        })
+    }
+})
+
 export {
     createSignup,
     createLogin,
-    getProfile
+    getProfile,
+    updatePassword
 }

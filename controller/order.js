@@ -66,7 +66,7 @@ const updateOrder = async (req, res) => {
             updateOps[ops.propName] = ops.value;
         }
         const updateOrder = await orderModel.findByIdAndUpdate(id, {$set: updateOps})
-        return res.json({
+        res.json({
             msg: `successfully updated data by ${id}`,
             updateOrder
         })
