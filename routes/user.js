@@ -3,11 +3,9 @@ import checkAuth from "../middleware/check-auth.js";
 import {
     createLogin,
     createSignup,
-    getProfile, updatePassword
+    getProfile,
+    updatePassword
 } from "../controller/user.js";
-import userModel from "../models/user.js";
-import user from "../models/user.js";
-import bcrypt from "bcrypt";
 
 const router = express.Router()
 
