@@ -28,11 +28,11 @@ const userSchema = mongoose.Schema(
         },
         username: {
             type: String,
-            minLength: 2
-            // todo: 최소, 최대 글자 설정
+            minLength: 2,
+            maxLength: 10
         },
         birth: {
-            type: Number, // todo: date로 변경
+            type: Date,
             required: false,
             length: 6
         },
@@ -50,12 +50,10 @@ const userSchema = mongoose.Schema(
 userSchema.pre('save', async function (next) {
     const user = this
     if (user.isModified('password') || user.isNew) {
-        console.log("enter")
         try {
             const salt = await bcrypt.genSalt(10)
             const hash = await bcrypt.hash(user.password, salt)
             user.password = hash
-            console.log("exit")
             next()
         } catch (e) {
             return next(e)

@@ -3,14 +3,10 @@ import checkAuth from "../middleware/check-auth.js";
 import {
     createLogin,
     createSignup,
+    findPassword,
     getProfile,
     updatePassword
 } from "../controller/user.js";
-import userModel from "../models/user.js";
-import {
-    sendEmail,
-    findPasswordTemplete
-} from "../config/sendEmail.js";
 
 const router = express.Router()
 
@@ -27,31 +23,6 @@ router.get("/", checkAuth, getProfile)
 router.put("/update/password", checkAuth, updatePassword)
 
 // find password
-router.post("/find/password", async (req, res) => {
-    const {email} = req.body
-    console.log(email)
-    try {
-        // 1. 이메일 찾기
-        const user = await userModel.findOne({email})
-        console.log(user)
-        if (!user) {
-            res.status(408).json({
-                msg: `no email`
-            })
-        }
-        console.log(user.email)
-        //
-        // // 2. 메일 전송
-        await sendEmail(email, "비밀번호 변경", findPasswordTemplete)
-        res.json({
-            msg: `Please check your email`
-        })
-
-    } catch (e) {
-        res.status(500).json({
-            msg: e.message
-        })
-    }
-})
+router.post("/find/password", findPassword)
 
 export default router
