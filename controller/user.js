@@ -83,7 +83,7 @@ const updatePassword = async (req, res) => {
     const {password} = req.body
     try {
         const passwordField = {}
-
+        // todo: 굳이 if문 안에 넣은 이유는?
         // password 암호화
         if (password) {
             // const hashedPassword = await bcrypt.hash(password, 10)
