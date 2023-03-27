@@ -7,14 +7,10 @@ const signupTemplete = (token) =>
             http://localhost:3000/email/confirm?token=${token}
      `
 
-const findPasswordTemplete =
+const findPasswordTemplete = (token) =>
     `
             아래버튼을 누르시면 비밀번호를 변경합니다.<br/>
-            <form action="#" method="POST">
-                <button>
-                    비밀번호변경
-                </button>
-            </form>
+            http://localhost:3000/change/password?token=${token}
             `
 
 const sendEmail = async (email, title, body) => {
