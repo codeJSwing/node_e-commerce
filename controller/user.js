@@ -8,9 +8,9 @@ import {
 } from "../config/sendEmail.js";
 
 const createSignup = async (req, res) => {
-    const {email, username, password, birth} = req.body
+    const { email, username, password, birth } = req.body
     try {
-        const user = await userModel.findOne({email})
+        const user = await userModel.findOne({ email })
         if (user) {
             return res.status(404).json({
                 msg: `exists user`
@@ -23,7 +23,13 @@ const createSignup = async (req, res) => {
             birth
         })
         const createUser = await newUser.save()
-        await sendEmail(createUser.email, "가입확인메일", signupTemplete)
+        // token 생성
+        const confirmToken = await jwt.sign(
+            {email: createUser.email},
+            process.env.EMAIL_CONFIRM_ACCESS_KEY,
+            {expiresIn: "10m"}
+        )
+        await sendEmail(createUser.email, "가입확인메일", signupTemplete(confirmToken))
         res.json({
             msg: `successful new User`,
             user: createUser
@@ -36,9 +42,9 @@ const createSignup = async (req, res) => {
 }
 
 const createLogin = async (req, res) => {
-    const {email, password} = req.body
+    const { email, password } = req.body
     try {
-        const user = await userModel.findOne({email})
+        const user = await userModel.findOne({ email })
         if (!user) {
             return res.status(400).json({
                 msg: `no user`
@@ -53,9 +59,9 @@ const createLogin = async (req, res) => {
 
         // 3. generate jwt
         const token = await jwt.sign(
-            {userId: user._id}, // 내용
+            { userId: user._id }, // 내용
             process.env.SECRET_KEY, // 민감정보이기 때문에 환경변수화
-            {expiresIn: "1h"} // 만료 기한
+            { expiresIn: "1h" } // 만료 기한
         )
         res.json({
             msg: `successful login`,
@@ -69,18 +75,24 @@ const createLogin = async (req, res) => {
 }
 
 const getProfile = async (req, res) => {
-    const {userId} = req.user
-    const user = await userModel.findById(userId)
-    res.json({
-        msg: `get profile info`,
-        user
-    })
+    const { userId } = req.user
+    try {
+        const user = await userModel.findById(userId)
+        res.json({
+            msg: `get profile info`,
+            user
+        })
+    } catch (e) {
+        res.status(500).json({
+            msg: e.message
+        })
+    }
 }
 
 const updatePassword = async (req, res) => {
     // 로직은 id 찾기, id에 해당되는 유저의 패스워드 변경
-    const {userId} = req.user
-    const {password} = req.body
+    const { userId } = req.user
+    const { password } = req.body
     try {
         const passwordField = {}
         // todo: 굳이 if문 안에 넣은 이유는?
@@ -90,7 +102,7 @@ const updatePassword = async (req, res) => {
             passwordField.password = password
         }
         // user를 찾고 해당되는 user의 패스워드 변경
-        await userModel.findByIdAndUpdate(userId, {$set: {password: passwordField.password}})
+        await userModel.findByIdAndUpdate(userId, { $set: { password: passwordField.password } })
         return res.json({
             msg: `updated password`,
             user
@@ -103,11 +115,11 @@ const updatePassword = async (req, res) => {
 }
 
 const findPassword = async (req, res) => {
-    const {email} = req.body
+    const { email } = req.body
     console.log(email)
     try {
         // 1. 이메일 찾기
-        const user = await userModel.findOne({email})
+        const user = await userModel.findOne({ email })
         if (!user) {
             res.status(408).json({
                 msg: `no email`

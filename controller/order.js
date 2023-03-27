@@ -18,9 +18,12 @@ const getAllOrders = async (req, res) => {
 }
 
 const getOrder = async (req, res) => {
-    const {id} = req.params
+    const { id } = req.params
     try {
-        const order = await orderModel.findById(id)
+        const order = await orderModel
+            .findById(id)
+            .populate("product", ["name", "price", "desc"])
+            .populate("user")
         if (!order) {
             return res.json({
                 msg: `no order`
@@ -39,11 +42,12 @@ const getOrder = async (req, res) => {
 }
 
 const createOrder = async (req, res) => {
+    const { userId } = req.user
+    const { product, quantity } = req.body
     try {
-        const {userId} = req.user
         const newOrder = new orderModel({
-            product: req.body.product,
-            quantity: req.body.quantity,
+            product,
+            quantity,
             user: userId
         })
         const order = await newOrder.save()
@@ -59,13 +63,13 @@ const createOrder = async (req, res) => {
 }
 
 const updateOrder = async (req, res) => {
-    try{
-        const {id} = req.params
+    try {
+        const { id } = req.params
         const updateOps = {}
-        for (const ops of req.body){
+        for (const ops of req.body) {
             updateOps[ops.propName] = ops.value;
         }
-        const updateOrder = await orderModel.findByIdAndUpdate(id, {$set: updateOps})
+        const updateOrder = await orderModel.findByIdAndUpdate(id, { $set: updateOps })
         res.json({
             msg: `successfully updated data by ${id}`,
             updateOrder
@@ -91,10 +95,15 @@ const deleteAllOrders = async (req, res) => {
     }
 }
 
-const deleteOrder = async (req, res) =>{
-    const {id} = req.params
+const deleteOrder = async (req, res) => {
+    const { id } = req.params
     try {
         const order = await orderModel.findByIdAndDelete(id)
+        if (!order) {
+            return res.status(410).json({
+                msg: `There is no order to delete`
+            })
+        }
         res.json({
             msg: `successfully deleted data by ${id}`,
             order

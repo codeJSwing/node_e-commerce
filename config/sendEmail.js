@@ -1,16 +1,14 @@
 import nodemailer from "nodemailer";
+import {token} from "morgan";
 
-const signupTemplete =
-            `
+const signupTemplete = (token) =>
+    `
             아래버튼을 누르시면 가입이 완료됩니다.<br/>
-            <form action="#" method="POST">
-                <button>
-                    가입확인
-                </button>
-            </form>
-            `
+            http://localhost:3000/email/confirm?token=${token}
+     `
+
 const findPasswordTemplete =
-            `
+    `
             아래버튼을 누르시면 비밀번호를 변경합니다.<br/>
             <form action="#" method="POST">
                 <button>

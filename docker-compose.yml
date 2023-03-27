@@ -1,0 +1,6 @@
+services:
+  rest-api:
+    build: ./
+    hostname: web1
+    ports:
+      - '4444:4444'

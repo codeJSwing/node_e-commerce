@@ -69,7 +69,7 @@ const updateProduct = async (req, res) => {
         }
         const updateProduct = await productModel.findByIdAndUpdate(id, {$set: updateOps})
         res.json({
-            msg: `successfully updated product by ${req.params.id}`,
+            msg: `successfully updated product by ${id}`,
             updateProduct
         })
     } catch (err) {
