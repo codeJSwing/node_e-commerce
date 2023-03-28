@@ -1,6 +1,28 @@
 services:
+  nginx:
+      image: nginx:latest
+      container_name: nginx
+      restart: unless-stopped
+      ports:
+        - 80:80
+      volumes:
+        - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      depends_on:
+        - rest-api
+      networks:
+        - ecommers_network
   rest-api:
-    build: ./
-    hostname: web1
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules
     ports:
       - '4444:4444'
+    networks:
+      - ecommers_network
+
+networks:
+  ecommers_network:
+    driver: bridge

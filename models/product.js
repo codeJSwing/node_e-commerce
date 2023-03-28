@@ -1,8 +1,5 @@
-// 1.
 import mongoose from "mongoose";
 
-
-// 2.
 const productSchema = mongoose.Schema({
     id: mongoose.Schema.Types.ObjectId,
     name: {
@@ -21,7 +18,5 @@ const productSchema = mongoose.Schema({
     }
 })
 
-// 3.
-// module.exports = mongoose.model("Product", productSchema)
 const productModel = mongoose.model("Product", productSchema)
 export default productModel

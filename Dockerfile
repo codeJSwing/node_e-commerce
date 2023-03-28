@@ -1,14 +1,15 @@
-FROM node:16
+FROM node:16-alpine
 
+RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
-COPY package.json ./
+COPY package.json .
 
-RUN npm install -g pnpm
-RUN pnpm install
+RUN npm install
 
-COPY . .
+COPY index.js ./
 
-CMD ["npm", "start"]
+EXPOSE 4444
+CMD ["npm", "run", "dev"]
 
 

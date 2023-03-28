@@ -6,6 +6,7 @@ import {
     sendEmail,
     signupTemplete
 } from "../config/sendEmail.js";
+import bcrypt from "bcrypt";
 
 const createSignup = async (req, res) => {
     const {email, username, password, birth} = req.body
@@ -76,6 +77,7 @@ const createLogin = async (req, res) => {
 
 const getProfile = async (req, res) => {
     const {userId} = req.user
+    console.log("+++++++", req.user)
     try {
         const user = await userModel.findById(userId)
         res.json({
@@ -117,11 +119,9 @@ const updatePassword = async (req, res) => {
 const findPassword = async (req, res) => {
     const {email} = req.body
     try {
-        // 1. 이메일 찾기
         const user = await userModel.findOne({email})
-        console.log(user)
         if (!user) {
-            res.status(408).json({
+            return res.status(408).json({
                 msg: `no email`
             })
         }
@@ -144,10 +144,61 @@ const findPassword = async (req, res) => {
     }
 }
 
+const resetPassword = async (req, res) => {
+    const {password1, password2, token} = req.body
+    try {
+        // 1. 토큰을 풀어서 아이디를 찾고
+        const {id} = await jwt.verify(token, process.env.FIND_PASSWORD_ACCESS_KEY)
+        if (password1 !== password2) {
+            return res.status(404).json({
+                msg: `please check password and confirm password`
+            })
+        }
+        const hashedPassword = await bcrypt.hash(password1, 10)
+        // 2. 아이디에 해당되는 패스워드 변경
+        await userModel.findByIdAndUpdate(id, {password: hashedPassword})
+        return res.json({
+            msg: `successful update password`
+        })
+    } catch (e) {
+        res.status(500).json({
+            msg: e.message
+        })
+    }
+}
+
+const emailConfirm = async (req, res) => {
+    const {token} = req.body
+    try {
+        // 토큰 payload 추출 (이메일)
+        const {email} = await jwt.verify(token, process.env.EMAIL_CONFIRM_ACCESS_KEY)
+        // 이메일에 해당되는 유저를 찾는다.
+        const user = await userModel.findOne({email})
+        if (user.isEmailConfirm === true) {
+            return res.status(410).json({
+                msg: `already isEmailConfirmed true`
+            })
+        }
+        // 유저의 이메일 유저 confirm : false -> true로 변경
+        await userModel.findOneAndUpdate(email, {isEmailConfirm: true})
+        res.json({
+            msg: `successful updated email confirm`
+        })
+    } catch (e) {
+        res.status(500).json({
+            msg: e.message
+        })
+
+    }
+
+}
+
 export {
     createSignup,
     createLogin,
     getProfile,
     updatePassword,
-    findPassword
+    findPassword,
+    resetPassword,
+    emailConfirm
 }
