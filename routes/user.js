@@ -1,5 +1,5 @@
 import express from "express";
-// import checkAuth from "../middleware/check-auth.js";
+import checkAuth from "../middleware/check-auth.js";
 import {
     createLogin,
     createSignup,
@@ -10,10 +10,10 @@ import {
     updatePassword
 } from "../controller/user.js";
 
-import jwt from "jsonwebtoken"
-import passport from "passport";
+// import jwt from "jsonwebtoken"
+// import passport from "passport";
 
-const checkAuth = passport.authenticate('jwt', {session: false})
+// const checkAuth = passport.authenticate('jwt', {session: false})
 
 const router = express.Router()
 
@@ -30,12 +30,12 @@ router.post("/login", createLogin)
 router.post("/find/password", findPassword)
 
 // emailConfirm(isEmailConfirmed false -> true)
-router.put("/email/confirm", emailConfirm)
+router.put("/confirm/email", emailConfirm)
 
 // 패스워드 변경 (로그인 후)
-router.put("/update/password", checkAuth, updatePassword)
+router.put("/password", checkAuth, updatePassword)
 
 // 패스워드 변경 (로그인 전)
-router.put("/password/reset", resetPassword)
+router.put("/reset/password", resetPassword)
 
 export default router

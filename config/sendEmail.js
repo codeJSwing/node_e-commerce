@@ -1,5 +1,4 @@
 import nodemailer from "nodemailer";
-import {token} from "morgan";
 
 const signupTemplete = (token) =>
     `
@@ -18,7 +17,7 @@ const sendEmail = async (email, title, body) => {
         service: process.env.MAIL_SERVICE,
         auth: {
             user: process.env.MAIL_USER,
-            pass: process.env.MAIL_SECRETKEY
+            pass: process.env.MAIL_SECRET_KEY
         }
     })
     const mailOptions = {

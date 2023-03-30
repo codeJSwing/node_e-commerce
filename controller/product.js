@@ -79,7 +79,7 @@ const updateProduct = async (req, res) => {
     }
 }
 
-const deleteProducts = async (req, res) => {
+const deleteAllProducts = async (req, res) => {
     try {
         const orders = await productModel.deleteMany()
         res.json({
@@ -113,6 +113,6 @@ export {
     getProduct,
     createProduct,
     updateProduct,
-    deleteProducts,
+    deleteAllProducts,
     deleteProduct
 }

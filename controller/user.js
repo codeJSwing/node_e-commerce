@@ -1,6 +1,5 @@
 import userModel from "../models/user.js";
 import jwt from "jsonwebtoken";
-import user from "../models/user.js";
 import {
     findPasswordTemplete,
     sendEmail,
@@ -51,18 +50,16 @@ const createLogin = async (req, res) => {
                 msg: `no user`
             })
         }
-        const isMatch = await user.matchPassword(password)
-        if (!isMatch) {
+        const isMatching = await user.matchPassword(password)
+        if (!isMatching) {
             return res.status(408).json({
                 msg: `password do not match`
             })
         }
-
-        // 3. generate jwt
         const token = await jwt.sign(
-            {userId: user._id}, // 내용
-            process.env.LOGIN_ACCESS_KEY, // 민감정보이기 때문에 환경변수화
-            {expiresIn: "1h"} // 만료 기한
+            {userId: user._id},
+            process.env.LOGIN_ACCESS_KEY,
+            {expiresIn: "1h"}
         )
         res.json({
             msg: `successful login`,
@@ -76,10 +73,9 @@ const createLogin = async (req, res) => {
 }
 
 const getProfile = async (req, res) => {
-    const {userId} = req.user
-    console.log("+++++++", req.user)
+    const {_id} = req.user
     try {
-        const user = await userModel.findById(userId)
+        const user = await userModel.findById(_id)
         res.json({
             msg: `get profile info`,
             user
@@ -91,23 +87,19 @@ const getProfile = async (req, res) => {
     }
 }
 
+// todo: 현재 비밀번호, 새 비밀번호, 새 비밀번호 확인, 자동입력 방지문자
 const updatePassword = async (req, res) => {
-    // 로직은 id 찾기, id에 해당되는 유저의 패스워드 변경
     const {userId} = req.user
     const {password} = req.body
     try {
         const passwordField = {}
-        // todo: 굳이 if문 안에 넣은 이유는?
-        // password 암호화
-        if (password) {
-            // const hashedPassword = await bcrypt.hash(password, 10)
-            passwordField.password = password
+        const hashedPassword = await bcrypt.hash(password, 10)
+        if (hashedPassword) {
+            passwordField.password = hashedPassword
         }
-        // user를 찾고 해당되는 user의 패스워드 변경
         await userModel.findByIdAndUpdate(userId, {$set: {password: passwordField.password}})
-        return res.json({
-            msg: `updated password`,
-            user
+        res.json({
+            msg: `successfully updated password`
         })
     } catch (e) {
         res.status(500).json({
@@ -130,13 +122,10 @@ const findPassword = async (req, res) => {
             process.env.FIND_PASSWORD_ACCESS_KEY,
             {expiresIn: "10m"}
         )
-
-        // 2. 메일 전송
         await sendEmail(email, "비밀번호 변경", findPasswordTemplete(findPasswordToken))
         res.json({
             msg: `Please check your email`
         })
-
     } catch (e) {
         res.status(500).json({
             msg: e.message
@@ -147,7 +136,6 @@ const findPassword = async (req, res) => {
 const resetPassword = async (req, res) => {
     const {password1, password2, token} = req.body
     try {
-        // 1. 토큰을 풀어서 아이디를 찾고
         const {id} = await jwt.verify(token, process.env.FIND_PASSWORD_ACCESS_KEY)
         if (password1 !== password2) {
             return res.status(404).json({
@@ -155,9 +143,8 @@ const resetPassword = async (req, res) => {
             })
         }
         const hashedPassword = await bcrypt.hash(password1, 10)
-        // 2. 아이디에 해당되는 패스워드 변경
         await userModel.findByIdAndUpdate(id, {password: hashedPassword})
-        return res.json({
+        res.json({
             msg: `successful update password`
         })
     } catch (e) {
@@ -168,18 +155,15 @@ const resetPassword = async (req, res) => {
 }
 
 const emailConfirm = async (req, res) => {
-    const {token} = req.body
+    const {token, email} = req.body
     try {
-        // 토큰 payload 추출 (이메일)
-        const {email} = await jwt.verify(token, process.env.EMAIL_CONFIRM_ACCESS_KEY)
-        // 이메일에 해당되는 유저를 찾는다.
+        await jwt.verify(token, process.env.LOGIN_ACCESS_KEY)
         const user = await userModel.findOne({email})
         if (user.isEmailConfirm === true) {
             return res.status(410).json({
                 msg: `already isEmailConfirmed true`
             })
         }
-        // 유저의 이메일 유저 confirm : false -> true로 변경
         await userModel.findOneAndUpdate(email, {isEmailConfirm: true})
         res.json({
             msg: `successful updated email confirm`
@@ -188,9 +172,7 @@ const emailConfirm = async (req, res) => {
         res.status(500).json({
             msg: e.message
         })
-
     }
-
 }
 
 export {

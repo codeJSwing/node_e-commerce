@@ -6,7 +6,7 @@ const productSchema = mongoose.Schema({
       type: String,
       required: true
     },
-    price: {
+    price: { // todo: 3자리마다 , 가 출력되도록
         type: Number,
         required: true,
         default: 1000

@@ -5,7 +5,7 @@ import {
     getProduct,
     createProduct,
     updateProduct,
-    deleteProducts,
+    deleteAllProducts,
     deleteProduct
 } from "../controller/product.js"
 
@@ -19,7 +19,7 @@ router.post("/", createProduct)
 
 router.put("/:id", updateProduct)
 
-router.delete("/", checkAuth, deleteProducts)
+router.delete("/", checkAuth, deleteAllProducts)
 
 router.delete("/:id", deleteProduct)
 
