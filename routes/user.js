@@ -1,7 +1,7 @@
 import express from "express";
 // import checkAuth from "../middleware/check-auth.js";
 import {
-    createLogin,
+    loginHandler,
     createSignup,
     emailConfirm,
     findPassword,
@@ -12,6 +12,8 @@ import {
 
 import jwt from "jsonwebtoken"
 import passport from "passport";
+import userModel from "../models/user.js";
+import isAdmin from "../middleware/check-admin.js";
 
 const checkAuth = passport.authenticate('jwt', {session: false})
 
@@ -19,6 +21,21 @@ const router = express.Router()
 
 // profile 정보 가져오기
 router.get("/", checkAuth, getProfile)
+
+// 유저 전체 프로필 ㅗ회
+router.get("/all", checkAuth, isAdmin, async (req, res) => {
+    try {
+        const users = await userModel.find()
+        res.json({
+            msg: `successful get all users`,
+            users
+        })
+    } catch (e) {
+        res.status(500).json({
+            msg: e.message
+        })
+    }
+})
 
 // todo: 약관동의 (필수 / 선택)
 // todo: 아이디, 비밀번호, 비밀번호 재확인, 이름, 생년월일, 성별(남, 여, 선택x), 본인확인 이메일(선택), 휴대전화(인증 필요)
@@ -29,7 +46,7 @@ router.post("/signup", createSignup)
 // todo: 로그인 상태 유지
 // todo: 간편 로그인(다른 플랫폼)
 // login
-router.post("/login", createLogin)
+router.post("/login", loginHandler)
 
 // todo: 현재 비밀번호, 새 비밀번호, 새 비밀번호 확인, 자동입력 방지문자
 // find password
@@ -38,6 +55,7 @@ router.post("/find/password", findPassword)
 // emailConfirm(isEmailConfirmed false -> true)
 router.put("/confirm/email", emailConfirm)
 
+// todo: checkAuth 없이
 // 패스워드 변경 (로그인 후)
 router.put("/password", checkAuth, updatePassword)
 
@@ -45,5 +63,29 @@ router.put("/password", checkAuth, updatePassword)
 router.put("/reset/password", resetPassword)
 
 // find email
+// 1. 계정에 등록된 휴대폰 번호 입력
+// 2. 인증 요청
+router.post("/find/email", async (req, res) => {
+    const {phoneNumber} = req.body
+    try {
+        const user = await userModel.findOne({phoneNumber})
+        if (!user) {
+            return res.status(400).json({
+                msg: `This phoneNumber does not exists`
+            })
+        }
+        console.log(user)
+        const {email} = user
+        res.json({
+            msg: `successfully find email`,
+            email
+        })
+    } catch (e) {
+        res.status(500).json({
+            msg: e.message
+        })
+    }
+})
+
 
 export default router

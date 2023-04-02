@@ -1,16 +1,17 @@
 import productModel from "../models/product.js";
 
 const getAllProducts = async (req, res) => {
-    const {name, price} = req.body
     try {
         const products = await productModel.find()
+
         return res.json({
             msg: "successful get products",
-            products: products.map(product => ({
-                name,
-                price,
-                id: product._id
-            }))
+            products: products.map(product => {
+                return {
+                    name: product.name,
+                    price: product.price
+                }
+            })
         })
     } catch (err) {
         res.status(500).json({

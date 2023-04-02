@@ -20,6 +20,9 @@ const getAllOrders = async (req, res) => {
 const getOrder = async (req, res) => {
     const { id } = req.params
     try {
+        // login 한 사람의 내용만 확인
+        // 로그인, ordermodel 주문한 사람 정보
+
         const order = await orderModel
             .findById(id)
             .populate("product", ["name", "price", "desc"])
@@ -29,11 +32,15 @@ const getOrder = async (req, res) => {
                 msg: `no order`
             })
         }
+        if (order.user !== req.user.userId) {
+            return res.status(408).json({
+                msg: `This is not your order`
+            })
+        }
         res.json({
             msg: `successful get order by ${id}`,
             order
         })
-
     } catch (e) {
         res.status(500).json({
             msg: e.message

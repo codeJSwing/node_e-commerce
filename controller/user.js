@@ -8,7 +8,7 @@ import {
 import bcrypt from "bcrypt";
 
 const createSignup = async (req, res) => {
-    const {email, username, password, birth} = req.body
+    const {email, username, password, birth, phoneNumber} = req.body
     try {
         const user = await userModel.findOne({email})
         if (user) {
@@ -20,7 +20,8 @@ const createSignup = async (req, res) => {
             email,
             password,
             username: username ? username : email.split('@')[0],
-            birth
+            birth,
+            phoneNumber
         })
         const createUser = await newUser.save()
         const confirmToken = await jwt.sign(
@@ -40,7 +41,7 @@ const createSignup = async (req, res) => {
     }
 }
 
-const createLogin = async (req, res) => {
+const loginHandler = async (req, res) => {
     const {email, password} = req.body
     try {
         const user = await userModel.findOne({email})
@@ -50,6 +51,7 @@ const createLogin = async (req, res) => {
             })
         }
         const isMatching = await user.matchPassword(password)
+        // console.log(isMatching)
         if (!isMatching) {
             return res.status(408).json({
                 msg: `password does not match`
@@ -167,7 +169,7 @@ const emailConfirm = async (req, res) => {
 
 export {
     createSignup,
-    createLogin,
+    loginHandler,
     getProfile,
     updatePassword,
     findPassword,
