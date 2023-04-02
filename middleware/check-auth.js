@@ -7,7 +7,7 @@ const checkAuth = (req, res, next) => {
         req.user = decoded;
         next()
     } catch (e) {
-        return res.status(409).json({
+        res.status(409).json({
             msg: "auth failed",
             detail: e.message
         })

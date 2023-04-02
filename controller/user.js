@@ -23,7 +23,6 @@ const createSignup = async (req, res) => {
             birth
         })
         const createUser = await newUser.save()
-        // token 생성
         const confirmToken = await jwt.sign(
             {email: createUser.email},
             process.env.EMAIL_CONFIRM_ACCESS_KEY,
@@ -53,7 +52,7 @@ const createLogin = async (req, res) => {
         const isMatching = await user.matchPassword(password)
         if (!isMatching) {
             return res.status(408).json({
-                msg: `password do not match`
+                msg: `password does not match`
             })
         }
         const token = await jwt.sign(
@@ -73,21 +72,12 @@ const createLogin = async (req, res) => {
 }
 
 const getProfile = async (req, res) => {
-    const {_id} = req.user
-    try {
-        const user = await userModel.findById(_id)
-        res.json({
-            msg: `get profile info`,
-            user
-        })
-    } catch (e) {
-        res.status(500).json({
-            msg: e.message
-        })
-    }
+    res.json({
+        msg: `successful get userInfo`,
+        user: req.user
+    })
 }
 
-// todo: 현재 비밀번호, 새 비밀번호, 새 비밀번호 확인, 자동입력 방지문자
 const updatePassword = async (req, res) => {
     const {userId} = req.user
     const {password} = req.body
@@ -136,14 +126,14 @@ const findPassword = async (req, res) => {
 const resetPassword = async (req, res) => {
     const {password1, password2, token} = req.body
     try {
-        const {id} = await jwt.verify(token, process.env.FIND_PASSWORD_ACCESS_KEY)
+        const {userId} = await jwt.verify(token, process.env.LOGIN_ACCESS_KEY)
         if (password1 !== password2) {
             return res.status(404).json({
                 msg: `please check password and confirm password`
             })
         }
         const hashedPassword = await bcrypt.hash(password1, 10)
-        await userModel.findByIdAndUpdate(id, {password: hashedPassword})
+        await userModel.findByIdAndUpdate(userId, {password: hashedPassword})
         res.json({
             msg: `successful update password`
         })

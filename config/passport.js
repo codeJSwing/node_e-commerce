@@ -28,14 +28,17 @@ opts.secretOrKey = process.env.LOGIN_ACCESS_KEY || "choseongik"
 const passportConfig = passport => {
     passport.use(
         new Strategy(opts, (payload, done) => {
-            userModel.findById(payload.userId)
+            userModel
+                .findById(payload.userId)
                 .then(user => {
                     if (user) {
                         return done(null, user)
                     }
                     return done(null, false)
                 })
-                .catch(err => console.log(err))
+                .catch(err => {
+                    return done(err, false)
+                })
         })
     )
 }
