@@ -44,4 +44,6 @@ router.put("/password", checkAuth, updatePassword)
 // 패스워드 변경 (로그인 전)
 router.put("/reset/password", resetPassword)
 
+// find email
+
 export default router

@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import validator from "validator";
 import bcrypt from "bcrypt";
+import gravatar from "gravatar"
 
 const userSchema = mongoose.Schema(
     {
@@ -36,6 +37,9 @@ const userSchema = mongoose.Schema(
             required: false,
             length: 6
         },
+        profileImg: {
+            type: String
+        },
         isEmailConfirm: {
             type: Boolean,
             default: false
@@ -49,8 +53,19 @@ const userSchema = mongoose.Schema(
 // password 암호화
 userSchema.pre('save', async function (next) {
     const user = this
-    if (user.isModified('password') || user.isNew) {
+    if (!user.isModified('profileImg') || !user.isModified('password')) {
+        next()
+    }
+    // if (user.isModified('password') || user.isNew) {
         try {
+            // 프로필 이미지 자동 생성
+            const avatar = await gravatar.url(
+                this.email,
+                { s: "200", r: "pg", d: "mm"},
+                { protocol: "https" }
+            )
+            this.profileImg = avatar
+            // password 암호화
             const salt = await bcrypt.genSalt(10)
             const hash = await bcrypt.hash(user.password, salt)
             user.password = hash
@@ -58,9 +73,9 @@ userSchema.pre('save', async function (next) {
         } catch (e) {
             return next(e)
         }
-    } else {
-        return next()
-    }
+    // } else {
+    //     return next()
+    // }
 })
 
 // password 검증
