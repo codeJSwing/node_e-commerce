@@ -22,7 +22,7 @@ const router = express.Router()
 // profile 정보 가져오기
 router.get("/", checkAuth, getProfile)
 
-// 유저 전체 프로필 ㅗ회
+// 유저 전체 프로필 wh회
 router.get("/all", checkAuth, isAdmin, async (req, res) => {
     try {
         const users = await userModel.find()
@@ -48,6 +48,7 @@ router.post("/signup", createSignup)
 // login
 router.post("/login", loginHandler)
 
+// 자동입력 방지문자는 프런트의 영역
 // todo: 현재 비밀번호, 새 비밀번호, 새 비밀번호 확인, 자동입력 방지문자
 // find password
 router.post("/find/password", findPassword)
@@ -86,6 +87,5 @@ router.post("/find/email", async (req, res) => {
         })
     }
 })
-
 
 export default router

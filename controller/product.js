@@ -1,4 +1,5 @@
 import productModel from "../models/product.js";
+import replyModel from "../models/reply.js";
 
 const getAllProducts = async (req, res) => {
     try {
@@ -6,12 +7,13 @@ const getAllProducts = async (req, res) => {
 
         return res.json({
             msg: "successful get products",
-            products: products.map(product => {
-                return {
-                    name: product.name,
-                    price: product.price
-                }
-            })
+            products
+            // products: products.map(product => {
+            //     return {
+            //         name: product.name,
+            //         price: product.price
+            //     }
+            // })
         })
     } catch (err) {
         res.status(500).json({
@@ -24,6 +26,7 @@ const getProduct = async (req, res) => {
     const {id} = req.params
     try{
         const product = await productModel.findById(id)
+        const replys = await replyModel.find({product: id})
         if(!product){
             return res.status(404).json({
                 msg: "no data"
@@ -31,7 +34,8 @@ const getProduct = async (req, res) => {
         }
         res.json({
             msg: `successful get data`,
-            product
+            product,
+            replys
         })
     } catch(err) {
         res.status(500).json({

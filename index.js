@@ -10,6 +10,7 @@ const app = express()
 import productRouter from "./routes/product.js"
 import orderRouter from "./routes/order.js"
 import userRouter from "./routes/user.js"
+
 import connectDB from "./config/database.js";
 import {errorHandler, notFound} from "./middleware/errorMiddleware.js";
 
