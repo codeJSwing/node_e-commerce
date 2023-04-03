@@ -25,21 +25,25 @@ const getOrder = async (req, res) => {
             .findById(id)
             .populate("product", ["name", "price", "desc"])
             .populate("user")
+        // const order = await orderModel.findById(id)
+        console.log(order)
         if (!order) {
             return res.json({
                 msg: `There is no order to get`
             })
         }
-        // console.log("order.user : ", order.user)
-        // console.log("type of (order.user) : ", typeof order.user)
+        console.log("order")
+        console.log("order.user : ", order.user._id)
+        console.log("type of (order.user) : ", typeof order.user._id)
         //
-        // console.log("req.user._id : ", req.user._id)
-        // console.log("type of (req.user._id) : ", typeof req.user._id)
-        if (order.user !== req.user._id) {
+        console.log("req.user._id : ", req.user._id)
+        console.log("type of (req.user._id) : ", typeof req.user._id)
+        if (order.user._id.toString() !== req.user._id.toString()) {
             return res.status(408).json({
                 msg: `This is not your order`
             })
         }
+        console.log("test")
         res.json({
             msg: `successful get order by ${id}`,
             order
