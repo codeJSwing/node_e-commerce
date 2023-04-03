@@ -13,7 +13,6 @@ const checkAuth = passport.authenticate('jwt', {session: false})
 
 const router = express.Router()
 
-// todo: map이 정상적으로 작동하는 지 확인 (여러개 생성하고)
 router.get("/", checkAuth, getAllOrders)
 
 router.get("/:id", checkAuth, getOrder)

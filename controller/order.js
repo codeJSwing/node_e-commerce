@@ -5,7 +5,7 @@ const getAllOrders = async (req, res) => {
         const order = await orderModel
             .find()
             .populate("product", ["name", "price"])
-            .populate("user")
+            .populate("user", ["email", "username", "phoneNumber"])
         res.json({
             msg: `successful get order`,
             order
@@ -17,22 +17,25 @@ const getAllOrders = async (req, res) => {
     }
 }
 
+// todo: 주문자와 로그인한 사람이 같을 때만 조회할 수 있도록 (저녁 행아웃)
 const getOrder = async (req, res) => {
     const { id } = req.params
     try {
-        // login 한 사람의 내용만 확인
-        // 로그인, ordermodel 주문한 사람 정보
-
         const order = await orderModel
             .findById(id)
             .populate("product", ["name", "price", "desc"])
             .populate("user")
         if (!order) {
             return res.json({
-                msg: `no order`
+                msg: `There is no order to get`
             })
         }
-        if (order.user !== req.user.userId) {
+        // console.log("order.user : ", order.user)
+        // console.log("type of (order.user) : ", typeof order.user)
+        //
+        // console.log("req.user._id : ", req.user._id)
+        // console.log("type of (req.user._id) : ", typeof req.user._id)
+        if (order.user !== req.user._id) {
             return res.status(408).json({
                 msg: `This is not your order`
             })
@@ -49,13 +52,13 @@ const getOrder = async (req, res) => {
 }
 
 const createOrder = async (req, res) => {
-    const { userId } = req.user
+    const { _id } = req.user
     const { product, quantity } = req.body
     try {
         const newOrder = new orderModel({
             product,
             quantity,
-            user: userId
+            user: _id
         })
         const order = await newOrder.save()
         res.json({
