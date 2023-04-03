@@ -1,5 +1,4 @@
 import express from "express";
-// import checkAuth from "../middleware/check-auth.js";
 import {
     loginHandler,
     createSignup,
@@ -7,7 +6,7 @@ import {
     findPassword,
     getProfile,
     resetPassword,
-    updatePassword
+    updatePassword, findEmail
 } from "../controller/user.js";
 
 import jwt from "jsonwebtoken"
@@ -22,7 +21,7 @@ const router = express.Router()
 // profile 정보 가져오기
 router.get("/", checkAuth, getProfile)
 
-// 유저 전체 프로필 wh회
+// 유저 전체 프로필 조회
 router.get("/all", checkAuth, isAdmin, async (req, res) => {
     try {
         const users = await userModel.find()
@@ -63,29 +62,7 @@ router.put("/password", checkAuth, updatePassword)
 // 패스워드 변경 (로그인 전)
 router.put("/reset/password", resetPassword)
 
-// find email
-// 1. 계정에 등록된 휴대폰 번호 입력
-// 2. 인증 요청
-router.post("/find/email", async (req, res) => {
-    const {phoneNumber} = req.body
-    try {
-        const user = await userModel.findOne({phoneNumber})
-        if (!user) {
-            return res.status(400).json({
-                msg: `This phoneNumber does not exists`
-            })
-        }
-        console.log(user)
-        const {email} = user
-        res.json({
-            msg: `successfully find email`,
-            email
-        })
-    } catch (e) {
-        res.status(500).json({
-            msg: e.message
-        })
-    }
-})
+// 이메일 찾기
+router.post("/find/email", findEmail)
 
 export default router
