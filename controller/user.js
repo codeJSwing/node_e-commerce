@@ -7,8 +7,8 @@ import {
 } from "../config/sendEmail.js";
 import bcrypt from "bcrypt";
 
-const createSignup = async (req, res) => {
-    const {email, username, password, birth, phoneNumber} = req.body
+const signupHandler = async (req, res) => {
+    const {email, username, password, birth, phoneNumber, role} = req.body
     try {
         const user = await userModel.findOne({email})
         if (user) {
@@ -21,7 +21,8 @@ const createSignup = async (req, res) => {
             password,
             username: username ? username : email.split('@')[0],
             birth,
-            phoneNumber
+            phoneNumber,
+            role
         })
         const createUser = await newUser.save()
         const confirmToken = await jwt.sign(
@@ -51,7 +52,6 @@ const loginHandler = async (req, res) => {
             })
         }
         const isMatching = await user.matchPassword(password)
-        // console.log(isMatching)
         if (!isMatching) {
             return res.status(408).json({
                 msg: `password does not match`
@@ -81,7 +81,7 @@ const getProfile = async (req, res) => {
 }
 
 const updatePassword = async (req, res) => {
-    const {userId} = req.user
+    const {_id} = req.user
     const {password} = req.body
     try {
         const passwordField = {}
@@ -89,7 +89,7 @@ const updatePassword = async (req, res) => {
         if (hashedPassword) {
             passwordField.password = hashedPassword
         }
-        await userModel.findByIdAndUpdate(userId, {$set: {password: passwordField.password}})
+        await userModel.findByIdAndUpdate(_id, {$set: {password: passwordField.password}})
         res.json({
             msg: `successfully updated password`
         })
@@ -125,6 +125,7 @@ const findPassword = async (req, res) => {
     }
 }
 
+// todo: 사용자는 패스워드만 입력해야 되는데 token을 어떻게 처리할까?
 const resetPassword = async (req, res) => {
     const {password1, password2, token} = req.body
     try {
@@ -189,13 +190,28 @@ const findEmail = async (req, res) => {
     }
 }
 
+const getAllUsers = async (req, res) => {
+    try {
+        const users = await userModel.find()
+        res.json({
+            msg: `successful get all users`,
+            users
+        })
+    } catch (e) {
+        res.status(500).json({
+            msg: e.message
+        })
+    }
+}
+
 export {
-    createSignup,
+    signupHandler,
     loginHandler,
     getProfile,
     updatePassword,
     findPassword,
     resetPassword,
     emailConfirm,
-    findEmail
+    findEmail,
+    getAllUsers
 }
