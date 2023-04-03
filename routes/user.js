@@ -6,7 +6,9 @@ import {
     findPassword,
     getProfile,
     resetPassword,
-    updatePassword, findEmail, getAllUsers
+    updatePassword,
+    findEmail,
+    getAllUsers
 } from "../controller/user.js";
 
 import jwt from "jsonwebtoken"
