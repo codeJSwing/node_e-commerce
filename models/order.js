@@ -16,7 +16,7 @@ const orderSchema = schema({
     user: {
         type: schema.ObjectId,
         ref: 'User',
-        required: true
+        required: false
     }
 })
 
