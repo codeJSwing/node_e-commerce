@@ -1,4 +1,5 @@
 import orderModel from "../models/order.js";
+import lodash from "lodash"
 
 const getAllOrders = async (req, res) => {
     try {
@@ -17,7 +18,6 @@ const getAllOrders = async (req, res) => {
     }
 }
 
-// todo: 주문자와 로그인한 사람이 같을 때만 조회할 수 있도록 (저녁 행아웃)
 const getOrder = async (req, res) => {
     const { id } = req.params
     try {
@@ -25,25 +25,16 @@ const getOrder = async (req, res) => {
             .findById(id)
             .populate("product", ["name", "price", "desc"])
             .populate("user")
-        // const order = await orderModel.findById(id)
-        console.log(order)
         if (!order) {
             return res.json({
                 msg: `There is no order to get`
             })
         }
-        console.log("order")
-        console.log("order.user : ", order.user._id)
-        console.log("type of (order.user) : ", typeof order.user._id)
-        //
-        console.log("req.user._id : ", req.user._id)
-        console.log("type of (req.user._id) : ", typeof req.user._id)
-        if (order.user._id.toString() !== req.user._id.toString()) {
+        if (!lodash.isEqual(order.user._id, req.user._id)) {
             return res.status(408).json({
                 msg: `This is not your order`
             })
         }
-        console.log("test")
         res.json({
             msg: `successful get order by ${id}`,
             order
