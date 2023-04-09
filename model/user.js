@@ -31,11 +31,11 @@ const userSchema = mongoose.Schema(
             type: String,
             minLength: 2,
             maxLength: 10
+            // todo: model에서 default로 처리하는 방법 생각해보자
         },
         birth: {
             type: Date,
-            required: false,
-            length: 6
+            length: [6, "YY-MM-DD"]
         },
         profileImg: {
             type: String
@@ -59,16 +59,13 @@ const userSchema = mongoose.Schema(
 
 // password 암호화
 userSchema.pre('save', async function (next) {
-    // if (user.isModified('password') || user.isNew) {
     try {
-        // 프로필 이미지 자동 생성
         const avatar = await gravatar.url(
             this.email,
             {s: "200", r: "pg", d: "mm"},
             {protocol: "https"}
         )
         this.profileImg = avatar
-        // password 암호화
         const salt = await bcrypt.genSalt(10)
         const hash = await bcrypt.hash(this.password, salt)
         this.password = hash
@@ -76,18 +73,10 @@ userSchema.pre('save', async function (next) {
     } catch (e) {
         return next(e)
     }
-    // } else {
-    //     return next()
-    // }
 })
 
-// password 검증
-// userSchema.methods.matchPassword = async function (password) {
-//     // return await bcrypt.compare(password, this.password)
-// }
-
-userSchema.methods.matchPassword = async function (enteredPassword) {
-    return await bcrypt.compare(enteredPassword, this.password)
+userSchema.methods.matchPassword = async function (password) {
+    return await bcrypt.compare(password, this.password)
 }
 
 const userModel = mongoose.model("User", userSchema)

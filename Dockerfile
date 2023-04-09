@@ -18,5 +18,3 @@ COPY index.js ./
 
 EXPOSE 4444
 CMD ["npm", "run", "dev"]
-
-

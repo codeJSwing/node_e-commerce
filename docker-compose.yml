@@ -13,6 +13,20 @@ services:
         - rest-api
       networks:
         - ecommers_network
+
+#  redis:
+#    image: "redis"
+#    environment:
+#      - REDIS_HOST=redis
+#      - REDIS_PORT=6379
+#
+#    ports:
+#      - "6379:6379"
+#    networks:
+#      - ecommers_network
+#    volumes:
+#      - redis:/data
+
   rest-api:
     build:
       context: .
@@ -20,10 +34,13 @@ services:
     volumes:
       - ./:/usr/src/app
       - /usr/src/app/node_modules
+    restart: always
     ports:
       - '4444:4444'
     networks:
       - ecommers_network
+
+
 
 networks:
   ecommers_network:

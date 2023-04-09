@@ -1,4 +1,4 @@
-import orderModel from "../models/order.js";
+import orderModel from "../model/order.js";
 import lodash from "lodash"
 
 const getAllOrders = async (req, res) => {

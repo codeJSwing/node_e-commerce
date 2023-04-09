@@ -1,18 +1,38 @@
-import productModel from "../models/product.js";
-import replyModel from "../models/reply.js";
+import productModel from "../model/product.js";
+import replyModel from "../model/reply.js";
+import dotenv from "dotenv";
+dotenv.config()
+
+import redis from "redis";
+
+const redisClient = await redis.createClient({
+    legacyMode: true,
+    url: `redis://${process.env.REDIS_USERNAME}:${process.env.REDIS_PASSWORD}@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`
+})
+await redisClient.on("connect", () => {
+    console.log("redis connected")
+})
+await redisClient.on("error", (err) => {
+    console.error("redis error", err)
+})
+await redisClient.connect().then()
+const redisCli = redisClient.v4
 
 const getAllProducts = async (req, res) => {
     try {
-        const products = await productModel.find()
-        res.json({
-            msg: "successful get products",
-            products: products.map(product => {
-                return {
-                    name: product.name,
-                    price: product.price,
-                    id: product._id
-                }
+        const productsFromMongo = await productModel.find()
+        const redisProducts = await redisCli.get("products")
+        // redisCli.del("products") // 삭제하는 명령어
+        if (redisProducts !== null) {
+            console.log("redis")
+            return res.json({
+                products: JSON.parse(redisProducts)
             })
+        }
+        console.log("mongo")
+        await redisCli.set("products", JSON.stringify(productsFromMongo))
+        return res.json({
+            products: productsFromMongo
         })
     } catch (err) {
         res.status(500).json({
@@ -59,7 +79,7 @@ const createProduct = async (req, res) => {
             desc
         })
         const createdProduct = await newProduct.save()
-        return res.json({
+        res.json({
             msg: `successfully created new product`,
             product: createdProduct
         })
@@ -70,7 +90,6 @@ const createProduct = async (req, res) => {
     }
 }
 
-// todo: body 의 raw로 수정하는 것보다 xxx 타입으로 수정할 수 있을 지 찾아보자
 const updateProduct = async (req, res) => {
     const {id} = req.params
     try {
@@ -80,7 +99,7 @@ const updateProduct = async (req, res) => {
         }
         const product = await productModel.findByIdAndUpdate(id, {$set: updateOps})
         if (!product) {
-            return res.status(410).json({
+            return res.status(404).json({
                 msg: `There is no product to update`
             })
         }
@@ -113,6 +132,11 @@ const deleteProduct = async (req, res) =>{
     const {id} = req.params
     try {
         const product = await productModel.findByIdAndDelete(id)
+        if (!product) {
+            return res.status(404).json({
+                msg: `There is no product to delete`
+            })
+        }
         res.json({
             msg: `successfully deleted data by ${id}`,
             product

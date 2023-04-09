@@ -1,12 +1,11 @@
 import mongoose from "mongoose";
 
 const productSchema = mongoose.Schema({
-    id: mongoose.Schema.Types.ObjectId,
     name: {
       type: String,
       required: true
     },
-    price: { // todo: 3자리마다 , 가 출력되도록
+    price: {
         type: Number,
         required: true,
         default: 1000
