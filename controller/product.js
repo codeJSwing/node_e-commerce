@@ -1,13 +1,17 @@
 import productModel from "../model/product.js";
 import replyModel from "../model/reply.js";
 import dotenv from "dotenv";
+
 dotenv.config()
 
 import redis from "redis";
 
 const redisClient = await redis.createClient({
-    legacyMode: true,
     url: `redis://${process.env.REDIS_USERNAME}:${process.env.REDIS_PASSWORD}@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
+    legacyMode: true,
+    socket: {
+        connectTimeout: 50000
+    }
 })
 await redisClient.on('connect', () => {
     console.log('redis connected')
@@ -44,7 +48,7 @@ const getAllProducts = async (req, res) => {
 // todo: 코드 리팩토링 해야 할 듯 너무 길다
 const getProduct = async (req, res) => {
     const {id} = req.params
-    try{
+    try {
         const products = await productModel.find()
         const product = await productModel.findById(id)
         const replys = await replyModel.find({product: id})
@@ -66,7 +70,7 @@ const getProduct = async (req, res) => {
                 })
             })
         }
-        if(!product){
+        if (!product) {
             return res.status(404).json({
                 msg: 'There is no product to get'
             })
@@ -85,7 +89,7 @@ const getProduct = async (req, res) => {
                 }
             })
         })
-    } catch(err) {
+    } catch (err) {
         res.status(500).json({
             msg: err.message
         })
@@ -106,7 +110,7 @@ const createProduct = async (req, res) => {
             msg: `successfully created new product`,
             product: createdProduct
         })
-    } catch(err) {
+    } catch (err) {
         res.status(500).json({
             msg: err.message
         })
@@ -117,7 +121,7 @@ const updateProduct = async (req, res) => {
     const {id} = req.params
     try {
         const updateOps = {};
-        for (const ops of req.body){
+        for (const ops of req.body) {
             updateOps[ops.propName] = ops.value;
         }
         const product = await productModel.findByIdAndUpdate(id, {$set: updateOps})
@@ -151,7 +155,7 @@ const deleteAllProducts = async (req, res) => {
     }
 }
 
-const deleteProduct = async (req, res) =>{
+const deleteProduct = async (req, res) => {
     const {id} = req.params
     try {
         const product = await productModel.findByIdAndDelete(id)
