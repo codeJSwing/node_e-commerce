@@ -29,23 +29,26 @@ const userSchema = mongoose.Schema(
         },
         username: {
             type: String,
-            minLength: 2,
-            maxLength: 10
+            minLength: [2, 'username is at least 2 characters long'],
+            maxLength: [10, 'username is less than 10 characters long']
             // todo: model에서 default로 처리하는 방법 생각해보자
+            // todo: 자동으로 겹치지 않게 생성해주는 방법
+        },
+        phoneNumber: {
+            type: Number,
+            length: [11, 'Please enter your phoneNumber in 11 digits without a hyphen'],
+            required: true
         },
         birth: {
             type: Date,
-            length: [6, "YY-MM-DD"]
+            length: [8, 'ex) 19930201']
         },
         profileImg: {
             type: String
         },
-        phoneNumber: {
-            type: Number
-        },
         role: {
             type: String,
-            default: "user" // level : user / admin / superUser
+            default: 'user' // level : user / admin / superUser
         },
         isEmailConfirm: {
             type: Boolean,
@@ -62,8 +65,8 @@ userSchema.pre('save', async function (next) {
     try {
         const avatar = await gravatar.url(
             this.email,
-            {s: "200", r: "pg", d: "mm"},
-            {protocol: "https"}
+            {s: '200', r: 'pg', d: 'mm'},
+            {protocol: 'https'}
         )
         this.profileImg = avatar
         const salt = await bcrypt.genSalt(10)
@@ -71,7 +74,7 @@ userSchema.pre('save', async function (next) {
         this.password = hash
         next()
     } catch (e) {
-        return next(e)
+        next(e)
     }
 })
 
@@ -79,5 +82,5 @@ userSchema.methods.matchPassword = async function (password) {
     return await bcrypt.compare(password, this.password)
 }
 
-const userModel = mongoose.model("User", userSchema)
+const userModel = mongoose.model('User', userSchema)
 export default userModel

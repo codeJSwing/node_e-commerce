@@ -7,13 +7,13 @@ import redis from "redis";
 
 const redisClient = await redis.createClient({
     legacyMode: true,
-    url: `redis://${process.env.REDIS_USERNAME}:${process.env.REDIS_PASSWORD}@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`
+    url: `redis://${process.env.REDIS_USERNAME}:${process.env.REDIS_PASSWORD}@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
 })
-await redisClient.on("connect", () => {
-    console.log("redis connected")
+await redisClient.on('connect', () => {
+    console.log('redis connected')
 })
-await redisClient.on("error", (err) => {
-    console.error("redis error", err)
+await redisClient.on('error', (err) => {
+    console.error('redis error', err)
 })
 await redisClient.connect().then()
 const redisCli = redisClient.v4
@@ -21,16 +21,16 @@ const redisCli = redisClient.v4
 const getAllProducts = async (req, res) => {
     try {
         const productsFromMongo = await productModel.find()
-        const redisProducts = await redisCli.get("products")
-        // redisCli.del("products") // 삭제하는 명령어
+        const redisProducts = await redisCli.get('products')
+        // redisCli.del('products') // 삭제하는 명령어
         if (redisProducts !== null) {
-            console.log("redis")
+            console.log('redis')
             return res.json({
                 products: JSON.parse(redisProducts)
             })
         }
-        console.log("mongo")
-        await redisCli.set("products", JSON.stringify(productsFromMongo))
+        console.log('mongo')
+        await redisCli.set('products', JSON.stringify(productsFromMongo))
         return res.json({
             products: productsFromMongo
         })
@@ -41,17 +41,18 @@ const getAllProducts = async (req, res) => {
     }
 }
 
+// todo: 코드 리팩토링 해야 할 듯 너무 길다
 const getProduct = async (req, res) => {
     const {id} = req.params
     try{
         const products = await productModel.find()
         const product = await productModel.findById(id)
         const replys = await replyModel.find({product: id})
-        const redisProducts = await redisCli.get("products")
+        const redisProducts = await redisCli.get('products')
         const parsedRedis = JSON.parse(redisProducts)
         if (redisProducts !== null) {
             const redisProduct = await parsedRedis.filter(item => item._id === id)
-            console.log("redis")
+            console.log('redis')
             return res.json({
                 msg: `successful get data`,
                 product: redisProduct,
@@ -67,11 +68,11 @@ const getProduct = async (req, res) => {
         }
         if(!product){
             return res.status(404).json({
-                msg: "There is no product to get"
+                msg: 'There is no product to get'
             })
         }
-        console.log("mongo")
-        await redisCli.set("products", JSON.stringify(products))
+        console.log('mongo')
+        await redisCli.set('products', JSON.stringify(products))
         res.json({
             msg: `successful get data`,
             product,
@@ -91,6 +92,7 @@ const getProduct = async (req, res) => {
     }
 }
 
+// todo: productId로 등록해서 조회할 때도 그렇게 나오도록
 const createProduct = async (req, res) => {
     const {name, price, desc} = req.body
     try {
@@ -139,7 +141,7 @@ const deleteAllProducts = async (req, res) => {
     try {
         const products = await productModel.deleteMany()
         res.json({
-            msg: `successfully deleted all data`,
+            msg: 'successfully deleted all data',
             products
         })
     } catch (e) {
@@ -155,7 +157,7 @@ const deleteProduct = async (req, res) =>{
         const product = await productModel.findByIdAndDelete(id)
         if (!product) {
             return res.status(404).json({
-                msg: `There is no product to delete`
+                msg: 'There is no product to delete'
             })
         }
         res.json({
@@ -180,7 +182,7 @@ const replyProduct = async (req, res) => {
         })
         const result = await newReply.save()
         res.json({
-            msg: `successfully created new reply`,
+            msg: 'successfully created new reply',
             result
         })
     } catch (e) {

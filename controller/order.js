@@ -5,10 +5,10 @@ const getAllOrders = async (req, res) => {
     try {
         const order = await orderModel
             .find()
-            .populate("product", ["name", "price"])
-            .populate("user", ["email", "username", "phoneNumber"])
+            .populate('product', ['name', 'price'])
+            .populate('user', ['email', 'username', 'phoneNumber'])
         res.json({
-            msg: `successful get order`,
+            msg: 'successful get order',
             order
         })
     } catch (err) {
@@ -23,16 +23,16 @@ const getOrder = async (req, res) => {
     try {
         const order = await orderModel
             .findById(id)
-            .populate("product", ["name", "price", "desc"])
-            .populate("user")
+            .populate('product', ['name', 'price', 'desc'])
+            .populate('user')
         if (!order) {
             return res.json({
-                msg: `There is no order to get`
+                msg: 'There is no order to get'
             })
         }
         if (!lodash.isEqual(order.user._id, req.user._id)) {
             return res.status(408).json({
-                msg: `This is not your order`
+                msg: 'This is not your order'
             })
         }
         res.json({
@@ -57,7 +57,7 @@ const createOrder = async (req, res) => {
         })
         const order = await newOrder.save()
         res.json({
-            msg: `successful create new order`,
+            msg: 'successful create new order',
             order
         })
     } catch (e) {
@@ -90,7 +90,7 @@ const deleteAllOrders = async (req, res) => {
     try {
         const orders = await orderModel.deleteMany()
         res.json({
-            msg: `successfully deleted all data`,
+            msg: 'successfully deleted all data',
             orders
         })
     } catch (e) {
@@ -106,7 +106,7 @@ const deleteOrder = async (req, res) => {
         const order = await orderModel.findByIdAndDelete(id)
         if (!order) {
             return res.status(410).json({
-                msg: `There is no order to delete`
+                msg: 'There is no order to delete'
             })
         }
         res.json({

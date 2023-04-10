@@ -12,10 +12,11 @@ const productSchema = mongoose.Schema({
     },
     desc: {
         type: String,
-        minLength: 10,
-        maxLength: 1000
+        required: true,
+        minLength: [10, 'desc must be at least 10 characters long'],
+        maxLength: [2000, 'desc must be less than 2000 characters']
     }
 })
 
-const productModel = mongoose.model("Product", productSchema)
+const productModel = mongoose.model('Product', productSchema)
 export default productModel

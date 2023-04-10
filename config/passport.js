@@ -3,7 +3,7 @@ import userModel from "../model/user.js";
 
 const opts = {}
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken()
-opts.secretOrKey = process.env.LOGIN_ACCESS_KEY || "choseongik"
+opts.secretOrKey = process.env.LOGIN_ACCESS_KEY || 'choseongik'
 
 const passportConfig = passport => {
     passport.use(

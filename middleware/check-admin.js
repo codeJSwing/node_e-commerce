@@ -1,7 +1,7 @@
 const isAdmin = (req, res, next) => {
-    if (req.user.role !== "admin") {
+    if (req.user.role !== 'admin') {
         res.status(401).json({
-            msg: `Not authorized as an admin`
+            msg: 'Not authorized as an admin'
         })
     }
     next()
