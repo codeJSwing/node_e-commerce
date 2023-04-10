@@ -44,13 +44,34 @@ const getAllProducts = async (req, res) => {
 const getProduct = async (req, res) => {
     const {id} = req.params
     try{
+        const products = await productModel.find()
         const product = await productModel.findById(id)
         const replys = await replyModel.find({product: id})
+        const redisProducts = await redisCli.get("products")
+        const parsedRedis = JSON.parse(redisProducts)
+        if (redisProducts !== null) {
+            const redisProduct = await parsedRedis.filter(item => item._id === id)
+            console.log("redis")
+            return res.json({
+                msg: `successful get data`,
+                product: redisProduct,
+                replys: replys.map(reply => {
+                    return {
+                        user: reply.user,
+                        memo: reply.memo,
+                        updateTime: reply.updatedAt,
+                        id: reply._id
+                    }
+                })
+            })
+        }
         if(!product){
             return res.status(404).json({
                 msg: "There is no product to get"
             })
         }
+        console.log("mongo")
+        await redisCli.set("products", JSON.stringify(products))
         res.json({
             msg: `successful get data`,
             product,

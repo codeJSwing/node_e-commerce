@@ -86,3 +86,11 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
+
+# certificates
+*.pem
+*.key
+*.crt
+*.cer
+*.der
+*.priv

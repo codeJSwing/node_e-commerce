@@ -13,7 +13,7 @@ import orderRouter from "./routes/order.js"
 import userRouter from "./routes/user.js"
 
 import connectDB from "./config/database.js";
-import {errorHandler, notFound} from "./middleware/errorMiddleware.js";
+import {errorHandler, notFound} from "./middleware/globalErrorHandler.js";
 // import connectRedis from "./config/redis.js";
 
 dotenv.config()

@@ -12,7 +12,7 @@ services:
       depends_on:
         - rest-api
       networks:
-        - ecommers_network
+        - ecommerce_network
 
 #  redis:
 #    image: "redis"
@@ -38,10 +38,10 @@ services:
     ports:
       - '4444:4444'
     networks:
-      - ecommers_network
+      - ecommerce_network
 
 
 
 networks:
-  ecommers_network:
+  ecommerce_network:
     driver: bridge
