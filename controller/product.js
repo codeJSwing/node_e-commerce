@@ -6,21 +6,21 @@ dotenv.config()
 
 import redis from "redis";
 
-const redisClient = await redis.createClient({
+const redisClient = redis.createClient({
     url: `redis://${process.env.REDIS_USERNAME}:${process.env.REDIS_PASSWORD}@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
     legacyMode: true,
     socket: {
         connectTimeout: 50000
     }
 })
-await redisClient.on('connect', () => {
+redisClient.on('connect', () => {
     console.log('redis connected')
 })
-await redisClient.on('error', (err) => {
+redisClient.on('error', (err) => {
     console.error('redis error', err)
 })
-await redisClient.connect().then()
-const redisCli = redisClient.v4
+redisClient.connect().then()
+const redisCli = redisClient
 
 const getAllProducts = async (req, res) => {
     try {
@@ -53,9 +53,11 @@ const getProduct = async (req, res) => {
         const product = await productModel.findById(id)
         const replys = await replyModel.find({product: id})
         const redisProducts = await redisCli.get('products')
-        const parsedRedis = JSON.parse(redisProducts)
+        // const parsedRedis = JSON.parse(redisProducts)
         if (redisProducts !== null) {
-            const redisProduct = await parsedRedis.filter(item => item._id === id)
+            // const redisProduct = await parsedRedis.filter(item => item._id === id)
+            const parsedRedis = JSON.parse(redisProducts);
+            const redisProduct = parsedRedis.find(item => item._id === id);
             console.log('redis')
             return res.json({
                 msg: `successful get data`,

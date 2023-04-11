@@ -172,14 +172,12 @@ const emailConfirm = async (req, res) => {
 const findEmail = async (req, res) => {
     const {phoneNumber} = req.body
     try {
-        const user = await userModel.findOne({phoneNumber})
-        if (!user) {
-            return res.status(400).json({
+        const {email} = await userModel.findOne({phoneNumber})
+        if (!email) {
+            return res.status(404).json({
                 msg: 'This phoneNumber does not exists'
             })
         }
-        console.log(user)
-        const {email} = user
         res.json({
             msg: 'successfully find email',
             email
