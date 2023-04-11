@@ -4,7 +4,6 @@ import morgan from "morgan"
 import bodyParser from "body-parser";
 import passport from "passport"
 import passportConfig from "./config/passport.js";
-import redisClient from "./config/redis.js";
 
 const app = express()
 
@@ -14,12 +13,10 @@ import userRouter from "./routes/user.js"
 
 import connectDB from "./config/database.js";
 import {errorHandler, notFound} from "./middleware/globalErrorHandler.js";
-// import connectRedis from "./config/redis.js";
 
 dotenv.config()
 
 connectDB()
-// connectRedis()
 
 // setting
 app.use(morgan("dev"))

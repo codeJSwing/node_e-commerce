@@ -1,46 +1,25 @@
 import productModel from "../model/product.js";
 import replyModel from "../model/reply.js";
-import dotenv from "dotenv";
-
-dotenv.config()
-
-import redis from "redis";
-
-const redisClient = redis.createClient({
-    url: `redis://${process.env.REDIS_USERNAME}:${process.env.REDIS_PASSWORD}@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
-    legacyMode: true,
-    socket: {
-        connectTimeout: 50000
-    }
-})
-redisClient.on('connect', () => {
-    console.log('redis connected')
-})
-redisClient.on('error', (err) => {
-    console.error('redis error', err)
-})
-redisClient.connect().then()
-const redisCli = redisClient
+import redisCli from "../config/redis.js";
 
 const getAllProducts = async (req, res) => {
     try {
-        const productsFromMongo = await productModel.find()
-        const redisProducts = await redisCli.get('products')
-        // redisCli.del('products') // 삭제하는 명령어
-        if (redisProducts !== null) {
+        const productFromMongo = await productModel.find()
+        const productFromRedis = await redisCli.get('products')
+        if (productFromRedis !== null) {
             console.log('redis')
             return res.json({
-                products: JSON.parse(redisProducts)
+                products: JSON.parse(productFromRedis)
             })
         }
         console.log('mongo')
-        await redisCli.set('products', JSON.stringify(productsFromMongo))
-        return res.json({
-            products: productsFromMongo
+        await redisCli.set('products', JSON.stringify(productFromMongo))
+        res.json({
+            products: productFromMongo
         })
-    } catch (err) {
+    } catch (e) {
         res.status(500).json({
-            msg: err.message
+            msg: e.message
         })
     }
 }
