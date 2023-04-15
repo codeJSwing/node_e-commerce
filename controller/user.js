@@ -7,13 +7,14 @@ import {
     sendEmail,
     signupTemplete
 } from "../config/sendEmail.js";
+import redisCli from "../config/redis.js";
 
 const signupHandler = async (req, res) => {
     const {email, username, password, birth, phoneNumber, role} = req.body
     try {
         const user = await userModel.findOne({email})
         if (user) {
-            return res.status(404).json({
+            return res.status(401).json({
                 msg: 'exists user'
             })
         }
@@ -48,14 +49,14 @@ const loginHandler = async (req, res) => {
     try {
         const user = await userModel.findOne({email})
         if (!user) {
-            return res.status(400).json({
-                msg: `no user`
+            return res.status(401).json({
+                msg: `This email does not exists`
             })
         }
         const isMatching = await user.matchPassword(password)
         if (!isMatching) {
-            return res.status(408).json({
-                msg: 'password does not match'
+            return res.status(401).json({
+                msg: `This password does not match, check your password`
             })
         }
         const token = await jwt.sign(
@@ -75,10 +76,29 @@ const loginHandler = async (req, res) => {
 }
 
 const getProfile = async (req, res) => {
-    res.json({
-        msg: 'successful get userInfo',
-        user: req.user
-    })
+    const {_id} = req.user
+    try {
+        const user = await userModel.findById(_id)
+        const userFromRedis = await redisCli.get('user')
+        if (userFromRedis !== null) {
+            const parsedRedis = JSON.parse(userFromRedis)
+            console.log('redis')
+            return res.json({
+                msg: `successfully get redis data`,
+                product: parsedRedis
+            })
+        }
+        console.log('mongo')
+        await redisCli.set('user', JSON.stringify(user))
+        res.json({
+            msg: `successfully get userInfo`,
+            user: req.user
+        })
+    } catch (e) {
+        res.status(500).json({
+            msg: e.message
+        })
+    }
 }
 
 const updatePassword = async (req, res) => {

@@ -30,18 +30,16 @@ const getProduct = async (req, res) => {
     try {
         const products = await productModel.find()
         const product = await productModel.findById(id)
-        const replys = await replyModel.find({product: id})
+        const replies = await replyModel.find({product: id})
         const redisProducts = await redisCli.get('products')
-        // const parsedRedis = JSON.parse(redisProducts)
         if (redisProducts !== null) {
-            // const redisProduct = await parsedRedis.filter(item => item._id === id)
             const parsedRedis = JSON.parse(redisProducts);
             const redisProduct = parsedRedis.find(item => item._id === id);
             console.log('redis')
             return res.json({
-                msg: `successful get data`,
+                msg: 'successfully get redis data',
                 product: redisProduct,
-                replys: replys.map(reply => {
+                replies: replies.map(reply => {
                     return {
                         user: reply.user,
                         memo: reply.memo,
@@ -52,7 +50,7 @@ const getProduct = async (req, res) => {
             })
         }
         if (!product) {
-            return res.status(404).json({
+            return res.status(401).json({
                 msg: 'There is no product to get'
             })
         }
@@ -61,7 +59,7 @@ const getProduct = async (req, res) => {
         res.json({
             msg: `successful get data`,
             product,
-            replys: replys.map(reply => {
+            replies: replies.map(reply => {
                 return {
                     user: reply.user,
                     memo: reply.memo,

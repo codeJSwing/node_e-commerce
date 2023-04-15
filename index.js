@@ -1,6 +1,7 @@
 import express from "express"
 import dotenv from "dotenv"
 import morgan from "morgan"
+
 import bodyParser from "body-parser";
 import passport from "passport"
 import passportConfig from "./config/passport.js";

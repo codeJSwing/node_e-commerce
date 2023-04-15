@@ -8,9 +8,6 @@ import {
     deleteProduct, replyProduct
 } from "../controller/product.js"
 import passport from "passport";
-import likeModel from "../model/like.js";
-import userModel from "../model/user.js";
-import productModel from "../model/product.js";
 
 const checkAuth = passport.authenticate('jwt', {session: false})
 
