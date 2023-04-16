@@ -85,6 +85,13 @@ const createProduct = async (req, res) => {
             desc
         })
         const createdProduct = await newProduct.save()
+        const products = await productModel.find()
+        // 기존 데이터를 지우고, 새로운 데이터를 등록 최신성을 유지해야 돼.
+        // await redisCli.del("products")
+        // todo: 지우지 않고 저장하는게 문제가 없는지 확인해봐
+
+        await redisCli.set("products", JSON.stringify(products))
+
         res.json({
             msg: `successfully created new product`,
             product: createdProduct
@@ -122,10 +129,12 @@ const updateProduct = async (req, res) => {
 
 const deleteAllProducts = async (req, res) => {
     try {
-        const products = await productModel.deleteMany()
+        const productsFromMongo = await productModel.deleteMany()
+        // 데이터베이스에 있는 데이터도 삭제할 때 redis에 남아있는 데이터도 같이 삭제해야돼.
+        await redisCli.del('products')
         res.json({
             msg: 'successfully deleted all data',
-            products
+            productsFromMongo
         })
     } catch (e) {
         res.status(500).json({
@@ -136,21 +145,29 @@ const deleteAllProducts = async (req, res) => {
 
 const deleteProduct = async (req, res) => {
     const {id} = req.params
+    console.log(id)
     try {
         const product = await productModel.findByIdAndDelete(id)
+        // console.log('product==========', product)
         if (!product) {
-            return res.status(404).json({
+            return res.status(401).json({
                 msg: 'There is no product to delete'
             })
         }
+        // const productFromRedis = redisCli.get(id)
+        // console.log(productFromRedis)
+        // console.log(id.toString())
+        await redisCli.del(id)
         res.json({
             msg: `successfully deleted data by ${id}`,
             product
         })
     } catch (e) {
-        res.status(500).json({
-            msg: e.message
-        })
+        // res.status(500).json({
+        //     msg: e.message
+        // })
+        res.status(500)
+        throw new Error(e.message)
     }
 }
 

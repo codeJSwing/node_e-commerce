@@ -52,6 +52,8 @@ const loginHandler = async (req, res) => {
             return res.status(401).json({
                 msg: `This email does not exists`
             })
+            // res.status(401)
+            // throw new Error(`This email does not exists`)
         }
         const isMatching = await user.matchPassword(password)
         if (!isMatching) {
@@ -69,17 +71,22 @@ const loginHandler = async (req, res) => {
             token
         })
     } catch (err) {
-        res.status(500).json({
-            msg: err.message
-        })
+        // res.status(500).json({
+        //     msg: err.message
+        // })
+        res.status(500)
+        throw new Error(err.message)
     }
 }
 
+// a라는 사람이 레디스에 이미 저장했을 때 , b라는 사람이 레디스에 있는 정보를 불러올 수 있어
 const getProfile = async (req, res) => {
     const {_id} = req.user
+    // console.log(_id)
     try {
         const user = await userModel.findById(_id)
-        const userFromRedis = await redisCli.get('user')
+        const userFromRedis = await redisCli.get(_id.toString())
+        console.log('userFromRedis-----', userFromRedis)
         if (userFromRedis !== null) {
             const parsedRedis = JSON.parse(userFromRedis)
             console.log('redis')
@@ -89,7 +96,8 @@ const getProfile = async (req, res) => {
             })
         }
         console.log('mongo')
-        await redisCli.set('user', JSON.stringify(user))
+
+        await redisCli.set(_id.toString(), JSON.stringify(user))
         res.json({
             msg: `successfully get userInfo`,
             user: req.user
@@ -152,8 +160,8 @@ const resetPassword = async (req, res) => {
     try {
         const {userId} = await jwt.verify(token, process.env.LOGIN_ACCESS_KEY)
         if (password1 !== password2) {
-            return res.status(404).json({
-                msg: 'please check password and confirm password'
+            return res.status(401).json({
+                msg: `please check password and confirm password`
             })
         }
         const hashedPassword = await bcrypt.hash(password1, 10)

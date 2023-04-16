@@ -32,6 +32,11 @@ app.use("/product", productRouter)
 app.use("/order", orderRouter)
 app.use("/user", userRouter)
 
+// 테스트 하는 방법 고민ㅇ해봐
+app.get("/", (req, res) => {
+    res.send('api is running')
+})
+
 // error handling
 app.use(notFound)
 app.use(errorHandler)
