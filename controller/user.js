@@ -49,11 +49,13 @@ const loginHandler = async (req, res) => {
     try {
         const user = await userModel.findOne({email})
         if (!user) {
-            return res.status(401).json({
-                msg: `This email does not exists`
-            })
             // res.status(401)
             // throw new Error(`This email does not exists`)
+            return res.status(401).json({
+                msg: `This email does not exists`
+
+            })
+
         }
         const isMatching = await user.matchPassword(password)
         if (!isMatching) {

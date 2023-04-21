@@ -32,7 +32,7 @@ app.use("/product", productRouter)
 app.use("/order", orderRouter)
 app.use("/user", userRouter)
 
-// 테스트 하는 방법 고민ㅇ해봐
+// todo: test 하는 방법
 app.get("/", (req, res) => {
     res.send('api is running')
 })
@@ -43,5 +43,5 @@ app.use(errorHandler)
 
 const port = process.env.PORT || process.env.SUB_PORT
 app.listen(port, () => {
-    console.log("Server started")
+    console.log(`Server started at ${process.env.PORT}`)
 })

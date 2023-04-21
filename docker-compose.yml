@@ -10,9 +10,9 @@ services:
       ports:
         - 443:443
       depends_on:
-        - rest-api_01
-        - rest-api_02
-        - rest-api_03
+        - rest-api
+#        - rest-api_02
+#        - rest-api_03
       networks:
         - ecommerce_network
 
@@ -29,7 +29,7 @@ services:
 #    volumes:
 #      - redis:/data
 
-  rest-api_01:
+  rest-api:
     build:
       context: .
       dockerfile: Dockerfile
@@ -42,31 +42,31 @@ services:
     networks:
       - ecommerce_network
 
-  rest-api_02:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    volumes:
-      - ./:/usr/src/app
-      - /usr/src/app/node_modules
-    restart: always
-    ports:
-      - '4445:4444'
-    networks:
-      - ecommerce_network
+#  rest-api_02:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    volumes:
+#      - ./:/usr/src/app
+#      - /usr/src/app/node_modules
+#    restart: always
+#    ports:
+#      - '4445:4444'
+#    networks:
+#      - ecommerce_network
 
-  rest-api_03:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    volumes:
-      - ./:/usr/src/app
-      - /usr/src/app/node_modules
-    restart: always
-    ports:
-      - '4446:4444'
-    networks:
-      - ecommerce_network
+#  rest-api_03:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    volumes:
+#      - ./:/usr/src/app
+#      - /usr/src/app/node_modules
+#    restart: always
+#    ports:
+#      - '4446:4444'
+#    networks:
+#      - ecommerce_network
 
 
 networks:
