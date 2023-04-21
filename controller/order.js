@@ -1,9 +1,9 @@
-import orderModel from "../model/order.js";
+import OrderModel from "../model/order.js";
 import lodash from "lodash"
 
 const getAllOrders = async (req, res) => {
     try {
-        const order = await orderModel
+        const order = await OrderModel
             .find()
             .populate('product', ['name', 'price'])
             .populate('user', ['email', 'username', 'phoneNumber'])
@@ -21,7 +21,7 @@ const getAllOrders = async (req, res) => {
 const getOrder = async (req, res) => {
     const { id } = req.params
     try {
-        const order = await orderModel
+        const order = await OrderModel
             .findById(id)
             .populate('product', ['name', 'price', 'desc'])
             .populate('user')
@@ -50,7 +50,7 @@ const createOrder = async (req, res) => {
     const { _id } = req.user
     const { product, quantity } = req.body
     try {
-        const newOrder = new orderModel({
+        const newOrder = new OrderModel({
             product,
             quantity,
             user: _id
@@ -74,7 +74,7 @@ const updateOrder = async (req, res) => {
         for (const ops of req.body) {
             updateOps[ops.propName] = ops.value;
         }
-        const updateOrder = await orderModel.findByIdAndUpdate(id, { $set: updateOps })
+        const updateOrder = await OrderModel.findByIdAndUpdate(id, { $set: updateOps })
         res.json({
             msg: `successfully updated data by ${id}`,
             updateOrder
@@ -88,7 +88,7 @@ const updateOrder = async (req, res) => {
 
 const deleteAllOrders = async (req, res) => {
     try {
-        const orders = await orderModel.deleteMany()
+        const orders = await OrderModel.deleteMany()
         res.json({
             msg: 'successfully deleted all data',
             orders
@@ -103,7 +103,7 @@ const deleteAllOrders = async (req, res) => {
 const deleteOrder = async (req, res) => {
     const { id } = req.params
     try {
-        const order = await orderModel.findByIdAndDelete(id)
+        const order = await OrderModel.findByIdAndDelete(id)
         if (!order) {
             return res.status(410).json({
                 msg: 'There is no order to delete'

@@ -20,5 +20,5 @@ const orderSchema = schema({
     }
 })
 
-const orderModel = mongoose.model('Order', orderSchema)
-export default orderModel
+const OrderModel = mongoose.model('Order', orderSchema)
+export default OrderModel

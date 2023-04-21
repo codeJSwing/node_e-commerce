@@ -24,5 +24,5 @@ const replySchema = mongoose.Schema(
     }
 )
 
-const replyModel = mongoose.model('Reply', replySchema)
-export default replyModel
+const ReplyModel = mongoose.model('Reply', replySchema)
+export default ReplyModel

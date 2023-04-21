@@ -1,4 +1,4 @@
-import userModel from "../model/user.js";
+import UserModel from "../model/user.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
@@ -12,13 +12,13 @@ import redisCli from "../config/redis.js";
 const signupHandler = async (req, res) => {
     const {email, username, password, birth, phoneNumber, role} = req.body
     try {
-        const user = await userModel.findOne({email})
+        const user = await UserModel.findOne({email})
         if (user) {
             return res.status(401).json({
                 msg: 'exists user'
             })
         }
-        const newUser = new userModel({
+        const newUser = new UserModel({
             email,
             password,
             username: username ? username : email.split('@')[0],
@@ -47,15 +47,11 @@ const signupHandler = async (req, res) => {
 const loginHandler = async (req, res) => {
     const {email, password} = req.body
     try {
-        const user = await userModel.findOne({email})
+        const user = await UserModel.findOne({email})
         if (!user) {
-            // res.status(401)
-            // throw new Error(`This email does not exists`)
             return res.status(401).json({
                 msg: `This email does not exists`
-
             })
-
         }
         const isMatching = await user.matchPassword(password)
         if (!isMatching) {
@@ -73,11 +69,11 @@ const loginHandler = async (req, res) => {
             token
         })
     } catch (err) {
-        // res.status(500).json({
-        //     msg: err.message
-        // })
-        res.status(500)
-        throw new Error(err.message)
+        res.status(500).json({
+            msg: err.message
+        })
+        // res.status(500)
+        // throw new Error(err.message)
     }
 }
 
@@ -86,7 +82,7 @@ const getProfile = async (req, res) => {
     const {_id} = req.user
     // console.log(_id)
     try {
-        const user = await userModel.findById(_id)
+        const user = await UserModel.findById(_id)
         const userFromRedis = await redisCli.get(_id.toString())
         console.log('userFromRedis-----', userFromRedis)
         if (userFromRedis !== null) {
@@ -120,7 +116,7 @@ const updatePassword = async (req, res) => {
         if (hashedPassword) {
             passwordField.password = hashedPassword
         }
-        await userModel.findByIdAndUpdate(_id, {$set: {password: passwordField.password}})
+        await UserModel.findByIdAndUpdate(_id, {$set: {password: passwordField.password}})
         res.json({
             msg: 'successfully updated password'
         })
@@ -134,7 +130,7 @@ const updatePassword = async (req, res) => {
 const findPassword = async (req, res) => {
     const {email} = req.body
     try {
-        const user = await userModel.findOne({email})
+        const user = await UserModel.findOne({email})
         if (!user) {
             return res.status(408).json({
                 msg: 'no email'
@@ -167,7 +163,7 @@ const resetPassword = async (req, res) => {
             })
         }
         const hashedPassword = await bcrypt.hash(password1, 10)
-        await userModel.findByIdAndUpdate(userId, {password: hashedPassword})
+        await UserModel.findByIdAndUpdate(userId, {password: hashedPassword})
         res.json({
             msg: 'successful update password'
         })
@@ -182,13 +178,13 @@ const emailConfirm = async (req, res) => {
     const {token, email} = req.body
     try {
         await jwt.verify(token, process.env.LOGIN_ACCESS_KEY)
-        const user = await userModel.findOne({email})
+        const user = await UserModel.findOne({email})
         if (user.isEmailConfirm === true) {
             return res.status(410).json({
                 msg: 'already isEmailConfirmed true'
             })
         }
-        await userModel.findOneAndUpdate(email, {isEmailConfirm: true})
+        await UserModel.findOneAndUpdate(email, {isEmailConfirm: true})
         res.json({
             msg: 'successful updated email confirm'
         })
@@ -202,7 +198,7 @@ const emailConfirm = async (req, res) => {
 const findEmail = async (req, res) => {
     const {phoneNumber} = req.body
     try {
-        const {email} = await userModel.findOne({phoneNumber})
+        const {email} = await UserModel.findOne({phoneNumber})
         if (!email) {
             return res.status(404).json({
                 msg: 'This phoneNumber does not exists'
@@ -221,7 +217,7 @@ const findEmail = async (req, res) => {
 
 const getAllUsers = async (req, res) => {
     try {
-        const users = await userModel.find()
+        const users = await UserModel.find()
         res.json({
             msg: 'successful get all users',
             users

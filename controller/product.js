@@ -1,11 +1,13 @@
-import productModel from "../model/product.js";
-import replyModel from "../model/reply.js";
+import ProductModel from "../model/product.js";
+import ReplyModel from "../model/reply.js";
 import redisCli from "../config/redis.js";
 
 const getAllProducts = async (req, res) => {
     try {
-        const productFromMongo = await productModel.find()
+        const productFromMongo = await ProductModel.find()
         const productFromRedis = await redisCli.get('products')
+        // redis에 저장된 이후의 데이터가 추가될 경우, 새로운 데이터가 포함된 products를 다시 set
+        await redisCli.set('products', JSON.stringify(productFromMongo))
         if (productFromRedis !== null) {
             console.log('redis')
             return res.json({
@@ -13,7 +15,6 @@ const getAllProducts = async (req, res) => {
             })
         }
         console.log('mongo')
-        await redisCli.set('products', JSON.stringify(productFromMongo))
         res.json({
             products: productFromMongo
         })
@@ -28,9 +29,9 @@ const getAllProducts = async (req, res) => {
 const getProduct = async (req, res) => {
     const {id} = req.params
     try {
-        const products = await productModel.find()
-        const product = await productModel.findById(id)
-        const replies = await replyModel.find({product: id})
+        const products = await ProductModel.find()
+        const product = await ProductModel.findById(id)
+        const replies = await ReplyModel.find({product: id})
         const redisProducts = await redisCli.get('products')
         if (redisProducts !== null) {
             const parsedRedis = JSON.parse(redisProducts);
@@ -75,23 +76,17 @@ const getProduct = async (req, res) => {
     }
 }
 
-// todo: productId로 등록해서 조회할 때도 그렇게 나오도록
 const createProduct = async (req, res) => {
     const {name, price, desc} = req.body
     try {
-        const newProduct = new productModel({
+        const newProduct = new ProductModel({
             name,
             price,
             desc
         })
         const createdProduct = await newProduct.save()
-        const products = await productModel.find()
         // 기존 데이터를 지우고, 새로운 데이터를 등록 최신성을 유지해야 돼.
-        // await redisCli.del("products")
-        // todo: 지우지 않고 저장하는게 문제가 없는지 확인해봐
-
-        await redisCli.set("products", JSON.stringify(products))
-
+        // await redisCli.set('products', JSON.stringify(createdProduct))
         res.json({
             msg: `successfully created new product`,
             product: createdProduct
@@ -110,7 +105,7 @@ const updateProduct = async (req, res) => {
         for (const ops of req.body) {
             updateOps[ops.propName] = ops.value;
         }
-        const product = await productModel.findByIdAndUpdate(id, {$set: updateOps})
+        const product = await ProductModel.findByIdAndUpdate(id, {$set: updateOps})
         if (!product) {
             return res.status(404).json({
                 msg: `There is no product to update`
@@ -129,12 +124,12 @@ const updateProduct = async (req, res) => {
 
 const deleteAllProducts = async (req, res) => {
     try {
-        const productsFromMongo = await productModel.deleteMany()
-        // 데이터베이스에 있는 데이터도 삭제할 때 redis에 남아있는 데이터도 같이 삭제해야돼.
-        await redisCli.del('products')
+        const productsFromMongo = await ProductModel.deleteMany()
+        const deleteFromRedis = await redisCli.del('products')
         res.json({
             msg: 'successfully deleted all data',
-            productsFromMongo
+            productsFromMongo,
+            deleteFromRedis
         })
     } catch (e) {
         res.status(500).json({
@@ -145,29 +140,40 @@ const deleteAllProducts = async (req, res) => {
 
 const deleteProduct = async (req, res) => {
     const {id} = req.params
-    console.log(id)
     try {
-        const product = await productModel.findByIdAndDelete(id)
-        // console.log('product==========', product)
-        if (!product) {
-            return res.status(401).json({
-                msg: 'There is no product to delete'
-            })
-        }
-        // const productFromRedis = redisCli.get(id)
-        // console.log(productFromRedis)
-        // console.log(id.toString())
-        await redisCli.del(id)
+        const productFromDB = await ProductModel.findByIdAndDelete(id)
+        // console.log('productFromDB==========', productFromDB)
+
+        // todo: 완료되면 주석 해제
+        // if (!productFromDB) {
+        //     return res.status(401).json({
+        //         msg: 'There is no product to delete'
+        //     })
+        // }
+
+        // 1. products 전체 조회
+        const getProductFromRedis = await redisCli.get('products')
+        // 2. string 타입을 JSON 타입으로 변환
+        const jsonProduct = await JSON.parse(getProductFromRedis)
+        // 3. 삭제 하려는 id와 같은 id를 찾기
+        const parsedProduct = await jsonProduct.find(product => product._id === id)
+        console.log('parsedProduct---------------------', parsedProduct)
+        // 4. todo: 찾은 id에 해당하는 product를 삭제
+
+        const setProductToRedis = await redisCli.set('products', JSON.stringify(parsedProduct));
+        console.log('setProductToRedis----------------', setProductToRedis)
+
         res.json({
             msg: `successfully deleted data by ${id}`,
-            product
+            product: productFromDB
+            // test
         })
     } catch (e) {
-        // res.status(500).json({
-        //     msg: e.message
-        // })
-        res.status(500)
-        throw new Error(e.message)
+        res.status(500).json({
+            msg: e.message
+        })
+        // res.status(500)
+        // throw new Error(e.message)
     }
 }
 
@@ -175,7 +181,7 @@ const replyProduct = async (req, res) => {
     const {memo} = req.body
     const {productId} = req.params
     try {
-        const newReply = new replyModel({
+        const newReply = new ReplyModel({
             product: productId,
             user: req.user._id,
             memo
