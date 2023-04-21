@@ -142,31 +142,22 @@ const deleteProduct = async (req, res) => {
     const {id} = req.params
     try {
         const productFromDB = await ProductModel.findByIdAndDelete(id)
-        // console.log('productFromDB==========', productFromDB)
-
-        // todo: 완료되면 주석 해제
-        // if (!productFromDB) {
-        //     return res.status(401).json({
-        //         msg: 'There is no product to delete'
-        //     })
-        // }
-
+        if (!productFromDB) {
+            return res.status(401).json({
+                msg: 'There is no product to delete'
+            })
+        }
         // 1. products 전체 조회
         const getProductFromRedis = await redisCli.get('products')
         // 2. string 타입을 JSON 타입으로 변환
         const jsonProduct = await JSON.parse(getProductFromRedis)
         // 3. 삭제 하려는 id와 같은 id를 찾기
-        const parsedProduct = await jsonProduct.find(product => product._id === id)
-        console.log('parsedProduct---------------------', parsedProduct)
-        // 4. todo: 찾은 id에 해당하는 product를 삭제
-
-        const setProductToRedis = await redisCli.set('products', JSON.stringify(parsedProduct));
-        console.log('setProductToRedis----------------', setProductToRedis)
-
+        const parsedProduct = await jsonProduct.filter(product => product._id !== id)
+        // 4. 찾은 id에 해당하는 product를 제외한 나머지를 다시 덮어 씌운다. (원하는 product만 지운 효과)
+        await redisCli.set('products', JSON.stringify(parsedProduct))
         res.json({
             msg: `successfully deleted data by ${id}`,
             product: productFromDB
-            // test
         })
     } catch (e) {
         res.status(500).json({
