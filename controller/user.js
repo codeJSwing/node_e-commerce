@@ -8,6 +8,7 @@ import {
     signupTemplete
 } from "../config/sendEmail.js";
 import redisCli from "../config/redis.js";
+import ProductModel from "../model/product.js";
 
 const signupHandler = async (req, res) => {
     const {email, username, password, birth, phoneNumber, role} = req.body
@@ -77,25 +78,25 @@ const loginHandler = async (req, res) => {
     }
 }
 
-// a라는 사람이 레디스에 이미 저장했을 때 , b라는 사람이 레디스에 있는 정보를 불러올 수 있어
 const getProfile = async (req, res) => {
     const {_id} = req.user
-    // console.log(_id)
     try {
         const user = await UserModel.findById(_id)
-        const userFromRedis = await redisCli.get(_id.toString())
-        console.log('userFromRedis-----', userFromRedis)
-        if (userFromRedis !== null) {
-            const parsedRedis = JSON.parse(userFromRedis)
+        if (!user) {
+            return res.status(400).json({
+                msg: 'There is no user to get'
+            })
+        }
+        const usersFromRedis = await redisCli.get('users')
+        if (usersFromRedis !== null) {
+            const parsedRedis = JSON.parse(usersFromRedis)
+            const userFromRedis = parsedRedis.find(user => user._id === _id.toString());
             console.log('redis')
             return res.json({
-                msg: `successfully get redis data`,
-                product: parsedRedis
+                user: userFromRedis
             })
         }
         console.log('mongo')
-
-        await redisCli.set(_id.toString(), JSON.stringify(user))
         res.json({
             msg: `successfully get userInfo`,
             user: req.user
