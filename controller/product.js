@@ -76,6 +76,7 @@ const getProduct = async (req, res) => {
     }
 }
 
+// todo: 최신 데이터가 위로 정렬되도록 수정
 const createProduct = async (req, res) => {
     const {name, price, desc} = req.body
     try {
@@ -85,8 +86,10 @@ const createProduct = async (req, res) => {
             desc
         })
         const createdProduct = await newProduct.save()
-        // 기존 데이터를 지우고, 새로운 데이터를 등록 최신성을 유지해야 돼.
-        // await redisCli.set('products', JSON.stringify(createdProduct))
+        // 1. 데이터베이스에서 products 전체 조회
+        const productsFromDB = await ProductModel.find()
+        // 2. 조회한 데이터를 redis 메모리에 덮어씌우기
+        await redisCli.set('products', JSON.stringify(productsFromDB))
         res.json({
             msg: `successfully created new product`,
             product: createdProduct
@@ -148,13 +151,13 @@ const deleteProduct = async (req, res) => {
             })
         }
         // 1. products 전체 조회
-        const getProductFromRedis = await redisCli.get('products')
+        const ProductsFromRedis = await redisCli.get('products')
         // 2. string 타입을 JSON 타입으로 변환
-        const jsonProduct = await JSON.parse(getProductFromRedis)
+        const jsonProducts = await JSON.parse(ProductsFromRedis)
         // 3. 삭제 하려는 id와 같은 id를 찾기
-        const parsedProduct = await jsonProduct.filter(product => product._id !== id)
+        const deleteProduct = await jsonProducts.filter(product => product._id !== id)
         // 4. 찾은 id에 해당하는 product를 제외한 나머지를 다시 덮어 씌운다. (원하는 product만 지운 효과)
-        await redisCli.set('products', JSON.stringify(parsedProduct))
+        await redisCli.set('products', JSON.stringify(deleteProduct))
         res.json({
             msg: `successfully deleted data by ${id}`,
             product: productFromDB
