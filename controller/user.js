@@ -217,10 +217,18 @@ const findEmail = async (req, res) => {
 
 const getAllUsers = async (req, res) => {
     try {
-        const users = await UserModel.find()
+        const usersFromDB = await UserModel.find()
+        const usersFromRedis = await redisCli.get('users')
+        await redisCli.set('users', JSON.stringify(usersFromDB))
+        if (usersFromRedis !== null) {
+            console.log('redis')
+            return res.json({
+                users: JSON.parse(usersFromRedis)
+            })
+        }
         res.json({
-            msg: 'successful get all users',
-            users
+            msg: 'successful get all users from DB',
+            users: usersFromDB
         })
     } catch (e) {
         res.status(500).json({

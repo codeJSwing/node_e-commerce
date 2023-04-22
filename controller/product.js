@@ -2,6 +2,7 @@ import ProductModel from "../model/product.js";
 import ReplyModel from "../model/reply.js";
 import redisCli from "../config/redis.js";
 
+// todo: reply 객체를 products 객체의 하위 객체로
 const getAllProducts = async (req, res) => {
     try {
         const productFromMongo = await ProductModel.find()
