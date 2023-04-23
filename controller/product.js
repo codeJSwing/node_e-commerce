@@ -2,22 +2,20 @@ import ProductModel from "../model/product.js";
 import ReplyModel from "../model/reply.js";
 import redisCli from "../config/redis.js";
 
-// todo: reply 객체를 products 객체의 하위 객체로
 const getAllProducts = async (req, res) => {
     try {
-        const productFromMongo = await ProductModel.find()
-        const productFromRedis = await redisCli.get('products')
-        // redis에 저장된 이후의 데이터가 추가될 경우, 새로운 데이터가 포함된 products를 다시 set
-        await redisCli.set('products', JSON.stringify(productFromMongo))
-        if (productFromRedis !== null) {
+        const productsFromDB = await ProductModel.find()
+        const productsFromRedis = await redisCli.get('products')
+        await redisCli.set('products', JSON.stringify(productsFromDB))
+        if (productsFromRedis !== null) {
             console.log('redis')
             return res.json({
-                products: JSON.parse(productFromRedis)
+                products: JSON.parse(productsFromRedis)
             })
         }
         console.log('mongo')
         res.json({
-            products: productFromMongo
+            products: productsFromDB
         })
     } catch (e) {
         res.status(500).json({
@@ -26,42 +24,30 @@ const getAllProducts = async (req, res) => {
     }
 }
 
-// todo: 코드 리팩토링 해야 할 듯 너무 길다
 const getProduct = async (req, res) => {
     const {id} = req.params
     try {
-        const products = await ProductModel.find()
-        const product = await ProductModel.findById(id)
-        const replies = await ReplyModel.find({product: id})
-        const redisProducts = await redisCli.get('products')
-        if (redisProducts !== null) {
-            const parsedRedis = JSON.parse(redisProducts);
-            const redisProduct = parsedRedis.find(item => item._id === id);
+        const productFromDB = await ProductModel.findById(id)
+        const reply = await ReplyModel.find({product: id})
+        const productFromRedis = await redisCli.get(id)
+        if (productFromRedis !== null) {
             console.log('redis')
             return res.json({
                 msg: 'successfully get redis data',
-                product: redisProduct,
-                replies: replies.map(reply => {
-                    return {
-                        user: reply.user,
-                        memo: reply.memo,
-                        updateTime: reply.updatedAt,
-                        id: reply._id
-                    }
-                })
+                product: JSON.parse(productFromRedis)
             })
         }
-        if (!product) {
+        if (!productFromDB) {
             return res.status(401).json({
                 msg: 'There is no product to get'
             })
         }
         console.log('mongo')
-        await redisCli.set('products', JSON.stringify(products))
+        await redisCli.set(id, JSON.stringify({product: productFromDB, reply}))
         res.json({
-            msg: `successful get data`,
-            product,
-            replies: replies.map(reply => {
+            msg: `successfully get product from DB`,
+            product: productFromDB,
+            reply: reply.map(reply => {
                 return {
                     user: reply.user,
                     memo: reply.memo,
