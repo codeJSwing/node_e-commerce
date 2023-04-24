@@ -1,6 +1,7 @@
 import ProductModel from "../model/product.js";
 import ReplyModel from "../model/reply.js";
 import redisCli from "../config/redis.js";
+import lodash from "lodash"
 
 const getAllProducts = async (req, res) => {
     try {
@@ -28,7 +29,7 @@ const getProduct = async (req, res) => {
     const {id} = req.params
     try {
         const productFromDB = await ProductModel.findById(id)
-        const reply = await ReplyModel.find({product: id})
+        const replies = await ReplyModel.find({product: id})
         const productFromRedis = await redisCli.get(id)
         if (productFromRedis !== null) {
             console.log('redis')
@@ -43,14 +44,24 @@ const getProduct = async (req, res) => {
             })
         }
         console.log('mongo')
-        await redisCli.set(id, JSON.stringify({product: productFromDB, reply}))
+        await redisCli.set(id, JSON.stringify({
+            product: productFromDB,
+            reply: replies.map(reply => {
+                return {
+                    memo: reply.memo,
+                    user: reply.user,
+                    updateTime: reply.updatedAt,
+                    id: reply._id
+                }
+            })
+        }))
         res.json({
             msg: `successfully get product from DB`,
             product: productFromDB,
-            reply: reply.map(reply => {
+            reply: replies.map(reply => {
                 return {
-                    user: reply.user,
                     memo: reply.memo,
+                    user: reply.user,
                     updateTime: reply.updatedAt,
                     id: reply._id
                 }
