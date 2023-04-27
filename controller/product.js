@@ -32,12 +32,13 @@ const getAllProducts = async (req, res) => {
     }
 }
 
+// todo: 조회 이후, 후기를 작성하고 다시 조회하면 후기가 레디스에 등록되지 않는 문제 확인
 const getProduct = async (req, res) => {
     const {id} = req.params
     try {
         const productFromDB = await ProductModel.findById(id)
-        const replies = await ReplyModel.find({product: id})
-        const productFromRedis = await redisCli.hget(id)
+        const reply = await ReplyModel.find({product: id})
+        const productFromRedis = await redisCli.get(id)
         if (productFromRedis !== null) {
             console.log('redis')
             return res.json({
@@ -51,24 +52,14 @@ const getProduct = async (req, res) => {
             })
         }
         console.log('mongo')
-        await redisCli.hset(id, JSON.stringify({
-            product: productFromDB,
-            reply: replies.map(reply => {
-                return {
-                    memo: reply.memo,
-                    user: reply.user,
-                    updateTime: reply.updatedAt,
-                    id: reply._id
-                }
-            })
-        }))
+        await redisCli.set(id, JSON.stringify({product: productFromDB, reply}))
         res.json({
             msg: `successfully get product from DB`,
             product: productFromDB,
-            reply: replies.map(reply => {
+            reply: reply.map(reply => {
                 return {
-                    memo: reply.memo,
                     user: reply.user,
+                    memo: reply.memo,
                     updateTime: reply.updatedAt,
                     id: reply._id
                 }
@@ -81,7 +72,6 @@ const getProduct = async (req, res) => {
     }
 }
 
-// todo: 최신 데이터가 위로 정렬되도록 수정
 const createProduct = async (req, res) => {
     const {name, price, desc} = req.body
     try {
