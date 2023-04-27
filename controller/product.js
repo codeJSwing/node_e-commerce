@@ -13,7 +13,6 @@ const getAllProducts = async (req, res) => {
                 description: result.desc
             }
         })
-        redisCli.set('products', JSON.stringify(filterProducts))
         const productsFromRedis = await redisCli.get('products')
         if (productsFromRedis !== null) {
             return res.json({
@@ -21,6 +20,7 @@ const getAllProducts = async (req, res) => {
                 products: JSON.parse(productsFromRedis)
             })
         }
+        redisCli.set('products', JSON.stringify(filterProducts))
         res.json({
             msg: `successfully get all products from DB`,
             products: filterProducts
