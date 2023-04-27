@@ -26,12 +26,12 @@ const getOrder = async (req, res) => {
             .populate('product', ['name', 'price', 'desc'])
             .populate('user')
         if (!order) {
-            return res.json({
+            return res.status(400).json({
                 msg: 'There is no order to get'
             })
         }
         if (!lodash.isEqual(order.user._id, req.user._id)) {
-            return res.status(408).json({
+            return res.status(401).json({
                 msg: 'This is not your order'
             })
         }

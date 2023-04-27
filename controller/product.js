@@ -1,22 +1,29 @@
 import ProductModel from "../model/product.js";
 import ReplyModel from "../model/reply.js";
 import redisCli from "../config/redis.js";
-import lodash from "lodash"
 
 const getAllProducts = async (req, res) => {
     try {
         const productsFromDB = await ProductModel.find()
+        const filterProducts = await productsFromDB.map(result => {
+            return {
+                productId: result._id,
+                name: result.name,
+                price: result.price,
+                description: result.desc
+            }
+        })
+        redisCli.set('products', JSON.stringify(filterProducts))
         const productsFromRedis = await redisCli.get('products')
-        await redisCli.set('products', JSON.stringify(productsFromDB))
         if (productsFromRedis !== null) {
-            console.log('redis')
             return res.json({
+                msg: `successfully get all products from Redis`,
                 products: JSON.parse(productsFromRedis)
             })
         }
-        console.log('mongo')
         res.json({
-            products: productsFromDB
+            msg: `successfully get all products from DB`,
+            products: filterProducts
         })
     } catch (e) {
         res.status(500).json({
@@ -30,7 +37,7 @@ const getProduct = async (req, res) => {
     try {
         const productFromDB = await ProductModel.findById(id)
         const replies = await ReplyModel.find({product: id})
-        const productFromRedis = await redisCli.get(id)
+        const productFromRedis = await redisCli.hget(id)
         if (productFromRedis !== null) {
             console.log('redis')
             return res.json({
@@ -44,7 +51,7 @@ const getProduct = async (req, res) => {
             })
         }
         console.log('mongo')
-        await redisCli.set(id, JSON.stringify({
+        await redisCli.hset(id, JSON.stringify({
             product: productFromDB,
             reply: replies.map(reply => {
                 return {
