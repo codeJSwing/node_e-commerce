@@ -20,7 +20,7 @@ router.get("/", getAllProducts)
 router.get("/:id", getProduct)
 
 // 판매 제품 등록 - 판매자
-router.post("/", createProduct)
+router.post("/", checkAuth, createProduct)
 
 // 등록한 판매 제품 수정 - 판매자
 router.put("/:id", updateProduct)
@@ -29,7 +29,7 @@ router.put("/:id", updateProduct)
 router.delete("/", checkAuth, deleteAllProducts)
 
 // 한가지 상품 삭제 - 판매자
-router.delete("/:id", deleteProduct)
+router.delete("/:id", checkAuth, deleteProduct)
 
 // 제품의 후기 등록 - 고객 / 인증 필요
 router.post("/:productId/reply", checkAuth, replyProduct)
