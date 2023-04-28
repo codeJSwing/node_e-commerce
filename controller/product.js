@@ -30,55 +30,23 @@ const getAllProducts = async (req, res) => {
 const getProduct = async (req, res) => {
     const {id} = req.params
     try {
-        // redis data가 있으면 먼저 data를 보여준다.
         const productFromRedis = await redisCli.get(id)
-        if (productFromRedis !== null) {
+        if (productFromRedis === null) {
+            const productFromDB = await ProductModel.findById(id)
+            const replies = await ReplyModel.find({product: id})
+            await redisCli.set(id, JSON.stringify({
+                product: productFromDB,
+                replies
+            }))
             return res.json({
-                msg: 'successfully get redis data from Redis',
-                product: JSON.parse(productFromRedis)
+                msg: `successfully get product from DB`,
+                product: productFromDB,
+                replies
             })
         }
-
-        // redis data가 없으면 db 에서 데이터를 찾는다.
-        const productFromDB = await ProductModel.findById(id)
-        if (!productFromDB) {
-            return res.status(401).json({
-                msg: 'There is no product to get in DB'
-            })
-        }
-        console.log(typeof productFromDB, ': productFromDB-----------', productFromDB)
-
-        // todo: 여기가 문제 왜 map이 안되는거지?
-        let filterProduct = await productFromDB.map(_ => {
-            return {
-                product_id: _._id,
-                name: _.name,
-                price: _.price,
-                description: _.desc
-            }
-        })
-        console.log('filterProduct-----------', filterProduct)
-
-        const replies = await ReplyModel.find({product: id})
-        const filterReplies = await replies.map(result => {
-            return {
-                reply_id: result._id,
-                memo: result.memo,
-                user_id: result.user,
-            }
-        })
-        console.log('filterReplies-----------', filterReplies)
-
-
-        await redisCli.set(id, JSON.stringify({
-            product: filterProduct,
-            replies: filterReplies
-        }))
-
         res.json({
-            msg: `successfully get product from DB`,
-            product: filterProduct,
-            reply: filterReplies
+            msg: `successfully get product from Redis`,
+            result: JSON.parse(productFromRedis)
         })
     } catch (err) {
         res.status(500).json({
