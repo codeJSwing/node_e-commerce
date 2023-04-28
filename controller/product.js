@@ -4,26 +4,21 @@ import redisCli from "../config/redis.js";
 
 const getAllProducts = async (req, res) => {
     try {
-        const productsFromDB = await ProductModel.find()
-        const filterProducts = await productsFromDB.map(result => {
-            return {
-                product_Id: result._id,
-                name: result.name,
-                price: result.price,
-                description: result.desc
-            }
-        })
         const productsFromRedis = await redisCli.get('products')
-        if (productsFromRedis !== null) {
-            return res.json({
-                msg: `successfully get all products from Redis`,
-                products: JSON.parse(productsFromRedis)
-            })
+        if (productsFromRedis === null) {
+            const productsFromDB = await ProductModel.find()
+            await redisCli.set('products', JSON.stringify(productsFromDB))
         }
-        redisCli.set('products', JSON.stringify(filterProducts))
         res.json({
-            msg: `successfully get all products from DB`,
-            products: filterProducts
+            msg: `successfully get all products`,
+            products: JSON.parse(productsFromRedis).map(result => {
+                return {
+                    product_Id: result._id,
+                    name: result.name,
+                    price: result.price,
+                    description: result.desc
+                }
+            })
         })
     } catch (e) {
         res.status(500).json({
@@ -92,7 +87,6 @@ const getProduct = async (req, res) => {
     }
 }
 
-// todo: 최신 데이터가 위로 정렬되도록 수정
 const createProduct = async (req, res) => {
     const {name, price, desc} = req.body
     try {
@@ -102,9 +96,7 @@ const createProduct = async (req, res) => {
             desc
         })
         const createdProduct = await newProduct.save()
-        // 1. 데이터베이스에서 products 전체 조회
         const productsFromDB = await ProductModel.find()
-        // 2. 조회한 데이터를 redis 메모리에 덮어씌우기
         await redisCli.set('products', JSON.stringify(productsFromDB))
         res.json({
             msg: `successfully created new product`,
