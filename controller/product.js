@@ -111,11 +111,10 @@ const updateProduct = async (req, res) => {
 const deleteAllProducts = async (req, res) => {
     try {
         const productsFromMongo = await ProductModel.deleteMany()
-        const deleteFromRedis = await redisCli.del('products')
+        await redisCli.del('products')
         res.json({
-            msg: 'successfully deleted all data',
-            productsFromMongo,
-            deleteFromRedis
+            msg: 'successfully deleted all data in DB & Redis',
+            productsFromMongo
         })
     } catch (e) {
         res.status(500).json({
