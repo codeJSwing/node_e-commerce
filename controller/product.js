@@ -7,7 +7,7 @@ const getAllProducts = async (req, res) => {
         const productsFromDB = await ProductModel.find()
         const filterProducts = await productsFromDB.map(result => {
             return {
-                productId: result._id,
+                product_Id: result._id,
                 name: result.name,
                 price: result.price,
                 description: result.desc
@@ -32,38 +32,58 @@ const getAllProducts = async (req, res) => {
     }
 }
 
-// todo: 조회 이후, 후기를 작성하고 다시 조회하면 후기가 레디스에 등록되지 않는 문제 확인
 const getProduct = async (req, res) => {
     const {id} = req.params
     try {
-        const productFromDB = await ProductModel.findById(id)
-        const reply = await ReplyModel.find({product: id})
+        // redis data가 있으면 먼저 data를 보여준다.
         const productFromRedis = await redisCli.get(id)
         if (productFromRedis !== null) {
-            console.log('redis')
             return res.json({
-                msg: 'successfully get redis data',
+                msg: 'successfully get redis data from Redis',
                 product: JSON.parse(productFromRedis)
             })
         }
+
+        // redis data가 없으면 db 에서 데이터를 찾는다.
+        const productFromDB = await ProductModel.findById(id)
         if (!productFromDB) {
             return res.status(401).json({
-                msg: 'There is no product to get'
+                msg: 'There is no product to get in DB'
             })
         }
-        console.log('mongo')
-        await redisCli.set(id, JSON.stringify({product: productFromDB, reply}))
+        console.log(typeof productFromDB, ': productFromDB-----------', productFromDB)
+
+        // todo: 여기가 문제 왜 map이 안되는거지?
+        let filterProduct = await productFromDB.map(_ => {
+            return {
+                product_id: _._id,
+                name: _.name,
+                price: _.price,
+                description: _.desc
+            }
+        })
+        console.log('filterProduct-----------', filterProduct)
+
+        const replies = await ReplyModel.find({product: id})
+        const filterReplies = await replies.map(result => {
+            return {
+                reply_id: result._id,
+                memo: result.memo,
+                user_id: result.user,
+            }
+        })
+        console.log('filterReplies-----------', filterReplies)
+
+
+        await redisCli.set(id, JSON.stringify({
+            product: filterProduct,
+            replies: filterReplies
+        }))
+
         res.json({
             msg: `successfully get product from DB`,
-            product: productFromDB,
-            reply: reply.map(reply => {
-                return {
-                    user: reply.user,
-                    memo: reply.memo,
-                    updateTime: reply.updatedAt,
-                    id: reply._id
-                }
-            })
+            product: filterProduct,
+            reply: filterReplies
         })
     } catch (err) {
         res.status(500).json({
@@ -72,6 +92,7 @@ const getProduct = async (req, res) => {
     }
 }
 
+// todo: 최신 데이터가 위로 정렬되도록 수정
 const createProduct = async (req, res) => {
     const {name, price, desc} = req.body
     try {
