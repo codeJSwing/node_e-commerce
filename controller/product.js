@@ -64,8 +64,15 @@ const createProduct = async (req, res) => {
             desc
         })
         const createdProduct = await newProduct.save()
-        const productsFromDB = await ProductModel.find()
-        await redisCli.set('products', JSON.stringify(productsFromDB))
+        const productsFromRedis = await redisCli.get('products')
+        if (productsFromRedis) {
+            const products = JSON.parse(productsFromRedis)
+            products.push(createdProduct)
+            await redisCli.set('products', JSON.stringify(products))
+        } else {
+            const products = await ProductModel.find()
+            await redisCli.set('products', JSON.stringify(products))
+        }
         res.json({
             msg: `successfully created new product`,
             product: createdProduct
