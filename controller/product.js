@@ -8,9 +8,20 @@ const getAllProducts = async (req, res) => {
         if (productsFromRedis === null) {
             const productsFromDB = await ProductModel.find()
             await redisCli.set('products', JSON.stringify(productsFromDB))
+            return res.json({
+                msg: `successfully get all products from DB`,
+                products: productsFromDB.map(product => {
+                    return {
+                        product_Id: product._id,
+                        name: product.name,
+                        price: product.price,
+                        description: product.desc
+                    }
+                })
+            })
         }
         res.json({
-            msg: `successfully get all products`,
+            msg: `successfully get all products from Redis`,
             products: JSON.parse(productsFromRedis).map(result => {
                 return {
                     product_Id: result._id,
@@ -97,6 +108,10 @@ const updateProduct = async (req, res) => {
                 msg: `There is no product to update`
             })
         }
+        const replies = await ReplyModel.find({product: id})
+        await redisCli.set(id, JSON.stringify({product, replies}))
+        const productsFromDB = await ProductModel.find()
+        await redisCli.set('products', JSON.stringify(productsFromDB))
         res.json({
             msg: `successfully updated product by ${id}`,
             product

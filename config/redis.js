@@ -4,13 +4,17 @@ import dotenv from "dotenv"
 dotenv.config()
 
 const redisClient = await redis.createClient({
-    url: `redis://${process.env.REDIS_USERNAME}:${process.env.REDIS_PASSWORD}@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
+    socket: {
+        host: process.env.REDIS_IP,
+        port: process.env.REDIS_PORT,
+        password: process.env.REDIS_PASSWORD,
+    },
     legacyMode: true
 })
-await redisClient.on('connect', () => {
+redisClient.on('connect', () => {
     console.info('Redis connected!')
 })
-await redisClient.on('error', (err) => {
+redisClient.on('error', (err) => {
     console.error('Redis Client Error', err)
 })
 await redisClient.connect().then()
