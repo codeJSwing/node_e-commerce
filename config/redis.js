@@ -4,10 +4,10 @@ import dotenv from "dotenv"
 dotenv.config()
 
 const redisClient = await redis.createClient({
+    password: process.env.REDIS_PASSWORD,
     socket: {
         host: process.env.REDIS_IP,
-        port: process.env.REDIS_PORT,
-        password: process.env.REDIS_PASSWORD,
+        port: process.env.REDIS_PORT
     },
     legacyMode: true
 })
