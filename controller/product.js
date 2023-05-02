@@ -5,37 +5,34 @@ import redisCli from "../config/redis.js";
 const getAllProducts = async (req, res) => {
     try {
         const productsFromRedis = await redisCli.get('products')
+        let products
+        let msg
         if (productsFromRedis === null) {
-            const productsFromDB = await ProductModel.find()
-            await redisCli.set('products', JSON.stringify(productsFromDB))
-            return res.json({
-                msg: `successfully get all products from DB`,
-                products: productsFromDB.map(product => {
-                    return {
-                        product_Id: product._id,
-                        name: product.name,
-                        price: product.price,
-                        description: product.desc
-                    }
-                })
-            })
+            products = await ProductModel.find()
+            await redisCli.set('products', JSON.stringify(products))
+            msg = 'successfully get all products from DB'
+        } else {
+            products = JSON.parse(productsFromRedis)
+            msg = 'successfully get all products from Redis'
         }
         res.json({
-            msg: `successfully get all products from Redis`,
-            products: JSON.parse(productsFromRedis).map(result => {
-                return {
-                    product_Id: result._id,
-                    name: result.name,
-                    price: result.price,
-                    description: result.desc
-                }
-            })
+            msg,
+            products: mapProducts(products)
         })
     } catch (e) {
         res.status(500).json({
             msg: e.message
         })
     }
+}
+
+const mapProducts = (products) => {
+    return products.map(product => ({
+        product_Id: product._id,
+        name: product.name,
+        price: product.price,
+        description: product.desc
+    }))
 }
 
 const getProduct = async (req, res) => {
