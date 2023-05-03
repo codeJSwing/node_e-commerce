@@ -3,6 +3,7 @@ import ReplyModel from "../model/reply.js";
 import redisCli from "../config/redis.js";
 import lodash from "lodash";
 
+// todo: db와 redis 의 데이터를 비교해서 다른 것만
 const getAllProducts = async (req, res) => {
     try {
         const productsFromRedis = await redisCli.get('products')
@@ -51,6 +52,7 @@ const getAllProducts = async (req, res) => {
     }
 }
 
+// todo: 추가, 수정, 삭제 API 하고 나서
 const getProduct = async (req, res) => {
     const {id} = req.params
     try {
@@ -89,19 +91,19 @@ const createProduct = async (req, res) => {
         })
         const createdProduct = await newProduct.save()
 
-        // // redis에 값을 저장해야 되는데
-        //
-        // const productsFromRedis = await redisCli.get('products')
-        // if (productsFromRedis === null) {
-        //     console.log('if null enter')
-        //     const products = JSON.parse(createdProduct)
-        //     await redisCli.set('products', JSON.stringify(products))
-        // } else {
-        //     console.log('if not null enter')
-        //     const products = JSON.parse(productsFromRedis)
-        //     products.push(createdProduct)
-        //     await redisCli.set('products', JSON.stringify(products))
-        // }
+        // redis 에 'products' 키가 있는 경우
+        const productsFromRedis = await redisCli.get('products')
+        if (productsFromRedis) {
+            const products = JSON.parse(productsFromRedis)
+            products.push(createdProduct)
+            await redisCli.set('products', JSON.stringify(products))
+        }
+
+        // redis 에 'products' 키가 없는 경우
+        if (productsFromRedis === null) {
+            await redisCli.set('products', JSON.stringify([createdProduct]))
+        }
+
         res.json({
             msg: `successfully created new product`,
             product: createdProduct
@@ -112,35 +114,6 @@ const createProduct = async (req, res) => {
         })
     }
 }
-
-// const createProduct = async (req, res) => {
-//     const {name, price, desc} = req.body
-//     try {
-//         const newProduct = new ProductModel({
-//             name,
-//             price,
-//             desc
-//         })
-//         const createdProduct = await newProduct.save()
-//         const productsFromRedis = await redisCli.get('products')
-//         if (productsFromRedis) {
-//             const products = JSON.parse(productsFromRedis)
-//             products.push(createdProduct)
-//             await redisCli.set('products', JSON.stringify(products))
-//         } else {
-//             const products = await ProductModel.find()
-//             await redisCli.set('products', JSON.stringify(products))
-//         }
-//         res.json({
-//             msg: `successfully created new product`,
-//             product: createdProduct
-//         })
-//     } catch (err) {
-//         res.status(500).json({
-//             msg: err.message
-//         })
-//     }
-// }
 
 const updateProduct = async (req, res) => {
     const {id} = req.params
