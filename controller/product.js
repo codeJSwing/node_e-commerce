@@ -81,6 +81,7 @@ const getProduct = async (req, res) => {
     }
 }
 
+// todo: 값을 저장할 때 역순으로 저장하면 최신 정보를 먼저 확인할 수 있는지 보자.
 const createProduct = async (req, res) => {
     const {name, price, desc} = req.body
     try {
@@ -124,14 +125,18 @@ const updateProduct = async (req, res) => {
         }
         const product = await ProductModel.findByIdAndUpdate(id, {$set: updateOps})
         if (!product) {
-            return res.status(404).json({
+            return res.status(400).json({
                 msg: `There is no product to update`
             })
         }
+
+        // 값 전체를 덮어씌워버리는 방법
+        const productsFromMongo = await ProductModel.find()
+        await redisCli.set('products', JSON.stringify(productsFromMongo))
+
         const replies = await ReplyModel.find({product: id})
         await redisCli.set(id, JSON.stringify({product, replies}))
-        const productsFromDB = await ProductModel.find()
-        await redisCli.set('products', JSON.stringify(productsFromDB))
+
         res.json({
             msg: `successfully updated product by ${id}`,
             product
