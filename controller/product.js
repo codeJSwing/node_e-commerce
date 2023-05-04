@@ -7,38 +7,38 @@ const getAllProducts = async (req, res) => {
     try {
         const productsFromRedis = await redisCli.get('products')
         const productsFromMongo = await ProductModel.find()
-        let products, msg
+        let products, message
 
         products = JSON.parse(productsFromRedis)
 
         // 데이터 자체가 없는 경우
         if (productsFromRedis === null && lodash.isEmpty(productsFromMongo)) {
             return res.json({
-                msg: `There is no product to get from any DB`
+                message: `There is no product to get from any DB`
             })
         }
 
         // redis 데이터가 있고, db 데이터와 같을 때
         if (productsFromRedis !== null && products.length === lodash.size(productsFromMongo)) {
-            msg = `successfully get all products from Redis`
+            message = `successfully get all products from Redis`
         }
 
         // DB 에서 가져온 데이터와 Redis 데이터를 비교하여 일치하지 않는 경우
         if (productsFromRedis !== null && lodash.size(productsFromMongo) !== products.length) {
             await redisCli.set('products', JSON.stringify(productsFromMongo))
             products = productsFromMongo
-            msg = `successfully get all products from Mongo and set Redis 'products'`
+            message = `successfully get all products from Mongo and set Redis 'products'`
         }
 
         // redis 'products' key 가 없지만, db 에는 데이터가 있는 경우
         if (productsFromRedis === null && !lodash.isEmpty(productsFromMongo)) {
             await redisCli.set('products', JSON.stringify(productsFromMongo))
             products = productsFromMongo
-            msg = `successfully get all products from Mongo and set Redis 'products'`
+            message = `successfully get all products from Mongo and set Redis 'products'`
         }
 
         res.json({
-            msg,
+            message,
             products: products.map(product => ({
                 product_id: product._id,
                 name: product.name,
@@ -48,7 +48,7 @@ const getAllProducts = async (req, res) => {
         })
     } catch (e) {
         res.status(500).json({
-            msg: e.message
+            message: e.message
         })
     }
 }

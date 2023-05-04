@@ -8,8 +8,7 @@ const redisClient = await redis.createClient({
     socket: {
         host: process.env.REDIS_IP,
         port: process.env.REDIS_PORT
-    },
-    legacyMode: true
+    }
 })
 redisClient.on('connect', () => {
     console.info('Redis connected!')
@@ -17,7 +16,6 @@ redisClient.on('connect', () => {
 redisClient.on('error', (err) => {
     console.error('Redis Client Error', err)
 })
-await redisClient.connect().then()
-const redisCli = redisClient.v4
 
+const redisCli = redisClient.connect().then()
 export default redisCli
