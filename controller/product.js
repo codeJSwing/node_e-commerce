@@ -3,38 +3,38 @@ import ReplyModel from "../model/reply.js";
 import redisCli from "../config/redis.js";
 import lodash from "lodash";
 
-// todo: db와 redis 의 데이터를 비교해서 다른 것만
-// todo: 데이터가 없는 경우 products key 로 빈 배열을 생성하는데 어떻게 할지?
 const getAllProducts = async (req, res) => {
     try {
         const productsFromRedis = await redisCli.get('products')
         const productsFromMongo = await ProductModel.find()
         let products, msg
 
-        // Redis 데이터가 있을 때
-        if (productsFromRedis !== null) {
-            products = JSON.parse(productsFromRedis)
+        products = JSON.parse(productsFromRedis)
 
-            // DB 에서 가져온 데이터와 Redis 데이터를 비교하여 일치하지 않는 경우
-            if (lodash.size(productsFromMongo) !== products.length) {
-                await redisCli.set('products', JSON.stringify(productsFromMongo))
-                products = productsFromMongo
-            }
-            msg = 'successfully get all products from Redis'
+        // 데이터 자체가 없는 경우
+        if (productsFromRedis === null && lodash.isEmpty(productsFromMongo)) {
+            return res.json({
+                msg: `There is no product to get from any DB`
+            })
         }
 
-        // redis 'products' key 가 없을 때
-        if (productsFromRedis === null) {
+        // redis 데이터가 있고, db 데이터와 같을 때
+        if (productsFromRedis !== null && products.length === lodash.size(productsFromMongo)) {
+            msg = `successfully get all products from Redis`
+        }
+
+        // DB 에서 가져온 데이터와 Redis 데이터를 비교하여 일치하지 않는 경우
+        if (productsFromRedis !== null && lodash.size(productsFromMongo) !== products.length) {
             await redisCli.set('products', JSON.stringify(productsFromMongo))
             products = productsFromMongo
-            msg = 'successfully get all products from Mongo'
+            msg = `successfully get all products from Mongo and set Redis 'products'`
         }
 
-        // 데이터 자체가 없는 경우 (빈 배열인 경우: products 를 빈 배열로 만들어뒀기 때문에)
-        if (products.length === 0 || !products) {
-            return res.json({
-                msg: 'There is no product to get from any DB'
-            })
+        // redis 'products' key 가 없지만, db 에는 데이터가 있는 경우
+        if (productsFromRedis === null && !lodash.isEmpty(productsFromMongo)) {
+            await redisCli.set('products', JSON.stringify(productsFromMongo))
+            products = productsFromMongo
+            msg = `successfully get all products from Mongo and set Redis 'products'`
         }
 
         res.json({
@@ -151,6 +151,7 @@ const updateProduct = async (req, res) => {
 }
 
 // todo: id 값을 키로 가진 데이터들은 자연스럽게 만료되서 사라지도록 구성하자.
+// todo: key 앞에 product 를 붙여서 필터링해서 삭제할까?
 const deleteAllProducts = async (req, res) => {
     try {
         await ProductModel.deleteMany()
@@ -165,7 +166,7 @@ const deleteAllProducts = async (req, res) => {
     }
 }
 
-// todo: products 내의 id 값이 같은 데이터는 자동 삭제되는 로직을 만들어보자.
+// todo: products key 의 데이터는 자동으로 삭제되도록
 const deleteProduct = async (req, res) => {
     const {id} = req.params
     try {
