@@ -4,6 +4,7 @@ import redisCli from "../config/redis.js";
 import lodash from "lodash";
 
 // todo: db와 redis 의 데이터를 비교해서 다른 것만
+// todo: 데이터가 없는 경우 products key 로 빈 배열을 생성하는데 어떻게 할지?
 const getAllProducts = async (req, res) => {
     try {
         const productsFromRedis = await redisCli.get('products')
@@ -53,6 +54,7 @@ const getAllProducts = async (req, res) => {
 }
 
 // todo: 추가, 수정, 삭제 API 하고 나서
+// todo: db 에 데이터가 없는데 200 응답
 const getProduct = async (req, res) => {
     const {id} = req.params
     try {
@@ -148,13 +150,13 @@ const updateProduct = async (req, res) => {
     }
 }
 
+// todo: id 값을 키로 가진 데이터들은 자연스럽게 만료되서 사라지도록 구성하자.
 const deleteAllProducts = async (req, res) => {
     try {
-        const productsFromMongo = await ProductModel.deleteMany()
+        await ProductModel.deleteMany()
         await redisCli.del('products')
         res.json({
-            msg: 'successfully deleted all data in DB & Redis',
-            productsFromMongo
+            msg: 'successfully deleted all data in DB & Redis'
         })
     } catch (e) {
         res.status(500).json({
@@ -163,25 +165,27 @@ const deleteAllProducts = async (req, res) => {
     }
 }
 
+// todo: products 내의 id 값이 같은 데이터는 자동 삭제되는 로직을 만들어보자.
 const deleteProduct = async (req, res) => {
     const {id} = req.params
     try {
+        // db 데이터 삭제
         const productFromDB = await ProductModel.findByIdAndDelete(id)
         if (!productFromDB) {
             return res.status(400).json({
                 msg: 'There is no product to delete from DB'
             })
         }
+
+        // redis 데이터 삭제 - 동일한 key
         const productFromRedis = await redisCli.get(id)
         if (productFromRedis !== null) {
             await redisCli.del(id)
         }
-        const products = await ProductModel.find()
-        if (products !== null) {
-            await redisCli.set('products', JSON.stringify(products))
-        }
+
         res.json({
-            msg: `successfully deleted data by ${id} from Redis`
+            msg: `successfully deleted data by ${id} from Redis`,
+            product: productFromDB
         })
     } catch (e) {
         res.status(500).json({
