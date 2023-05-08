@@ -53,6 +53,7 @@ const getAllProducts = async (req, res) => {
     }
 }
 
+// todo: 후기를 따로 redis 데이터에 넣고 불러오는 방식으로
 const getProduct = async (req, res) => {
     const {id} = req.params
     try {
@@ -214,6 +215,7 @@ const deleteProduct = async (req, res) => {
     }
 }
 
+// todo: user 를 id 대신 username 으로 표시
 const replyProduct = async (req, res) => {
     const {memo} = req.body
     const {productId} = req.params
@@ -223,10 +225,15 @@ const replyProduct = async (req, res) => {
             user: req.user._id,
             memo
         })
-        const result = await newReply.save()
+        const reply = await newReply.save()
+        await redisClient.set(productId, JSON.stringify(reply))
         res.json({
             msg: 'successfully created new reply',
-            result
+            reply: {
+                user: reply.user,
+                memo: reply.memo,
+                reply_id: reply._id
+            }
         })
     } catch (e) {
         res.status(500).json({
