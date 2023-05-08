@@ -220,6 +220,13 @@ const replyToProduct = async (req, res) => {
     const {memo} = req.body
     const {productId} = req.params
     try {
+        const findProduct = await ProductModel.findById(productId)
+        if (!findProduct) {
+            return res.status(400).json({
+                message: `The product to reply does not exist`
+            })
+        }
+
         const newReply = new ReplyModel({
             product: productId,
             user: req.user._id,
@@ -227,17 +234,18 @@ const replyToProduct = async (req, res) => {
         })
         const reply = await newReply.save()
 
-        // key 가 없을 때
-        const repliesFromRedis = await redisClient.get('replies')
+        // key 가 없을 때 - productId 가 일치하는 데이터만 삽입
+        const repliesFromRedis = await redisClient.get(`${productId} replies`)
         if (lodash.size(repliesFromRedis) === 0) {
-            await redisClient.set('replies', JSON.stringify([reply]))
+            const repliesFromDB = await ReplyModel.find({product: productId})
+            await redisClient.set(`${productId} replies`, JSON.stringify([repliesFromDB]))
         }
 
         // key 가 있을 때 (push)
         if (lodash.size(repliesFromRedis) > 0) {
             const replies = JSON.parse(repliesFromRedis)
             replies.push(reply)
-            await redisClient.set('replies', JSON.stringify(replies))
+            await redisClient.set(`${productId} replies`, JSON.stringify(replies))
         }
 
         res.json({
