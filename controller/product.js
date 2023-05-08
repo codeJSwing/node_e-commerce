@@ -1,11 +1,11 @@
 import ProductModel from "../model/product.js";
 import ReplyModel from "../model/reply.js";
-import redisCli from "../config/redis.js";
+import redisClient from "../config/redis.js";
 import lodash from "lodash";
 
 const getAllProducts = async (req, res) => {
     try {
-        const productsFromRedis = await redisCli.get('products')
+        const productsFromRedis = await redisClient.get('products')
         const productsFromMongo = await ProductModel.find()
         let products, message
 
@@ -25,14 +25,14 @@ const getAllProducts = async (req, res) => {
 
         // DB 에서 가져온 데이터와 Redis 데이터를 비교하여 일치하지 않는 경우
         if (productsFromRedis !== null && lodash.size(productsFromMongo) !== products.length) {
-            await redisCli.set('products', JSON.stringify(productsFromMongo))
+            await redisClient.set('products', JSON.stringify(productsFromMongo))
             products = productsFromMongo
             message = `successfully get all products from Mongo and set Redis 'products'`
         }
 
         // redis 'products' key 가 없지만, db 에는 데이터가 있는 경우
         if (productsFromRedis === null && !lodash.isEmpty(productsFromMongo)) {
-            await redisCli.set('products', JSON.stringify(productsFromMongo))
+            await redisClient.set('products', JSON.stringify(productsFromMongo))
             products = productsFromMongo
             message = `successfully get all products from Mongo and set Redis 'products'`
         }
@@ -53,28 +53,47 @@ const getAllProducts = async (req, res) => {
     }
 }
 
-// todo: 추가, 수정, 삭제 API 하고 나서
-// todo: db 에 데이터가 없는데 200 응답
 const getProduct = async (req, res) => {
     const {id} = req.params
     try {
-        const productFromRedis = await redisCli.get(id)
-        if (productFromRedis === null) {
-            const productFromDB = await ProductModel.findById(id)
-            const replies = await ReplyModel.find({product: id})
-            await redisCli.set(id, JSON.stringify({
-                product: productFromDB,
-                replies
-            }))
-            return res.json({
-                msg: `successfully get product from DB`,
-                product: productFromDB,
-                replies
+        // redis key(id) 를 읽어서 상수에 대입
+        const productFromRedis = await redisClient.hGetAll(id)
+        const productFromDB = await ProductModel.findById(id)
+        const replies = await ReplyModel.find({product: id})
+        let message, product
+
+        // redis 데이터와 db 데이터 모두 없는 경우
+        if (productFromRedis === null && productFromDB === null) {
+            return res.status(400).json({
+                message: `There is no product to get any DB`
             })
         }
+
+        // 입력한 id 값에 해당하는 redis key 가 있는 경우
+        if (lodash.size(productFromRedis) > 0) {
+            console.log('test2--------------------')
+            message = `successfully get product by ${id} from Redis`
+            product = {
+                product: JSON.parse(productFromRedis.product),
+                replies: JSON.parse(productFromRedis.replies)
+            }
+        }
+
+        // redis 데이터가 없고, db 데이터는 있는 경우
+        if (lodash.size(productFromRedis) === 0 && productFromDB) {
+            console.log('test1--------------------')
+            const redisData = {
+                product: JSON.stringify(productFromDB),
+                replies: JSON.stringify(replies)
+            }
+            await redisClient.hSet(id, redisData)
+            message = `successfully get product from DB`
+            product = productFromDB
+        }
+
         res.json({
-            msg: `successfully get product from Redis`,
-            result: JSON.parse(productFromRedis)
+            message,
+            product
         })
     } catch (err) {
         res.status(500).json({
@@ -95,16 +114,16 @@ const createProduct = async (req, res) => {
         const createdProduct = await newProduct.save()
 
         // redis 에 'products' 키가 있는 경우
-        const productsFromRedis = await redisCli.get('products')
+        const productsFromRedis = await redisClient.get('products')
         if (productsFromRedis) {
             const products = JSON.parse(productsFromRedis)
             products.push(createdProduct)
-            await redisCli.set('products', JSON.stringify(products))
+            await redisClient.set('products', JSON.stringify(products))
         }
 
         // redis 에 'products' 키가 없는 경우
         if (productsFromRedis === null) {
-            await redisCli.set('products', JSON.stringify([createdProduct]))
+            await redisClient.set('products', JSON.stringify([createdProduct]))
         }
 
         res.json({
@@ -134,10 +153,10 @@ const updateProduct = async (req, res) => {
 
         // 값 전체를 덮어씌워버리는 방법
         const productsFromMongo = await ProductModel.find()
-        await redisCli.set('products', JSON.stringify(productsFromMongo))
+        await redisClient.set('products', JSON.stringify(productsFromMongo))
 
         const replies = await ReplyModel.find({product: id})
-        await redisCli.set(id, JSON.stringify({product, replies}))
+        await redisClient.set(id, JSON.stringify({product, replies}))
 
         res.json({
             msg: `successfully updated product by ${id}`,
@@ -155,7 +174,7 @@ const updateProduct = async (req, res) => {
 const deleteAllProducts = async (req, res) => {
     try {
         await ProductModel.deleteMany()
-        await redisCli.del('products')
+        await redisClient.del('products')
         res.json({
             msg: 'successfully deleted all data in DB & Redis'
         })
@@ -179,9 +198,9 @@ const deleteProduct = async (req, res) => {
         }
 
         // redis 데이터 삭제 - 동일한 key
-        const productFromRedis = await redisCli.get(id)
+        const productFromRedis = await redisClient.get(id)
         if (productFromRedis !== null) {
-            await redisCli.del(id)
+            await redisClient.del(id)
         }
 
         res.json({

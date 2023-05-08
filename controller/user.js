@@ -7,7 +7,7 @@ import {
     sendEmail,
     signupTemplete
 } from "../config/sendEmail.js";
-import redisCli from "../config/redis.js";
+import redisClient from "../config/redis.js";
 import ProductModel from "../model/product.js";
 
 const signupHandler = async (req, res) => {
@@ -87,7 +87,7 @@ const getProfile = async (req, res) => {
                 msg: 'There is no user to get'
             })
         }
-        const usersFromRedis = await redisCli.get('users')
+        const usersFromRedis = await redisClient.get('users')
         if (usersFromRedis !== null) {
             const parsedRedis = JSON.parse(usersFromRedis)
             const userFromRedis = parsedRedis.find(user => user._id === _id.toString());
@@ -219,8 +219,8 @@ const findEmail = async (req, res) => {
 const getAllUsers = async (req, res) => {
     try {
         const usersFromDB = await UserModel.find()
-        const usersFromRedis = await redisCli.get('users')
-        await redisCli.set('users', JSON.stringify(usersFromDB))
+        const usersFromRedis = await redisClient.get('users')
+        await redisClient.set('users', JSON.stringify(usersFromDB))
         if (usersFromRedis !== null) {
             console.log('redis')
             return res.json({
