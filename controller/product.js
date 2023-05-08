@@ -116,14 +116,14 @@ const createProduct = async (req, res) => {
 
         // redis 에 'products' 키가 있는 경우
         const productsFromRedis = await redisClient.get('products')
-        if (productsFromRedis) {
+        if (lodash.size(productsFromRedis) > 0) {
             const products = JSON.parse(productsFromRedis)
             products.push(createdProduct)
             await redisClient.set('products', JSON.stringify(products))
         }
 
         // redis 에 'products' 키가 없는 경우
-        if (productsFromRedis === null) {
+        if (lodash.size(productsFromRedis) === 0) {
             await redisClient.set('products', JSON.stringify([createdProduct]))
         }
 
@@ -216,7 +216,7 @@ const deleteProduct = async (req, res) => {
 }
 
 // todo: user 를 id 대신 username 으로 표시
-const replyProduct = async (req, res) => {
+const replyToProduct = async (req, res) => {
     const {memo} = req.body
     const {productId} = req.params
     try {
@@ -226,7 +226,20 @@ const replyProduct = async (req, res) => {
             memo
         })
         const reply = await newReply.save()
-        await redisClient.set(productId, JSON.stringify(reply))
+
+        // key 가 없을 때
+        const repliesFromRedis = await redisClient.get('replies')
+        if (lodash.size(repliesFromRedis) === 0) {
+            await redisClient.set('replies', JSON.stringify([reply]))
+        }
+
+        // key 가 있을 때 (push)
+        if (lodash.size(repliesFromRedis) > 0) {
+            const replies = JSON.parse(repliesFromRedis)
+            replies.push(reply)
+            await redisClient.set('replies', JSON.stringify(replies))
+        }
+
         res.json({
             msg: 'successfully created new reply',
             reply: {
@@ -249,5 +262,5 @@ export {
     updateProduct,
     deleteAllProducts,
     deleteProduct,
-    replyProduct
+    replyToProduct
 }

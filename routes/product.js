@@ -5,7 +5,7 @@ import {
     createProduct,
     updateProduct,
     deleteAllProducts,
-    deleteProduct, replyProduct
+    deleteProduct, replyToProduct
 } from "../controller/product.js"
 import passport from "passport";
 
@@ -32,6 +32,6 @@ router.delete("/", checkAuth, deleteAllProducts)
 router.delete("/:id", checkAuth, deleteProduct)
 
 // 제품의 후기 등록 - 고객 / 인증 필요
-router.post("/:productId/reply", checkAuth, replyProduct)
+router.post("/:productId/reply", checkAuth, replyToProduct)
 
 export default router
