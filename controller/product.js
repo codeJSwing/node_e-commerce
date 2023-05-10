@@ -106,7 +106,6 @@ const getProduct = async (req, res) => {
     }
 }
 
-// todo: 값을 저장할 때 역순으로 저장하면 최신 정보를 먼저 확인할 수 있는지 보자.
 const createProduct = async (req, res) => {
     const {name, price, desc} = req.body
     try {
@@ -121,7 +120,7 @@ const createProduct = async (req, res) => {
         const productsFromRedis = await redisClient.get('products')
         if (lodash.size(productsFromRedis) > 0) {
             const products = JSON.parse(productsFromRedis)
-            products.push(createdProduct)
+            products.unshift(createdProduct)
             await redisClient.set('products', JSON.stringify(products))
         }
 
@@ -219,6 +218,7 @@ const deleteProduct = async (req, res) => {
 }
 
 // todo: user 를 id 대신 username 으로 표시
+// todo: 후기를 작성한 제품이 삭제되면 자동으로 삭제되도록
 const replyToProduct = async (req, res) => {
     const {memo} = req.body
     const {productId} = req.params
@@ -247,7 +247,7 @@ const replyToProduct = async (req, res) => {
         // key 가 있을 때 (push)
         if (lodash.size(repliesFromRedis) > 0) {
             const replies = JSON.parse(repliesFromRedis)
-            replies.push(reply)
+            replies.unshift(reply)
             await redisClient.set(`${productId} replies`, JSON.stringify(replies))
         }
 
