@@ -53,48 +53,51 @@ const getAllProducts = async (req, res) => {
     }
 }
 
-// todo: 후기를 따로 redis 데이터에 넣고 불러오는 방식으로
 const getProduct = async (req, res) => {
     const {id} = req.params
     try {
         // redis key(id) 를 읽어서 상수에 대입
-        const productFromRedis = await redisClient.hGetAll(id)
+        const productFromRedis = await redisClient.get(id)
+        const repliesFromRedis = await redisClient.get(`${id} replies`)
+
         const productFromDB = await ProductModel.findById(id)
-        const replies = await ReplyModel.find({product: id})
-        let message, product
+        const repliesFromDB = await ReplyModel.find({product: id})
+        let message, product, replies
 
         // redis 데이터와 db 데이터 모두 없는 경우
-        if (productFromRedis === null && productFromDB === null) {
+        if (lodash.size(productFromRedis) === 0 && lodash.size(productFromDB) === 0) {
             return res.status(400).json({
                 message: `There is no product to get any DB`
             })
         }
 
-        // 입력한 id 값에 해당하는 redis key 가 있는 경우
-        if (lodash.size(productFromRedis) > 0) {
-            console.log('test2--------------------')
-            message = `successfully get product by ${id} from Redis`
-            product = {
-                product: JSON.parse(productFromRedis.product),
-                replies: JSON.parse(productFromRedis.replies)
-            }
-        }
-
         // redis 데이터가 없고, db 데이터는 있는 경우
-        if (lodash.size(productFromRedis) === 0 && productFromDB) {
-            console.log('test1--------------------')
-            const redisData = {
-                product: JSON.stringify(productFromDB),
-                replies: JSON.stringify(replies)
-            }
-            await redisClient.hSet(id, redisData)
+        if (lodash.size(productFromRedis) === 0 && lodash.size(productFromDB) > 1) {
+            await redisClient.set(id, JSON.stringify(productFromDB))
             message = `successfully get product from DB`
             product = productFromDB
         }
 
+        // 입력한 id 값에 해당하는 redis key 가 있는 경우
+        if (lodash.size(productFromRedis) > 0) {
+            message = `successfully get product by ${id} from Redis`
+            product = JSON.parse(productFromRedis)
+        }
+
+        // replies Redis data 가 있는 경우
+        if (lodash.size(repliesFromRedis) > 0) {
+            replies = JSON.parse(repliesFromRedis)
+        }
+
+        // replies Redis data 가 없는 경우
+        if (lodash.size(repliesFromRedis) === 0 && lodash.size(repliesFromDB) > 1) {
+            replies = repliesFromDB
+        }
+
         res.json({
             message,
-            product
+            product,
+            replies
         })
     } catch (err) {
         res.status(500).json({
