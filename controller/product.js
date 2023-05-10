@@ -109,6 +109,7 @@ const getProduct = async (req, res) => {
 const createProduct = async (req, res) => {
     const {name, price, desc} = req.body
     try {
+        let products;
         const newProduct = new ProductModel({
             name,
             price,
@@ -119,15 +120,17 @@ const createProduct = async (req, res) => {
         // redis 에 'products' 키가 있는 경우
         const productsFromRedis = await redisClient.get('products')
         if (lodash.size(productsFromRedis) > 0) {
-            const products = JSON.parse(productsFromRedis)
+            products = JSON.parse(productsFromRedis)
             products.unshift(createdProduct)
-            await redisClient.set('products', JSON.stringify(products))
         }
 
         // redis 에 'products' 키가 없는 경우
         if (lodash.size(productsFromRedis) === 0) {
-            await redisClient.set('products', JSON.stringify([createdProduct]))
+            products = [createdProduct]
         }
+
+        await redisClient.set('products', JSON.stringify(products))
+        await redisClient.expire('products', 3600)
 
         res.json({
             msg: `successfully created new product`,
