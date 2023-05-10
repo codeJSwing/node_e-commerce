@@ -20,5 +20,16 @@ const orderSchema = schema({
     }
 })
 
+orderSchema.pre('save', async function (next) {
+    const Product = mongoose.model('Product')
+    const product = await Product.findById(this.product)
+
+    if (!product) {
+        throw new Error('This product does not exist')
+    }
+
+    next()
+})
+
 const OrderModel = mongoose.model('Order', orderSchema)
 export default OrderModel

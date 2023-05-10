@@ -74,6 +74,7 @@ const getProduct = async (req, res) => {
         // redis 데이터가 없고, db 데이터는 있는 경우
         if (lodash.size(productFromRedis) === 0 && lodash.size(productFromDB) > 1) {
             await redisClient.set(id, JSON.stringify(productFromDB))
+            await redisClient.expire(id, 3600)
             message = `successfully get product from DB`
             product = productFromDB
         }
