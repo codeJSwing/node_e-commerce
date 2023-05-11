@@ -55,7 +55,7 @@ components:
             type: object
             example:
               status: 200
-              success: true"
+              success: true
               message: message
     BadRequest:
       description: 잘못된 요청
@@ -83,9 +83,9 @@ paths:
       summary: 등록된 모든 제품 조회 - 관리자
       consumes:
         - application/json
+      produces:
+        - application/json
       requestBody:
-        x-name: body
-        required: true
         content:
           application/json:
             schema:
@@ -93,6 +93,22 @@ paths:
             examples:
               productExample:
                 $ref: '#/components/examples/productExample'
+      responses:
+        '200':
+          $ref: '#/components/responses/successResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  '/product/{id}':
+    get:
+      tags:
+        - Product
+      summary: 판매 제품 등록 - 판매자
+      consumes:
+        - application/json
+      produces:
+        - application/json
       responses:
         '200':
           $ref: '#/components/responses/successResponse'

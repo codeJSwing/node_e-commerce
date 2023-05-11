@@ -8,6 +8,33 @@
       - application/json
     produces:
       - application/json
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: './openapi.yaml#/components/schemas/product'
+          examples:
+            productExample:
+              $ref: './openapi.yaml#/components/examples/productExample'
+    responses:
+      '200':
+        $ref: './openapi.yaml#/components/responses/successResponse'
+      '400':
+        $ref: './openapi.yaml#/components/responses/BadRequest'
+      '500':
+        $ref: './openapi.yaml#/components/responses/InternalServerError'
+
+
+# getProduct
+/product/{id}:
+  get:
+    tags:
+      - Product
+    summary: 판매 제품 등록 - 판매자
+    consumes:
+      - application/json
+    produces:
+      - application/json
     responses:
       '200':
         $ref: './openapi.yaml#/components/responses/successResponse'

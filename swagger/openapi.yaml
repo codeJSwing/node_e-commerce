@@ -59,7 +59,7 @@ components:
           application/json:
             schema:
               type: object
-              example: {"status": 200, "success": true", "message": "message"}
+              example: {"status": 200, "success": true, "message": "message"}
     BadRequest:
       description: 잘못된 요청
       content:
@@ -82,3 +82,5 @@ components:
 paths:
   /product:
     $ref: './product.yaml#/~1product'
+  /product/{id}:
+    $ref: './product.yaml#/~1product~1{id}'
