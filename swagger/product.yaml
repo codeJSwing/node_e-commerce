@@ -1,5 +1,5 @@
-# getAllProducts
 /product:
+  # getAllProducts
   get:
     tags:
       - Product
@@ -8,7 +8,32 @@
       - application/json
     produces:
       - application/json
+    responses:
+      '200':
+        content:
+          application/json:
+            schema:
+              $ref: './openapi.yaml#/components/schemas/product'
+            examples:
+              products:
+                $ref: './openapi.yaml#/components/examples/products'
+      '400':
+        $ref: './openapi.yaml#/components/responses/BadRequest'
+      '500':
+        $ref: './openapi.yaml#/components/responses/InternalServerError'
+
+  # createProduct
+  post:
+    tags:
+      - Product
+    summary: 판매 제품 등록 - 판매자
+    consumes:
+      - application/json
+    produces:
+      - application/json
     requestBody:
+      x-name: body
+      required: true
       content:
         application/json:
           schema:
@@ -24,28 +49,25 @@
       '500':
         $ref: './openapi.yaml#/components/responses/InternalServerError'
 
-
 # getProduct
 /product/{id}:
   get:
     tags:
       - Product
-    summary: 판매 제품 등록 - 판매자
+    summary: 제품의 상세 페이지 이동 - 모든 사용자
     consumes:
       - application/json
     produces:
       - application/json
-    requestBody:
-      content:
-        application/json:
-          schema:
-            $ref: './openapi.yaml#/components/schemas/product'
-          examples:
-            productExample:
-              $ref: './openapi.yaml#/components/examples/product'
     responses:
       '200':
-        $ref: './openapi.yaml#/components/responses/successResponse'
+        content:
+          application/json:
+            schema:
+              $ref: './openapi.yaml#/components/schemas/product'
+            examples:
+              product:
+                $ref: './openapi.yaml#/components/examples/product'
       '400':
         $ref: './openapi.yaml#/components/responses/BadRequest'
       '500':
