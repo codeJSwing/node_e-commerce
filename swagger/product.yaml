@@ -6,16 +6,8 @@
     summary: 등록된 모든 제품 조회 - 관리자
     consumes:
       - application/json
-    requestBody:
-      x-name: body
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: './openapi.yaml#/components/schemas/product'
-          examples:
-            productExample:
-              $ref: './openapi.yaml#/components/examples/productExample'
+    produces:
+      - application/json
     responses:
       '200':
         $ref: './openapi.yaml#/components/responses/successResponse'
