@@ -1,0 +1,25 @@
+# getAllProducts
+/product:
+  get:
+    tags:
+      - Product
+    summary: 등록된 모든 제품 조회 - 관리자
+    consumes:
+      - application/json
+    requestBody:
+      x-name: body
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: './openapi.yaml#/components/schemas/product'
+          examples:
+            productExample:
+              $ref: './openapi.yaml#/components/examples/productExample'
+    responses:
+      '200':
+        $ref: './openapi.yaml#/components/responses/successResponse'
+      '400':
+        $ref: './openapi.yaml#/components/responses/BadRequest'
+      '500':
+        $ref: './openapi.yaml#/components/responses/InternalServerError'
