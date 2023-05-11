@@ -16,6 +16,13 @@ import connectDB from "./config/database.js";
 import {errorHandler, notFound} from "./middleware/globalErrorHandler.js";
 import redisClient from "./config/redis.js";
 
+import { swaggerUi, specs } from './swagger/swagger.js'
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs))
+
+// http listen port 생성 서버 실행
+app.listen(3000, () => console.log("swagger test"))
+
 dotenv.config()
 
 connectDB()
