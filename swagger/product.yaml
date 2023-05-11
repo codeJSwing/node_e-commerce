@@ -15,7 +15,7 @@
             $ref: './openapi.yaml#/components/schemas/product'
           examples:
             productExample:
-              $ref: './openapi.yaml#/components/examples/productExample'
+              $ref: './openapi.yaml#/components/examples/products'
     responses:
       '200':
         $ref: './openapi.yaml#/components/responses/successResponse'
@@ -35,6 +35,14 @@
       - application/json
     produces:
       - application/json
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: './openapi.yaml#/components/schemas/product'
+          examples:
+            productExample:
+              $ref: './openapi.yaml#/components/examples/product'
     responses:
       '200':
         $ref: './openapi.yaml#/components/responses/successResponse'

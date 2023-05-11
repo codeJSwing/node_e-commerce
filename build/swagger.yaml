@@ -29,7 +29,7 @@ components:
         message:
           type: string
   examples:
-    productExample:
+    products:
       value:
         message: successfully get all products from Redis
         products:
@@ -46,6 +46,22 @@ components:
             name: Apple Watch Ultra
             price: 1149000
             description: '동작 버튼을 갖추고 있으며 무게감, 견고함, 내부식성이 완벽한 조화를 이루는 초강력 49mm 티타늄 케이스 혹독한 조건에서도 보기 쉬운 역대 가장 크고 밝은 상시표시형 Retina 디스플레이 거리, 페이스, 이동 경로를 계산할 수 있도록 정확한 위치 정보를 제공하는 정밀한 이중 주파수 GPS 최대 36시간의¹ 배터리 사용 시간, 그리고 저전력 모드에서 최대 60시간²'
+    product:
+      value:
+        message: successfully get product from DB
+        product:
+          _id: 645c6e83b9e1ccb37c920ae7
+          name: iPad Pro 11
+          price: 1390000
+          desc: |-
+            프로급 워크플로를 위한 막강한 성능과 온종일 가는 배터리 사용 시간을 구현하는 Apple M2 칩¹
+            ProMotion, True Tone, P3의 넓은 색영역을 갖춘 27.9cm Liquid Retina 디스플레이각주²
+            LiDAR 스캐너를 탑재한 프로급 카메라, 센터 스테이지 기술이 적용된 울트라 와이드 전면 카메라
+            가장 빠른 Wi-Fi 연결성을 선사하는 Wi-Fi 6E 그리고 초고속 다운로드 및 고화질 스트리밍이 가능한 5G.³
+            Apple Pencil(2세대),Magic Keyboard, Smart Keyboard Folio과 호환각주⁴
+          createdAt: '2023-05-11T04:26:44.005Z'
+          updatedAt: '2023-05-11T04:26:44.005Z'
+          __v: 0
   responses:
     successResponse:
       description: successful request with no data
@@ -92,7 +108,7 @@ paths:
               $ref: '#/components/schemas/product'
             examples:
               productExample:
-                $ref: '#/components/examples/productExample'
+                $ref: '#/components/examples/products'
       responses:
         '200':
           $ref: '#/components/responses/successResponse'
@@ -109,6 +125,14 @@ paths:
         - application/json
       produces:
         - application/json
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/product'
+            examples:
+              productExample:
+                $ref: '#/components/examples/product'
       responses:
         '200':
           $ref: '#/components/responses/successResponse'
