@@ -16,12 +16,25 @@ import connectDB from "./config/database.js";
 import {errorHandler, notFound} from "./middleware/globalErrorHandler.js";
 import redisClient from "./config/redis.js";
 
-import { swaggerUi, specs } from './swagger/swagger.js'
+//swagger 연결
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import * as path from "path";
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs))
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const swaggerSpec = YAML.load(path.join(__dirname, './build/swagger.yaml'));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+// import { swaggerUi, specs } from './swagger/swagger.js'
+
+// app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs))
 
 // http listen port 생성 서버 실행
-app.listen(3000, () => console.log("swagger test"))
+// app.listen(3000, () => console.log("swagger test"))
 
 dotenv.config()
 

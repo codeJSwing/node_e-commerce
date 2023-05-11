@@ -15,7 +15,7 @@ const options = {
             },
         ],
     },
-    apis: ['/routes/*.js'], // Swagger 파일 연동
+    apis: ['./routes/*.js'], // Swagger 파일 연동
 }
 const specs = swaggerJsdor(options)
 
