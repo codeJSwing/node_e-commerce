@@ -12,8 +12,8 @@ const getAllOrders = async (req, res) => {
         const ordersFromRedis = await redisClient.get('orders')
         const parsedRedis = await JSON.parse(ordersFromRedis)
 
-        // 데이터가 없는 경우
-        if (lodash.size(parsedRedis) === 0 && lodash.size(ordersFromDB) === 0) {
+        // 데이터가 없는 경우 or db 데이터가 없지만, redis 데이터가 남아있는 경우
+        if (lodash.size(ordersFromDB) === 0 || (lodash.size(ordersFromRedis) > 1 && lodash.size(ordersFromDB) === 0)) {
             return res.status(200).json({
                 message: `There is no order to get from any DB`
             })
@@ -25,9 +25,10 @@ const getAllOrders = async (req, res) => {
             message = `successfully get all orders from Redis`
         }
 
-        // redis data 가 없는 경우
+        // redis 데이터가 만료된 경우 (없는 경우)
         if (lodash.size(parsedRedis) === 0) {
             await redisClient.set('orders', JSON.stringify(ordersFromDB))
+            await redisClient.expire('orders', 1800)
             orders = ordersFromDB
             message = `successfully get all orders from DB`
         }
@@ -46,22 +47,42 @@ const getAllOrders = async (req, res) => {
 const getOrder = async (req, res) => {
     const { id } = req.params
     try {
-        const order = await OrderModel
+        let order, message;
+        const orderFromDB = await OrderModel
             .findById(id)
             .populate('product', ['name', 'price', 'desc'])
             .populate('user')
-        if (!order) {
+        const orderFromRedis = await redisClient.get(id)
+
+        // 조회하려는 주문이 없을 때
+        if (!orderFromDB) {
             return res.status(400).json({
                 msg: 'There is no order to get'
             })
         }
-        if (!lodash.isEqual(order.user._id, req.user._id)) {
+
+        // 등록된 주문의 사용자와 조회하려는 사용자가 다를 때
+        if (!lodash.isEqual(orderFromDB.user._id, req.user._id)) {
             return res.status(401).json({
                 msg: 'This is not your order'
             })
         }
+
+        // redis data 와 db 데이터가 일치할 때
+        if (lodash.size(orderFromRedis) > 0 && (lodash.size(orderFromDB) === lodash.size(orderFromRedis))) {
+            order = orderFromRedis
+            message = `successfully get order by ${id} from Redis`
+        }
+
+        // redis data 가 없거나, redis data 와 db 데이터가 일치하지 않을 때
+        if ((lodash.size(orderFromRedis) === 0 && lodash.size(orderFromDB) > 1) || (lodash.size(orderFromRedis) > 0 && (lodash.size(orderFromDB) !== lodash.size(orderFromRedis)))) {
+            await redisClient.set(id, JSON.stringify(orderFromDB))
+            order = orderFromDB
+            message = `successfully get order by ${id} from DB`
+        }
+
         res.json({
-            msg: `successful get order by ${id}`,
+            message,
             order
         })
     } catch (e) {

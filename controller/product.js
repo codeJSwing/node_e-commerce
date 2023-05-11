@@ -5,6 +5,7 @@ import lodash from "lodash";
 
 const getAllProducts = async (req, res) => {
     try {
+        // promise all 병렬 처리
         const productsFromRedis = await redisClient.get('products')
         const productsFromMongo = await ProductModel.find()
         let products, message
