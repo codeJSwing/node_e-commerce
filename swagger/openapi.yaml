@@ -96,6 +96,11 @@ components:
             "__v": 0
           }
         }
+    deleteAllProducts:
+      value:
+        {
+          "message": "successfully deleted all data in DB & Redis"
+        }
 
 # Responses 재사용 되는 코드
   responses:

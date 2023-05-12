@@ -87,6 +87,9 @@ components:
           createdAt: '2023-05-10T06:02:37.034Z'
           updatedAt: '2023-05-12T04:16:43.624Z'
           __v: 0
+    deleteAllProducts:
+      value:
+        message: successfully deleted all data in DB & Redis
   responses:
     successResponse:
       description: successful request with no data
@@ -167,6 +170,23 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '500':
           $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+        - Product
+      summary: 등록된 모든 제품 삭제 - 판매자
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/product'
+              examples:
+                deleteAllProducts:
+                  $ref: '#/components/examples/deleteAllProducts'
   '/product/{id}':
     get:
       tags:
@@ -201,7 +221,7 @@ paths:
         x-name: body
         required: true
         content:
-          'application/json, x-www-form-urlencoded':
+          x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/product'
       responses:

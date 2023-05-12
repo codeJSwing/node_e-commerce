@@ -52,6 +52,26 @@
       '500':
         $ref: './openapi.yaml#/components/responses/InternalServerError'
 
+
+  # deleteAllProducts
+  delete:
+    tags:
+      - Product
+    summary: 등록된 모든 제품 삭제 - 판매자
+    consumes:
+      - application/json
+    produces:
+      - application/json
+    responses:
+      '200':
+        content:
+          application/json:
+            schema:
+              $ref: './openapi.yaml#/components/schemas/product'
+            examples:
+              deleteAllProducts:
+                $ref: './openapi.yaml#/components/examples/deleteAllProducts'
+
 # getProduct
 /product/{id}:
   get:
