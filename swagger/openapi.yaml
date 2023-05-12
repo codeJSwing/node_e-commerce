@@ -24,6 +24,12 @@ components:
           type: string
           description: 제품 정보
           example: "Apple이 디자인한 이 MagSafe형 실리콘 케이스는 iPhone 14에 멋을 한층 더하는 동시에 폰을 든든하게 보호해줍니다."
+    reply:
+      properties:
+        memo:
+          type: string
+          description: 제품에 대한 후기
+          example: "저렴하게 잘 샀습니다. 다음에 또 주문할게요."
     Error:
       type: object
       properties:
@@ -31,6 +37,7 @@ components:
           type: boolean
         message:
           type: string
+
   examples:
     getProducts:
       value:
@@ -105,6 +112,16 @@ components:
       value:
         {
           "message": "successfully deleted data by 645dea5be6b8f6d7c770f3bf"
+        }
+    createReplyToProduct:
+      value:
+        {
+          "message": "successfully created new reply",
+          "reply": {
+            "user": "64429ec62ea5616cfe5fe437",
+            "memo": "저렴하게 잘 샀습니다. 다음에 또 주문할게요.",
+            "reply_id": "645df643278345f7b7f21e6d"
+          }
         }
 
 # Responses 재사용 되는 코드

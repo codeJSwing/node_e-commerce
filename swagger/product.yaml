@@ -161,15 +161,21 @@
       - application/json
     produces:
       - application/json
+    requestBody:
+      required: true
+      content:
+        x-www-form-urlencoded:
+          schema:
+            $ref: './openapi.yaml#/components/schemas/reply'
     responses:
       '200':
         content:
           application/json:
             schema:
-              $ref: './openapi.yaml#/components/schemas/product'
+              $ref: './openapi.yaml#/components/schemas/reply'
             examples:
               deleteAllProducts:
-                $ref: './openapi.yaml#/components/examples/deleteProduct'
+                $ref: './openapi.yaml#/components/examples/createReplyToProduct'
       '400':
         $ref: './openapi.yaml#/components/responses/BadRequest'
       '500':
