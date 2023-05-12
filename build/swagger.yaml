@@ -8,7 +8,14 @@ info:
 servers:
   - url: 'http://localhost:4444/'
 components:
-  parameters: null
+  parameters:
+    productId:
+      name: id
+      in: path
+      description: 제품의 고유 식별자
+      required: true
+      schema:
+        type: string
   schemas:
     product:
       properties:
@@ -29,7 +36,7 @@ components:
         memo:
           type: string
           description: 제품에 대한 후기
-          example: 싸게 잘 샀습니다.
+          example: 저렴하게 잘 샀습니다. 다음에 또 주문할게요.
     Error:
       type: object
       properties:
@@ -216,6 +223,8 @@ paths:
         - application/json
       produces:
         - application/json
+      parameters:
+        - $ref: '#/components/parameters/productId'
       responses:
         '200':
           content:
@@ -237,6 +246,8 @@ paths:
         - application/json
       produces:
         - application/json
+      parameters:
+        - $ref: '#/components/parameters/productId'
       requestBody:
         x-name: body
         required: true
@@ -265,6 +276,8 @@ paths:
         - application/json
       produces:
         - application/json
+      parameters:
+        - $ref: '#/components/parameters/productId'
       responses:
         '200':
           content:
@@ -286,6 +299,8 @@ paths:
         - application/json
       produces:
         - application/json
+      parameters:
+        - $ref: '#/components/parameters/productId'
       requestBody:
         required: true
         content:
