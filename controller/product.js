@@ -145,23 +145,23 @@ const createProduct = async (req, res) => {
     }
 }
 
+/*
+* 1. DB의 데이터가 없는 경우 (O)
+* 2. redis 데이터 덮어씌우기 (O)
+* */
 const updateProduct = async (req, res) => {
     const {id} = req.params
     try {
         const updateOps = req.body
         const product = await ProductModel.findByIdAndUpdate(id, {$set: updateOps})
+
         if (!product) {
             return res.status(400).json({
                 message: `There is no product to update`
             })
         }
 
-        // 값 전체를 덮어씌워버리는 방법
-        // const productsFromMongo = await ProductModel.find()
-        // await redisClient.set('products', JSON.stringify(productsFromMongo))
-        //
-        // const replies = await ReplyModel.find({product: id})
-        // await redisClient.set(id, JSON.stringify({product, replies}))
+        await redisClient.set(id, JSON.stringify(product))
 
         res.json({
             msg: `successfully updated product by ${id}`,
