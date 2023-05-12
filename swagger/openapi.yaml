@@ -15,12 +15,15 @@ components:
         name:
           type: string
           description: 제품 이름
+          example: "MagSafe형 iPhone 14 실리콘 케이스 - 카나리 옐로"
         price:
           type: number
-          description: 제품 가격
+          desc: 제품 가격
+          example: 69000
         description:
           type: string
           description: 제품 정보
+          example: "Apple이 디자인한 이 MagSafe형 실리콘 케이스는 iPhone 14에 멋을 한층 더하는 동시에 폰을 든든하게 보호해줍니다."
     Error:
       type: object
       properties:
@@ -29,7 +32,7 @@ components:
         message:
           type: string
   examples:
-    products:
+    getProducts:
       value:
         {
           "message": "successfully get all products from Redis",
@@ -51,7 +54,7 @@ components:
             }
           ]
         }
-    product:
+    getProduct:
       value:
         {
           "message": "successfully get product from DB",
@@ -62,6 +65,34 @@ components:
             "desc": "프로급 워크플로를 위한 막강한 성능과 온종일 가는 배터리 사용 시간을 구현하는 Apple M2 칩¹\nProMotion, True Tone, P3의 넓은 색영역을 갖춘 27.9cm Liquid Retina 디스플레이각주²\nLiDAR 스캐너를 탑재한 프로급 카메라, 센터 스테이지 기술이 적용된 울트라 와이드 전면 카메라\n가장 빠른 Wi-Fi 연결성을 선사하는 Wi-Fi 6E 그리고 초고속 다운로드 및 고화질 스트리밍이 가능한 5G.³\nApple Pencil(2세대),Magic Keyboard, Smart Keyboard Folio과 호환각주⁴",
             "createdAt": "2023-05-11T04:26:44.005Z",
             "updatedAt": "2023-05-11T04:26:44.005Z",
+            "__v": 0
+          }
+        }
+    createProduct:
+      value:
+        {
+          "message": "successfully created new product",
+          "product": {
+            "name": "45mm 브라이트 오렌지 스포츠 밴드",
+            "price": 65000,
+            "desc": "스포츠 밴드는 특수 제작한 고탄성 불화탄성중합체로 만들어 튼튼하고 내구성이 뛰어나면서도 놀라우리만치 부드럽습니다. 부드러운 고밀도 소재의 밴드가 우아하게 손목을 감싸주어 피부에 닿는 느낌이 편안합니다. 또한 혁신적인 핀앤턱 잠금장치는 깔끔하게 떨어지는 착용감을 선사합니다.",
+            "_id": "645dccb7c4bffbf15f95c54c",
+            "createdAt": "2023-05-12T05:20:55.480Z",
+            "updatedAt": "2023-05-12T05:20:55.480Z",
+            "__v": 0
+          }
+        }
+    updateProduct:
+      value:
+        {
+          "msg": "successfully updated product by 645b337dc24ebe7016fd2dfd",
+          "product": {
+            "_id": "645b337dc24ebe7016fd2dfd",
+            "name": "test11111111111111111111111111111111",
+            "price": 1231231241241,
+            "desc": "test11111111111111111111111111111111",
+            "createdAt": "2023-05-10T06:02:37.034Z",
+            "updatedAt": "2023-05-12T04:16:43.624Z",
             "__v": 0
           }
         }

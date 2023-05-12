@@ -34,8 +34,8 @@ redisClient.connect().then()
 app.use(morgan("dev"))
 
 // 요청과 응답의 바디를 파싱
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({extended: false}))
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 
 // passport 초기화 및 구성
 app.use(passport.initialize())

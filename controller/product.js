@@ -135,12 +135,12 @@ const createProduct = async (req, res) => {
         await redisClient.expire('products', 3600)
 
         res.json({
-            msg: `successfully created new product`,
+            message: `successfully created new product`,
             product: createdProduct
         })
     } catch (err) {
         res.status(500).json({
-            msg: err.message
+            message: err.message
         })
     }
 }
@@ -148,23 +148,20 @@ const createProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
     const {id} = req.params
     try {
-        const updateOps = {};
-        for (const ops of req.body) {
-            updateOps[ops.propName] = ops.value;
-        }
+        const updateOps = req.body
         const product = await ProductModel.findByIdAndUpdate(id, {$set: updateOps})
         if (!product) {
             return res.status(400).json({
-                msg: `There is no product to update`
+                message: `There is no product to update`
             })
         }
 
         // 값 전체를 덮어씌워버리는 방법
-        const productsFromMongo = await ProductModel.find()
-        await redisClient.set('products', JSON.stringify(productsFromMongo))
-
-        const replies = await ReplyModel.find({product: id})
-        await redisClient.set(id, JSON.stringify({product, replies}))
+        // const productsFromMongo = await ProductModel.find()
+        // await redisClient.set('products', JSON.stringify(productsFromMongo))
+        //
+        // const replies = await ReplyModel.find({product: id})
+        // await redisClient.set(id, JSON.stringify({product, replies}))
 
         res.json({
             msg: `successfully updated product by ${id}`,
@@ -184,11 +181,11 @@ const deleteAllProducts = async (req, res) => {
         await ProductModel.deleteMany()
         await redisClient.del('products')
         res.json({
-            msg: 'successfully deleted all data in DB & Redis'
+            message: 'successfully deleted all data in DB & Redis'
         })
     } catch (e) {
         res.status(500).json({
-            msg: e.message
+            message: e.message
         })
     }
 }
@@ -201,7 +198,7 @@ const deleteProduct = async (req, res) => {
         const productFromDB = await ProductModel.findByIdAndDelete(id)
         if (!productFromDB) {
             return res.status(400).json({
-                msg: 'There is no product to delete from DB'
+                message: 'There is no product to delete from DB'
             })
         }
 
@@ -212,12 +209,12 @@ const deleteProduct = async (req, res) => {
         }
 
         res.json({
-            msg: `successfully deleted data by ${id} from Redis`,
+            message: `successfully deleted data by ${id} from Redis`,
             product: productFromDB
         })
     } catch (e) {
         res.status(500).json({
-            msg: e.message
+            message: e.message
         })
     }
 }
@@ -257,7 +254,7 @@ const replyToProduct = async (req, res) => {
         }
 
         res.json({
-            msg: 'successfully created new reply',
+            message: 'successfully created new reply',
             reply: {
                 user: reply.user,
                 memo: reply.memo,
@@ -266,7 +263,7 @@ const replyToProduct = async (req, res) => {
         })
     } catch (e) {
         res.status(500).json({
-            msg: e.message
+            message: e.message
         })
     }
 }

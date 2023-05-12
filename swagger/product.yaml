@@ -16,7 +16,7 @@
               $ref: './openapi.yaml#/components/schemas/product'
             examples:
               products:
-                $ref: './openapi.yaml#/components/examples/products'
+                $ref: './openapi.yaml#/components/examples/getProducts'
       '400':
         $ref: './openapi.yaml#/components/responses/BadRequest'
       '500':
@@ -35,15 +35,18 @@
       x-name: body
       required: true
       content:
-        application/json:
+        x-www-form-urlencoded:
           schema:
             $ref: './openapi.yaml#/components/schemas/product'
-          examples:
-            productExample:
-              $ref: './openapi.yaml#/components/examples/products'
     responses:
       '200':
-        $ref: './openapi.yaml#/components/responses/successResponse'
+        content:
+          application/json:
+            schema:
+              $ref: './openapi.yaml#/components/schemas/product'
+            examples:
+              productExample:
+                $ref: './openapi.yaml#/components/examples/getProduct'
       '400':
         $ref: './openapi.yaml#/components/responses/BadRequest'
       '500':
@@ -67,7 +70,37 @@
               $ref: './openapi.yaml#/components/schemas/product'
             examples:
               product:
-                $ref: './openapi.yaml#/components/examples/product'
+                $ref: './openapi.yaml#/components/examples/getProduct'
+      '400':
+        $ref: './openapi.yaml#/components/responses/BadRequest'
+      '500':
+        $ref: './openapi.yaml#/components/responses/InternalServerError'
+
+  # updateProduct
+  put:
+    tags:
+      - Product
+    summary: 등록한 판매 제품 수정 - 판매자
+    consumes:
+      - application/json
+    produces:
+      - application/json
+    requestBody:
+      x-name: body
+      required: true
+      content:
+        x-www-form-urlencoded:
+          schema:
+            $ref: './openapi.yaml#/components/schemas/product'
+    responses:
+      '200':
+        content:
+          application/json:
+            schema:
+              $ref: './openapi.yaml#/components/schemas/product'
+            examples:
+              product:
+                $ref: './openapi.yaml#/components/examples/updateProduct'
       '400':
         $ref: './openapi.yaml#/components/responses/BadRequest'
       '500':
