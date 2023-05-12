@@ -3,35 +3,44 @@ import ReplyModel from "../model/reply.js";
 import redisClient from "../config/redis.js";
 import lodash from "lodash";
 
+/*
+* todo
+* 1. 병렬 처리 (promise all) - O
+*
+* 예외 처리
+* 1. 데이터 자체가 없는 경우 - O
+* 2. redis 데이터가 있고, db 데이터와 같을 때 - O
+* 3. DB 에서 가져온 데이터와 Redis 데이터를 비교하여 일치하지 않는 경우 - O
+* 4. redis 'products' key 가 없지만, db 에는 데이터가 있는 경우 - O
+* */
 const getAllProducts = async (req, res) => {
     try {
-        // promise all 병렬 처리
-        const productsFromRedis = await redisClient.get('products')
-        const productsFromMongo = await ProductModel.find()
+        const productPromise = Promise.all([
+            redisClient.get('products'),
+            ProductModel.find()
+        ])
+        const [productsFromRedis, productsFromMongo] = await productPromise
+
         let products, message
 
         products = JSON.parse(productsFromRedis)
 
-        // 데이터 자체가 없는 경우
-        if (productsFromRedis === null && lodash.isEmpty(productsFromMongo)) {
-            return res.json({
+        if (lodash.size(products) === 0 && lodash.size(productsFromMongo) === 0) {
+            return res.status(400).json({
                 message: `There is no product to get from any DB`
             })
         }
 
-        // redis 데이터가 있고, db 데이터와 같을 때
         if (productsFromRedis !== null && products.length === lodash.size(productsFromMongo)) {
             message = `successfully get all products from Redis`
         }
 
-        // DB 에서 가져온 데이터와 Redis 데이터를 비교하여 일치하지 않는 경우
         if (productsFromRedis !== null && lodash.size(productsFromMongo) !== products.length) {
             await redisClient.set('products', JSON.stringify(productsFromMongo))
             products = productsFromMongo
             message = `successfully get all products from Mongo and set Redis 'products'`
         }
 
-        // redis 'products' key 가 없지만, db 에는 데이터가 있는 경우
         if (productsFromRedis === null && !lodash.isEmpty(productsFromMongo)) {
             await redisClient.set('products', JSON.stringify(productsFromMongo))
             products = productsFromMongo
@@ -221,7 +230,7 @@ const deleteProduct = async (req, res) => {
 
 // todo: user 를 id 대신 username 으로 표시
 // todo: 후기를 작성한 제품이 삭제되면 자동으로 삭제되도록
-const replyToProduct = async (req, res) => {
+const createReplyToProduct = async (req, res) => {
     const {memo} = req.body
     const {productId} = req.params
     try {
@@ -275,5 +284,5 @@ export {
     updateProduct,
     deleteAllProducts,
     deleteProduct,
-    replyToProduct
+    createReplyToProduct
 }
