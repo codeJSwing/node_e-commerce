@@ -90,6 +90,9 @@ components:
     deleteAllProducts:
       value:
         message: successfully deleted all data in DB & Redis
+    deleteProduct:
+      value:
+        message: successfully deleted data by 645dea5be6b8f6d7c770f3bf
   responses:
     successResponse:
       description: successful request with no data
@@ -187,6 +190,10 @@ paths:
               examples:
                 deleteAllProducts:
                   $ref: '#/components/examples/deleteAllProducts'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   '/product/{id}':
     get:
       tags:
@@ -233,6 +240,27 @@ paths:
               examples:
                 product:
                   $ref: '#/components/examples/updateProduct'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+        - Product
+      summary: 특정 제품 삭제 - 판매자
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/product'
+              examples:
+                deleteAllProducts:
+                  $ref: '#/components/examples/deleteProduct'
         '400':
           $ref: '#/components/responses/BadRequest'
         '500':

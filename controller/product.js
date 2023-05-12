@@ -210,8 +210,7 @@ const deleteProduct = async (req, res) => {
         }
 
         res.json({
-            message: `successfully deleted data by ${id} from Redis`,
-            product: productFromDB
+            message: `successfully deleted data by ${id}`
         })
     } catch (e) {
         res.status(500).json({
