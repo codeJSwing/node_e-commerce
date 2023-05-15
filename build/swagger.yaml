@@ -180,6 +180,9 @@ components:
             profileImg: 'https://s.gravatar.com/avatar/8514e2835b97194ffe16b21bf723e420?s=200&r=pg&d=mm'
             __v: 0
           __v: 0
+    updateOrder:
+      value:
+        message: successfully updated data by 6461a63408373afc9748814e
   responses:
     successResponse:
       description: successful request with no data
@@ -459,6 +462,36 @@ paths:
               examples:
                 products:
                   $ref: '#/components/examples/getOrder'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags:
+        - Order
+      summary: 주문 수량 수정
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/components/parameters/orderId'
+      requestBody:
+        x-name: body
+        required: true
+        content:
+          x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/order'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/order'
+              examples:
+                product:
+                  $ref: '#/components/examples/updateOrder'
         '400':
           $ref: '#/components/responses/BadRequest'
         '500':

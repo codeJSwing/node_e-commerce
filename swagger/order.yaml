@@ -77,3 +77,35 @@
         $ref: './openapi.yaml#/components/responses/BadRequest'
       '500':
         $ref: './openapi.yaml#/components/responses/InternalServerError'
+
+  # updateProduct
+  put:
+    tags:
+      - Order
+    summary: 주문 수량 수정
+    consumes:
+      - application/json
+    produces:
+      - application/json
+    parameters:
+      - $ref: './openapi.yaml#/components/parameters/orderId'
+    requestBody:
+      x-name: body
+      required: true
+      content:
+        x-www-form-urlencoded:
+          schema:
+            $ref: './openapi.yaml#/components/schemas/order'
+    responses:
+      '200':
+        content:
+          application/json:
+            schema:
+              $ref: './openapi.yaml#/components/schemas/order'
+            examples:
+              product:
+                $ref: './openapi.yaml#/components/examples/updateOrder'
+      '400':
+        $ref: './openapi.yaml#/components/responses/BadRequest'
+      '500':
+        $ref: './openapi.yaml#/components/responses/InternalServerError'

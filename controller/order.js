@@ -116,18 +116,14 @@ const createOrder = async (req, res) => {
 const updateOrder = async (req, res) => {
     try {
         const { id } = req.params
-        const updateOps = {}
-        for (const ops of req.body) {
-            updateOps[ops.propName] = ops.value;
-        }
-        const updateOrder = await OrderModel.findByIdAndUpdate(id, { $set: updateOps })
+        const updateOps = req.body
+        await OrderModel.findByIdAndUpdate(id, { $set: updateOps })
         res.json({
-            msg: `successfully updated data by ${id}`,
-            updateOrder
+            message: `successfully updated data by ${id}`
         })
     } catch (err) {
         res.status(500).json({
-            msg: err.message
+            message: err.message
         })
     }
 }

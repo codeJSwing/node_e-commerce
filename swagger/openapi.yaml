@@ -210,6 +210,11 @@ components:
           "__v": 0
         }
       }
+    updateOrder:
+      value:
+        {
+          "message": "successfully updated data by 6461a63408373afc9748814e"
+        }
 
 # Responses 재사용 되는 코드
   responses:
