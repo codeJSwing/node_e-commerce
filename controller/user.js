@@ -57,7 +57,7 @@ const loginHandler = async (req, res) => {
         const isMatching = await user.matchPassword(password)
         if (!isMatching) {
             return res.status(401).json({
-                msg: `This password does not match, check your password`
+                message: `This password does not match, check your password`
             })
         }
         const token = await jwt.sign(
@@ -66,12 +66,12 @@ const loginHandler = async (req, res) => {
             {expiresIn: '1h'}
         )
         res.json({
-            msg: 'successful login',
+            message: 'successful login',
             token
         })
     } catch (err) {
         res.status(500).json({
-            msg: err.message
+            message: err.message
         })
         // res.status(500)
         // throw new Error(err.message)
