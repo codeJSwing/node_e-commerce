@@ -55,10 +55,7 @@ components:
         product:
           type: product
           description: 주문명
-          example:
-            _id: 645df5e5278345f7b7f21e65
-            name: 45mm 브라이트 오렌지 스포츠 밴드
-            price: 65000
+          example: 645df5e5278345f7b7f21e65
         quantity:
           type: number
           description: 주문 수량
@@ -66,11 +63,7 @@ components:
         user:
           type: user
           description: 구매자
-          example:
-            _id: 64429ec62ea5616cfe5fe437
-            email: imlogic20@gmail.com
-            username: imlogic20
-            phoneNumber: 1095627719
+          example: 64429ec62ea5616cfe5fe437
     Error:
       type: object
       properties:
@@ -405,6 +398,34 @@ paths:
         - application/json
       produces:
         - application/json
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/order'
+              examples:
+                products:
+                  $ref: '#/components/examples/getAllOrders'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - Order
+      summary: 장바구니 등록
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      requestBody:
+        x-name: body
+        required: true
+        content:
+          x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/order'
       responses:
         '200':
           content:

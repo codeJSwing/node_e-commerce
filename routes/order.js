@@ -19,7 +19,7 @@ router.get("/", checkAuth, getAllOrders)
 // 상세 주문조회 - 언제 필요할 지 생각해보자.
 router.get("/:id", checkAuth, getOrder)
 
-// 장바구니에 구매하고 싶은 제품 등록 - 고객 / 인증 필요
+// 장바구니 등록 - 고객 / 인증 필요
 router.post("/", checkAuth, createOrder)
 
 // 주문 수량 수정 - 고객
