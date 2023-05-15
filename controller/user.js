@@ -35,12 +35,12 @@ const signupHandler = async (req, res) => {
         )
         await sendEmail(createUser.email, '가입확인메일', signupTemplete(confirmToken))
         res.json({
-            msg: 'successful new User',
+            message: `successful new User`,
             user: createUser
         })
     } catch (err) {
         res.status(500).json({
-            msg: err.message
+            message: err.message
         })
     }
 }

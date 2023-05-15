@@ -45,3 +45,33 @@
         $ref: './openapi.yaml#/components/responses/BadRequest'
       '500':
         $ref: './openapi.yaml#/components/responses/InternalServerError'
+
+/signup:
+  # signupHandler
+  post:
+    tags:
+      - User
+    summary: 회원가입
+    consumes:
+      - application/json
+    produces:
+      - application/json
+    requestBody:
+      required: true
+      content:
+        x-www-form-urlencoded:
+          schema:
+            $ref: './openapi.yaml#/components/schemas/user'
+    responses:
+      '200':
+        content:
+          application/json:
+            schema:
+              $ref: './openapi.yaml#/components/schemas/user'
+            examples:
+              user:
+                $ref: './openapi.yaml#/components/examples/signupHandler'
+      '400':
+        $ref: './openapi.yaml#/components/responses/BadRequest'
+      '500':
+        $ref: './openapi.yaml#/components/responses/InternalServerError'

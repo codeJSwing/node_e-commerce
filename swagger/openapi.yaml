@@ -325,6 +325,24 @@ components:
             }
           ]
         }
+    signupHandler:
+      value:
+        {
+          "message": "successful new User",
+          "user": {
+            "email": "imlogic@naver.com",
+            "password": "$2b$10$EJr1dPY3IILbaTJKyAzZl.fDRF1LWfCGd0gNzIva2r51GI75mFlNS",
+            "username": "imlogic",
+            "phoneNumber": 1095627719,
+            "role": "admin",
+            "isEmailConfirm": false,
+            "_id": "6461c9693365a6ede54c9ec9",
+            "createdAt": "2023-05-15T05:55:53.392Z",
+            "updatedAt": "2023-05-15T05:55:53.392Z",
+            "profileImg": "https://s.gravatar.com/avatar/97d4e35bcd645ff51cc8fc74dbe752dc?s=200&r=pg&d=mm",
+            "__v": 0
+          }
+        }
 
 # Responses 재사용 되는 코드
   responses:
@@ -399,3 +417,5 @@ paths:
     $ref: './user.yaml#/~1user'
   /user/list:
     $ref: './user.yaml#/~1list'
+  /user/signup:
+    $ref: './user.yaml#/~1signup'
