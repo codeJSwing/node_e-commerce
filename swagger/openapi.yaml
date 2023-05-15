@@ -364,6 +364,11 @@ components:
         {
           "message": "successfully updated password"
         }
+    updatePassword:
+      value:
+        {
+          "msg": "successfully updated password"
+        }
 
 # Responses 재사용 되는 코드
   responses:
@@ -447,6 +452,8 @@ paths:
     $ref: './user.yaml#/~1user/~1signup'
   /user/login:
     $ref: './user.yaml#/~1user/~1login'
+  /user/password:
+    $ref: './user.yaml#/~1user/~1password'
   /user/find/password:
     $ref: './user.yaml#/~1user/~1find/~1password'
   /user/find/email:

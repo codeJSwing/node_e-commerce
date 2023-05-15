@@ -108,26 +108,6 @@ const getProfile = async (req, res) => {
     }
 }
 
-const updatePassword = async (req, res) => {
-    const {_id} = req.user
-    const {password} = req.body
-    try {
-        const passwordField = {}
-        const hashedPassword = await bcrypt.hash(password, 10)
-        if (hashedPassword) {
-            passwordField.password = hashedPassword
-        }
-        await UserModel.findByIdAndUpdate(_id, {$set: {password: passwordField.password}})
-        res.json({
-            msg: 'successfully updated password'
-        })
-    } catch (e) {
-        res.status(500).json({
-            msg: e.message
-        })
-    }
-}
-
 const findPassword = async (req, res) => {
     const {email} = req.body
     try {
@@ -190,6 +170,39 @@ const resetPassword = async (req, res) => {
     } catch (e) {
         res.status(500).json({
             message: e.message
+        })
+    }
+}
+
+/*
+* todo
+*  1. 비밀번호 일치 여부 확인 - O
+*  2. 패스워드 암호화 - O
+*  3. DB에 저장된 패스워드 변경 - O
+* */
+const updatePassword = async (req, res) => {
+    const {_id} = req.user
+    const {password, password2} = req.body
+    try {
+        if (password !== password2) {
+            return res.status(400).json({
+                message: `Password does not match`
+            })
+        }
+
+        const passwordField = {}
+        const hashedPassword = await bcrypt.hash(password, 10)
+        if (hashedPassword) {
+            passwordField.password = hashedPassword
+        }
+
+        await UserModel.findByIdAndUpdate(_id, {$set: {password: passwordField.password}})
+        res.json({
+            msg: 'successfully updated password'
+        })
+    } catch (e) {
+        res.status(500).json({
+            msg: e.message
         })
     }
 }

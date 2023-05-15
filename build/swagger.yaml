@@ -296,6 +296,9 @@ components:
     resetPassword:
       value:
         message: successfully updated password
+    updatePassword:
+      value:
+        msg: successfully updated password
   responses:
     successResponse:
       description: successful request with no data
@@ -785,6 +788,41 @@ paths:
             $ref: '#/components/responses/BadRequest'
           '500':
             $ref: '#/components/responses/InternalServerError'
+    /password:
+      put:
+        tags:
+          - User
+        summary: 비밀번호 변경 (로그인 후)
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        requestBody:
+          required: true
+          content:
+            x-www-form-urlencoded:
+              schema:
+                type: object
+                properties:
+                  password1:
+                    type: string
+                    example: Ac123456789!@
+                  password2:
+                    type: string
+                    example: Ac123456789!@
+        responses:
+          '200':
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/user'
+                examples:
+                  user:
+                    $ref: '#/components/examples/updatePassword'
+          '400':
+            $ref: '#/components/responses/BadRequest'
+          '500':
+            $ref: '#/components/responses/InternalServerError'
     /find:
       /password:
         post:
@@ -893,6 +931,8 @@ paths:
     $ref: '#/paths/~1user/~1signup'
   /user/login:
     $ref: '#/paths/~1user/~1login'
+  /user/password:
+    $ref: '#/paths/~1user/~1password'
   /user/find/password:
     $ref: '#/paths/~1user/~1find/~1password'
   /user/find/email:
