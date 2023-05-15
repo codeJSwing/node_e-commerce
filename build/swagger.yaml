@@ -12,7 +12,14 @@ components:
     productId:
       name: id
       in: path
-      description: 제품의 고유 식별자
+      description: 제품 번호
+      required: true
+      schema:
+        type: string
+    orderId:
+      name: id
+      in: path
+      description: 주문 번호
       required: true
       schema:
         type: string
@@ -43,6 +50,27 @@ components:
           type: string
           description: 제품에 대한 후기
           example: 저렴하게 잘 샀습니다. 다음에 또 주문할게요.
+    order:
+      properties:
+        product:
+          type: product
+          description: 주문명
+          example:
+            _id: 645df5e5278345f7b7f21e65
+            name: 45mm 브라이트 오렌지 스포츠 밴드
+            price: 65000
+        quantity:
+          type: number
+          description: 주문 수량
+          example: 1
+        user:
+          type: user
+          description: 구매자
+          example:
+            _id: 64429ec62ea5616cfe5fe437
+            email: imlogic20@gmail.com
+            username: imlogic20
+            phoneNumber: 1095627719
     Error:
       type: object
       properties:
@@ -51,7 +79,7 @@ components:
         message:
           type: string
   examples:
-    getProducts:
+    getAllProducts:
       value:
         message: successfully get all products from Redis
         products:
@@ -119,6 +147,46 @@ components:
           user: 64429ec62ea5616cfe5fe437
           memo: 저렴하게 잘 샀습니다. 다음에 또 주문할게요.
           reply_id: 645df643278345f7b7f21e6d
+    getAllOrders:
+      value:
+        message: successfully get all orders from DB
+        orders:
+          - _id: 6461a63408373afc9748814e
+            product:
+              _id: 645df5e5278345f7b7f21e65
+              name: 45mm 브라이트 오렌지 스포츠 밴드
+              price: 65000
+            quantity: 1
+            user:
+              _id: 64429ec62ea5616cfe5fe437
+              email: imlogic20@gmail.com
+              username: imlogic20
+              phoneNumber: 1095627719
+            __v: 0
+    getOrder:
+      value:
+        message: successfully get order by 6461a63408373afc9748814e from DB
+        order:
+          _id: 6461a63408373afc9748814e
+          product:
+            _id: 645df5e5278345f7b7f21e65
+            name: 45mm 브라이트 오렌지 스포츠 밴드
+            price: 65000
+            desc: 스포츠 밴드는 특수 제작한 고탄성 불화탄성중합체로 만들어 튼튼하고 내구성이 뛰어나면서도 놀라우리만치 부드럽습니다. 부드러운 고밀도 소재의 밴드가 우아하게 손목을 감싸주어 피부에 닿는 느낌이 편안합니다. 또한 혁신적인 핀앤턱 잠금장치는 깔끔하게 떨어지는 착용감을 선사합니다.
+          quantity: 1
+          user:
+            _id: 64429ec62ea5616cfe5fe437
+            email: imlogic20@gmail.com
+            password: $2b$10$MmLsSwKzVgnYeccAUOH6Q.ftj1gqKzp3H/y2B25SY.vwaD6AISB6K
+            username: imlogic20
+            phoneNumber: 1095627719
+            role: admin
+            isEmailConfirm: false
+            createdAt: '2023-04-21T14:33:42.503Z'
+            updatedAt: '2023-04-21T14:33:42.503Z'
+            profileImg: 'https://s.gravatar.com/avatar/8514e2835b97194ffe16b21bf723e420?s=200&r=pg&d=mm'
+            __v: 0
+          __v: 0
   responses:
     successResponse:
       description: successful request with no data
@@ -166,7 +234,7 @@ paths:
                 $ref: '#/components/schemas/product'
               examples:
                 products:
-                  $ref: '#/components/examples/getProducts'
+                  $ref: '#/components/examples/getAllProducts'
         '400':
           $ref: '#/components/responses/BadRequest'
         '500':
@@ -324,6 +392,52 @@ paths:
               examples:
                 deleteAllProducts:
                   $ref: '#/components/examples/createReplyToProduct'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /order:
+    get:
+      tags:
+        - Order
+      summary: 장바구니에 담긴 모든 주문 조회 - 고객
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/order'
+              examples:
+                products:
+                  $ref: '#/components/examples/getAllOrders'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  '/order/{id}':
+    get:
+      tags:
+        - Order
+      summary: 상세 주문조회
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/components/parameters/orderId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/order'
+              examples:
+                products:
+                  $ref: '#/components/examples/getOrder'
         '400':
           $ref: '#/components/responses/BadRequest'
         '500':

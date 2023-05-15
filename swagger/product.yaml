@@ -16,7 +16,7 @@
               $ref: './openapi.yaml#/components/schemas/product'
             examples:
               products:
-                $ref: './openapi.yaml#/components/examples/getProducts'
+                $ref: './openapi.yaml#/components/examples/getAllProducts'
       '400':
         $ref: './openapi.yaml#/components/responses/BadRequest'
       '500':
