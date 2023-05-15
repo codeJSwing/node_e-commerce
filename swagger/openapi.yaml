@@ -349,6 +349,11 @@ components:
           "message": "successful login",
           "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDQyOWVjNjJlYTU2MTZjZmU1ZmU0MzciLCJpYXQiOjE2ODQxMzAzMzYsImV4cCI6MTY4NDEzMzkzNn0.fr4IV5MSYNkR24GU_HOtImh372AtfGDEnvEgmCA9wnc"
         }
+    findPassword:
+      value:
+        {
+          "message": "Please check your email"
+        }
 
 # Responses 재사용 되는 코드
   responses:
@@ -422,8 +427,10 @@ paths:
   /user:
     $ref: './user.yaml#/~1user'
   /user/list:
-    $ref: './user.yaml#/~1list'
+    $ref: './user.yaml#/~1user/~1list'
   /user/signup:
-    $ref: './user.yaml#/~1signup'
+    $ref: './user.yaml#/~1user/~1signup'
   /user/login:
-    $ref: './user.yaml#/~1login'
+    $ref: './user.yaml#/~1user/~1login'
+  /user/find/password:
+    $ref: './user.yaml#/~1user/~1find/~1password'

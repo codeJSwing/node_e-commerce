@@ -22,91 +22,125 @@
       '500':
         $ref: './openapi.yaml#/components/responses/InternalServerError'
 
-/list:
-  # getAllUsers
-  get:
-    tags:
-      - User
-    summary: 모든 유저 프로필 조회
-    consumes:
-      - application/json
-    produces:
-      - application/json
-    responses:
-      '200':
-        content:
-          application/json:
-            schema:
-              $ref: './openapi.yaml#/components/schemas/user'
-            examples:
-              user:
-                $ref: './openapi.yaml#/components/examples/getAllUsers'
-      '400':
-        $ref: './openapi.yaml#/components/responses/BadRequest'
-      '500':
-        $ref: './openapi.yaml#/components/responses/InternalServerError'
+  /list:
+    # getAllUsers
+    get:
+      tags:
+        - User
+      summary: 모든 유저 프로필 조회
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: './openapi.yaml#/components/schemas/user'
+              examples:
+                user:
+                  $ref: './openapi.yaml#/components/examples/getAllUsers'
+        '400':
+          $ref: './openapi.yaml#/components/responses/BadRequest'
+        '500':
+          $ref: './openapi.yaml#/components/responses/InternalServerError'
 
-/signup:
-  # signupHandler
-  post:
-    tags:
-      - User
-    summary: 회원가입
-    consumes:
-      - application/json
-    produces:
-      - application/json
-    requestBody:
-      required: true
-      content:
-        x-www-form-urlencoded:
-          schema:
-            $ref: './openapi.yaml#/components/schemas/user'
-    responses:
-      '200':
+  /signup:
+    # signupHandler
+    post:
+      tags:
+        - User
+      summary: 회원가입
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      requestBody:
+        required: true
         content:
-          application/json:
+          x-www-form-urlencoded:
             schema:
               $ref: './openapi.yaml#/components/schemas/user'
-            examples:
-              user:
-                $ref: './openapi.yaml#/components/examples/signupHandler'
-      '400':
-        $ref: './openapi.yaml#/components/responses/BadRequest'
-      '500':
-        $ref: './openapi.yaml#/components/responses/InternalServerError'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: './openapi.yaml#/components/schemas/user'
+              examples:
+                user:
+                  $ref: './openapi.yaml#/components/examples/signupHandler'
+        '400':
+          $ref: './openapi.yaml#/components/responses/BadRequest'
+        '500':
+          $ref: './openapi.yaml#/components/responses/InternalServerError'
 
-/login:
-  # loginHandler
-  post:
-    tags:
-      - User
-    summary: 로그인
-    consumes:
-      - application/json
-    produces:
-      - application/json
-    requestBody:
-      required: true
-      content:
-        x-www-form-urlencoded:
-          schema:
-            type: object
-            properties:
-              email:
-                $ref: './openapi.yaml#/components/schemas/user/properties/email'
-              password:
-                $ref: './openapi.yaml#/components/schemas/user/properties/password'
-    responses:
-      '200':
+  /login:
+    # loginHandler
+    post:
+      tags:
+        - User
+      summary: 로그인
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      requestBody:
+        required: true
         content:
-          application/json:
+          x-www-form-urlencoded:
             schema:
-              $ref: './openapi.yaml#/components/schemas/user'
-            examples:
-              user:
-                $ref: './openapi.yaml#/components/examples/loginHandler'
-      '400':
-        $ref: './openapi.yaml#/components/responses/BadRequest'
-      '500':
-        $ref: './openapi.yaml#/components/responses/InternalServerError'
+              type: object
+              properties:
+                email:
+                  $ref: './openapi.yaml#/components/schemas/user/properties/email'
+                password:
+                  $ref: './openapi.yaml#/components/schemas/user/properties/password'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: './openapi.yaml#/components/schemas/user'
+              examples:
+                user:
+                  $ref: './openapi.yaml#/components/examples/loginHandler'
+        '400':
+          $ref: './openapi.yaml#/components/responses/BadRequest'
+        '500':
+          $ref: './openapi.yaml#/components/responses/InternalServerError'
+
+  /find:
+    /password:
+      # findPassword
+      post:
+        tags:
+          - User
+        summary: 비밀번호 찾기
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        requestBody:
+          required: true
+          content:
+            x-www-form-urlencoded:
+              schema:
+                type: object
+                properties:
+                  email:
+                    $ref: './openapi.yaml#/components/schemas/user/properties/email'
+        responses:
+          '200':
+            content:
+              application/json:
+                schema:
+                  $ref: './openapi.yaml#/components/schemas/user'
+                examples:
+                  user:
+                    $ref: './openapi.yaml#/components/examples/findPassword'
+          '400':
+            $ref: './openapi.yaml#/components/responses/BadRequest'
+          '500':
+            $ref: './openapi.yaml#/components/responses/InternalServerError'

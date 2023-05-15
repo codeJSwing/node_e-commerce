@@ -133,8 +133,8 @@ const findPassword = async (req, res) => {
     try {
         const user = await UserModel.findOne({email})
         if (!user) {
-            return res.status(408).json({
-                msg: 'no email'
+            return res.status(404).json({
+                message: `${email} does not exist`
             })
         }
         const findPasswordToken = await jwt.sign(
@@ -144,11 +144,11 @@ const findPassword = async (req, res) => {
         )
         await sendEmail(email, '비밀번호 변경', findPasswordTemplete(findPasswordToken))
         res.json({
-            msg: 'Please check your email'
+            message: `Please check your email`
         })
     } catch (e) {
         res.status(500).json({
-            msg: e.message
+            message: e.message
         })
     }
 }
