@@ -293,6 +293,9 @@ components:
     findEmail:
       value:
         message: 'Your email address is [imlogic20@gmail.com]'
+    resetPassword:
+      value:
+        message: successfully updated password
   responses:
     successResponse:
       description: successful request with no data
@@ -844,6 +847,46 @@ paths:
               $ref: '#/components/responses/BadRequest'
             '500':
               $ref: '#/components/responses/InternalServerError'
+    /reset:
+      /password:
+        put:
+          tags:
+            - User
+          summary: 비밀번호 초기화 (로그인 전)
+          consumes:
+            - application/json
+          produces:
+            - application/json
+          requestBody:
+            required: true
+            content:
+              x-www-form-urlencoded:
+                schema:
+                  type: object
+                  properties:
+                    password1:
+                      type: string
+                      example: c12uic1i2uc1
+                    password2:
+                      type: string
+                      example: c12uic1i2uc1
+                    token:
+                      type: string
+                      format: jwt
+                      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDQyOWVjNjJlYTU2MTZjZmU1ZmU0MzciLCJpYXQiOjE2ODQxMzAzMzYsImV4cCI6MTY4NDEzMzkzNn0.fr4IV5MSYNkR24GU_HOtImh372AtfGDEnvEgmCA9wnc
+          responses:
+            '200':
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/user'
+                  examples:
+                    user:
+                      $ref: '#/components/examples/resetPassword'
+            '400':
+              $ref: '#/components/responses/BadRequest'
+            '500':
+              $ref: '#/components/responses/InternalServerError'
   /user/list:
     $ref: '#/paths/~1user/~1list'
   /user/signup:
@@ -854,3 +897,5 @@ paths:
     $ref: '#/paths/~1user/~1find/~1password'
   /user/find/email:
     $ref: '#/paths/~1user/~1find/~1email'
+  /user/reset/password:
+    $ref: '#/paths/~1user/~1reset/~1password'

@@ -359,6 +359,11 @@ components:
         {
           "message": "Your email address is [imlogic20@gmail.com]"
         }
+    resetPassword:
+      value:
+        {
+          "message": "successfully updated password"
+        }
 
 # Responses 재사용 되는 코드
   responses:
@@ -446,3 +451,5 @@ paths:
     $ref: './user.yaml#/~1user/~1find/~1password'
   /user/find/email:
     $ref: './user.yaml#/~1user/~1find/~1email'
+  /user/reset/password:
+    $ref: './user.yaml#/~1user/~1reset/~1password'

@@ -39,13 +39,13 @@ router.post("/find/password", findPassword)
 // 이메일 찾기
 router.post("/find/email", findEmail)
 
-// emailConfirm(isEmailConfirmed false -> true)
-router.put("/confirm/email", emailConfirm)
+// 패스워드 변경 (로그인 전)
+router.put("/reset/password", resetPassword)
 
 // 패스워드 변경 (로그인 후)
 router.put("/password", checkAuth, updatePassword)
 
-// 패스워드 변경 (로그인 전)
-router.put("/reset/password", resetPassword)
+// emailConfirm(isEmailConfirmed false -> true)
+router.put("/confirm/email", emailConfirm)
 
 export default router

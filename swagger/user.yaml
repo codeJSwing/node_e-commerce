@@ -176,3 +176,46 @@
             $ref: './openapi.yaml#/components/responses/BadRequest'
           '500':
             $ref: './openapi.yaml#/components/responses/InternalServerError'
+
+  /reset:
+    /password:
+      # resetPassword
+      put:
+        tags:
+          - User
+        summary: 비밀번호 초기화 (로그인 전)
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        requestBody:
+          required: true
+          content:
+            x-www-form-urlencoded:
+              schema:
+                type: object
+                properties:
+                  password1:
+                    type: string
+                    example: "c12uic1i2uc1"
+                  password2:
+                    type: string
+                    example: "c12uic1i2uc1"
+                  token:
+                    type: string
+                    format: jwt
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDQyOWVjNjJlYTU2MTZjZmU1ZmU0MzciLCJpYXQiOjE2ODQxMzAzMzYsImV4cCI6MTY4NDEzMzkzNn0.fr4IV5MSYNkR24GU_HOtImh372AtfGDEnvEgmCA9wnc"
+
+        responses:
+          '200':
+            content:
+              application/json:
+                schema:
+                  $ref: './openapi.yaml#/components/schemas/user'
+                examples:
+                  user:
+                    $ref: './openapi.yaml#/components/examples/resetPassword'
+          '400':
+            $ref: './openapi.yaml#/components/responses/BadRequest'
+          '500':
+            $ref: './openapi.yaml#/components/responses/InternalServerError'

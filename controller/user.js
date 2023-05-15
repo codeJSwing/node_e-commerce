@@ -178,14 +178,14 @@ const resetPassword = async (req, res) => {
     try {
         const {userId} = await jwt.verify(token, process.env.LOGIN_ACCESS_KEY)
         if (password1 !== password2) {
-            return res.status(401).json({
+            return res.status(400).json({
                 message: `please check password and confirm password`
             })
         }
         const hashedPassword = await bcrypt.hash(password1, 10)
         await UserModel.findByIdAndUpdate(userId, {password: hashedPassword})
         res.json({
-            message: 'successful update password'
+            message: `successfully updated password`
         })
     } catch (e) {
         res.status(500).json({
