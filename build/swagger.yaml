@@ -183,6 +183,9 @@ components:
     updateOrder:
       value:
         message: successfully updated data by 6461a63408373afc9748814e
+    deleteAllOrders:
+      value:
+        message: successfully deleted all Orders
   responses:
     successResponse:
       description: successful request with no data
@@ -438,6 +441,27 @@ paths:
               examples:
                 products:
                   $ref: '#/components/examples/getAllOrders'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+        - Order
+      summary: 장바구니에 등록된 모든 주문 삭제
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/order'
+              examples:
+                products:
+                  $ref: '#/components/examples/deleteAllOrders'
         '400':
           $ref: '#/components/responses/BadRequest'
         '500':

@@ -215,6 +215,11 @@ components:
         {
           "message": "successfully updated data by 6461a63408373afc9748814e"
         }
+    deleteAllOrders:
+      value:
+        {
+          "message": "successfully deleted all Orders"
+        }
 
 # Responses 재사용 되는 코드
   responses:

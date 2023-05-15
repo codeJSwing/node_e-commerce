@@ -130,14 +130,13 @@ const updateOrder = async (req, res) => {
 
 const deleteAllOrders = async (req, res) => {
     try {
-        const orders = await OrderModel.deleteMany()
+        await OrderModel.deleteMany()
         res.json({
-            msg: 'successfully deleted all data',
-            orders
+            message: 'successfully deleted all Orders'
         })
     } catch (e) {
         res.status(500).json({
-            msg: e.message
+            message: e.message
         })
     }
 }
