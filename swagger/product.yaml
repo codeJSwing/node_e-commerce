@@ -31,6 +31,9 @@
       - application/json
     produces:
       - application/json
+    security:
+      - $ref: './openapi.yaml#/components/securitySchemes/jwt'
+#        https://m.blog.naver.com/wonieie/222121678725
     requestBody:
       x-name: body
       required: true

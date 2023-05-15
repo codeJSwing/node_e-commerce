@@ -16,6 +16,14 @@ components:
       required: true
       schema:
         type: string
+
+  securitySchemes:
+      jwt:
+        type: apiKey
+        in: header
+        name: Authorization
+        description: JWT 토큰
+
   schemas:
     product:
       properties:

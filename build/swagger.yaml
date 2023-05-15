@@ -16,6 +16,12 @@ components:
       required: true
       schema:
         type: string
+  securitySchemes:
+    jwt:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: JWT 토큰
   schemas:
     product:
       properties:
@@ -173,6 +179,8 @@ paths:
         - application/json
       produces:
         - application/json
+      security:
+        - $ref: '#/components/securitySchemes/jwt'
       requestBody:
         x-name: body
         required: true
