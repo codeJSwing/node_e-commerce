@@ -180,6 +180,15 @@ components:
             profileImg: 'https://s.gravatar.com/avatar/8514e2835b97194ffe16b21bf723e420?s=200&r=pg&d=mm'
             __v: 0
           __v: 0
+    createOrder:
+      value:
+        message: successfully created new order
+        order:
+          product: 645df5e5278345f7b7f21e65
+          quantity: 1
+          user: 64429ec62ea5616cfe5fe437
+          _id: 6461afeea43a7cb2ea7e966a
+          __v: 0
     updateOrder:
       value:
         message: successfully updated data by 6461a63408373afc9748814e
@@ -440,7 +449,7 @@ paths:
                 $ref: '#/components/schemas/order'
               examples:
                 products:
-                  $ref: '#/components/examples/getAllOrders'
+                  $ref: '#/components/examples/createOrder'
         '400':
           $ref: '#/components/responses/BadRequest'
         '500':

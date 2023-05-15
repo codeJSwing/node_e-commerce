@@ -103,12 +103,12 @@ const createOrder = async (req, res) => {
         })
         const order = await newOrder.save()
         res.json({
-            msg: 'successful create new order',
+            message: 'successfully created new order',
             order
         })
     } catch (e) {
         res.status(500).json({
-            msg: e.message
+            message: e.message
         })
     }
 }

@@ -75,6 +75,7 @@ components:
           type: string
 
   examples:
+    # Product
     getAllProducts:
       value:
         {
@@ -159,6 +160,8 @@ components:
             "reply_id": "645df643278345f7b7f21e6d"
           }
         }
+
+    # Order
     getAllOrders:
       value:
         {
@@ -210,6 +213,18 @@ components:
           "__v": 0
         }
       }
+    createOrder:
+      value:
+        {
+          "message": "successfully created new order",
+          "order": {
+            "product": "645df5e5278345f7b7f21e65",
+            "quantity": 1,
+            "user": "64429ec62ea5616cfe5fe437",
+            "_id": "6461afeea43a7cb2ea7e966a",
+            "__v": 0
+          }
+        }
     updateOrder:
       value:
         {
