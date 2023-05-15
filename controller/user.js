@@ -98,12 +98,12 @@ const getProfile = async (req, res) => {
         }
         console.log('mongo')
         res.json({
-            msg: `successfully get userInfo`,
+            message: `successfully get userInfo`,
             user: req.user
         })
     } catch (e) {
         res.status(500).json({
-            msg: e.message
+            message: e.message
         })
     }
 }

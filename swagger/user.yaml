@@ -1,0 +1,23 @@
+/user:
+  # getProfile
+  get:
+    tags:
+      - User
+    summary: 프로필 정보 가져오기
+    consumes:
+      - application/json
+    produces:
+      - application/json
+    responses:
+      '200':
+        content:
+          application/json:
+            schema:
+              $ref: './openapi.yaml#/components/schemas/user'
+            examples:
+              user:
+                $ref: './openapi.yaml#/components/examples/getProfile'
+      '400':
+        $ref: './openapi.yaml#/components/responses/BadRequest'
+      '500':
+        $ref: './openapi.yaml#/components/responses/InternalServerError'

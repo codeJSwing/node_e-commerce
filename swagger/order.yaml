@@ -15,7 +15,7 @@
             schema:
               $ref: './openapi.yaml#/components/schemas/order'
             examples:
-              products:
+              order:
                 $ref: './openapi.yaml#/components/examples/getAllOrders'
       '400':
         $ref: './openapi.yaml#/components/responses/BadRequest'
@@ -45,7 +45,7 @@
             schema:
               $ref: './openapi.yaml#/components/schemas/order'
             examples:
-              products:
+              order:
                 $ref: './openapi.yaml#/components/examples/createOrder'
       '400':
         $ref: './openapi.yaml#/components/responses/BadRequest'
@@ -68,7 +68,7 @@
             schema:
               $ref: './openapi.yaml#/components/schemas/order'
             examples:
-              products:
+              order:
                 $ref: './openapi.yaml#/components/examples/deleteAllOrders'
       '400':
         $ref: './openapi.yaml#/components/responses/BadRequest'
@@ -94,7 +94,7 @@
             schema:
               $ref: './openapi.yaml#/components/schemas/order'
             examples:
-              products:
+              order:
                 $ref: './openapi.yaml#/components/examples/getOrder'
       '400':
         $ref: './openapi.yaml#/components/responses/BadRequest'
@@ -126,7 +126,7 @@
             schema:
               $ref: './openapi.yaml#/components/schemas/order'
             examples:
-              product:
+              order:
                 $ref: './openapi.yaml#/components/examples/updateOrder'
       '400':
         $ref: './openapi.yaml#/components/responses/BadRequest'
@@ -151,7 +151,7 @@
             schema:
               $ref: './openapi.yaml#/components/schemas/order'
             examples:
-              product:
+              order:
                 $ref: './openapi.yaml#/components/examples/deleteOrder'
       '400':
         $ref: './openapi.yaml#/components/responses/BadRequest'

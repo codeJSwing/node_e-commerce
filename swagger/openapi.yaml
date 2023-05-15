@@ -66,6 +66,38 @@ components:
           type: user
           description: 구매자
           example: "64429ec62ea5616cfe5fe437"
+    user:
+      properties:
+        email:
+          type: string
+          description: 이메일 주소
+          required: true
+          example: imlogic20@gmail.com
+        password:
+          type: string
+          description: 비밀번호
+          required: true
+          example: asdf1234!@#$
+        username:
+          type: string
+          description: 유저 닉네임
+          example: seongik
+        phoneNumber:
+          type: number
+          description: 휴대폰 번호
+          required: true
+          example: 01012347890
+        birth:
+          type: date
+          description: 생년월일
+          example: 19930201
+        role:
+          type: string
+          description: 사용자 권한
+          example: user / admin
+
+
+    # Error
     Error:
       type: object
       properties:
@@ -241,6 +273,27 @@ components:
           "message": "successfully deleted data by 6461beeeace9cd8297757759"
         }
 
+    # User
+    getProfile:
+      value:
+        {
+          "message": "successfully get userInfo",
+          "user": {
+            "_id": "64429ec62ea5616cfe5fe437",
+            "email": "imlogic20@gmail.com",
+            "password": "$2b$10$MmLsSwKzVgnYeccAUOH6Q.ftj1gqKzp3H/y2B25SY.vwaD6AISB6K",
+            "username": "imlogic20",
+            "phoneNumber": 1095627719,
+            "role": "admin",
+            "isEmailConfirm": false,
+            "createdAt": "2023-04-21T14:33:42.503Z",
+            "updatedAt": "2023-04-21T14:33:42.503Z",
+            "profileImg": "https://s.gravatar.com/avatar/8514e2835b97194ffe16b21bf723e420?s=200&r=pg&d=mm",
+            "__v": 0
+          }
+        }
+
+
 # Responses 재사용 되는 코드
   responses:
     successResponse:
@@ -310,3 +363,5 @@ paths:
     $ref: './order.yaml#/~1order'
   /order/{id}:
     $ref: './order.yaml#/~1order~1{id}'
+  /user:
+    $ref: './user.yaml#/~1user'
