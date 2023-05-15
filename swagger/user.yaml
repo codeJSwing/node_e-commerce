@@ -117,7 +117,7 @@
       post:
         tags:
           - User
-        summary: 비밀번호 찾기
+        summary: 등록된 이메일 주소로 비밀번호 찾기
         consumes:
           - application/json
         produces:
@@ -140,6 +140,38 @@
                 examples:
                   user:
                     $ref: './openapi.yaml#/components/examples/findPassword'
+          '400':
+            $ref: './openapi.yaml#/components/responses/BadRequest'
+          '500':
+            $ref: './openapi.yaml#/components/responses/InternalServerError'
+
+    /email:
+      # findEmail
+      post:
+        tags:
+          - User
+        summary: 휴대폰 번호로 이메일 찾기
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        requestBody:
+          required: true
+          content:
+            x-www-form-urlencoded:
+              schema:
+                properties:
+                  phoneNumber:
+                    $ref: './openapi.yaml#/components/schemas/user/properties/phoneNumber'
+        responses:
+          '200':
+            content:
+              application/json:
+                schema:
+                  $ref: './openapi.yaml#/components/schemas/user'
+                examples:
+                  user:
+                    $ref: './openapi.yaml#/components/examples/findEmail'
           '400':
             $ref: './openapi.yaml#/components/responses/BadRequest'
           '500':

@@ -81,10 +81,10 @@ components:
           description: 유저 닉네임
           example: seongik
         phoneNumber:
-          type: number
+          type: string
           description: 휴대폰 번호
           required: true
-          example: 01012347890
+          example: '010-7777-9999, enter only numbers except hyphens'
         birth:
           type: date
           description: 생년월일
@@ -290,6 +290,9 @@ components:
     findPassword:
       value:
         message: Please check your email
+    findEmail:
+      value:
+        message: 'Your email address is [imlogic20@gmail.com]'
   responses:
     successResponse:
       description: successful request with no data
@@ -784,7 +787,7 @@ paths:
         post:
           tags:
             - User
-          summary: 비밀번호 찾기
+          summary: 등록된 이메일 주소로 비밀번호 찾기
           consumes:
             - application/json
           produces:
@@ -811,6 +814,36 @@ paths:
               $ref: '#/components/responses/BadRequest'
             '500':
               $ref: '#/components/responses/InternalServerError'
+      /email:
+        post:
+          tags:
+            - User
+          summary: 휴대폰 번호로 이메일 찾기
+          consumes:
+            - application/json
+          produces:
+            - application/json
+          requestBody:
+            required: true
+            content:
+              x-www-form-urlencoded:
+                schema:
+                  properties:
+                    phoneNumber:
+                      $ref: '#/components/schemas/user/properties/phoneNumber'
+          responses:
+            '200':
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/user'
+                  examples:
+                    user:
+                      $ref: '#/components/examples/findEmail'
+            '400':
+              $ref: '#/components/responses/BadRequest'
+            '500':
+              $ref: '#/components/responses/InternalServerError'
   /user/list:
     $ref: '#/paths/~1user/~1list'
   /user/signup:
@@ -819,3 +852,5 @@ paths:
     $ref: '#/paths/~1user/~1login'
   /user/find/password:
     $ref: '#/paths/~1user/~1find/~1password'
+  /user/find/email:
+    $ref: '#/paths/~1user/~1find/~1email'

@@ -153,6 +153,25 @@ const findPassword = async (req, res) => {
     }
 }
 
+const findEmail = async (req, res) => {
+    const {phoneNumber} = req.body
+    try {
+        const {email} = await UserModel.findOne({phoneNumber})
+        if (!email) {
+            return res.status(404).json({
+                message: `${phoneNumber} does not exists`
+            })
+        }
+        res.json({
+            message: `Your email address is [${email}]`
+        })
+    } catch (e) {
+        res.status(500).json({
+            message: e.message
+        })
+    }
+}
+
 // todo: 사용자는 패스워드만 입력해야 되는데 token을 어떻게 처리할까?
 const resetPassword = async (req, res) => {
     const {password1, password2, token} = req.body
@@ -160,17 +179,17 @@ const resetPassword = async (req, res) => {
         const {userId} = await jwt.verify(token, process.env.LOGIN_ACCESS_KEY)
         if (password1 !== password2) {
             return res.status(401).json({
-                msg: `please check password and confirm password`
+                message: `please check password and confirm password`
             })
         }
         const hashedPassword = await bcrypt.hash(password1, 10)
         await UserModel.findByIdAndUpdate(userId, {password: hashedPassword})
         res.json({
-            msg: 'successful update password'
+            message: 'successful update password'
         })
     } catch (e) {
         res.status(500).json({
-            msg: e.message
+            message: e.message
         })
     }
 }
@@ -188,26 +207,6 @@ const emailConfirm = async (req, res) => {
         await UserModel.findOneAndUpdate(email, {isEmailConfirm: true})
         res.json({
             msg: 'successful updated email confirm'
-        })
-    } catch (e) {
-        res.status(500).json({
-            msg: e.message
-        })
-    }
-}
-
-const findEmail = async (req, res) => {
-    const {phoneNumber} = req.body
-    try {
-        const {email} = await UserModel.findOne({phoneNumber})
-        if (!email) {
-            return res.status(404).json({
-                msg: 'This phoneNumber does not exists'
-            })
-        }
-        res.json({
-            msg: 'successfully find email',
-            email
         })
     } catch (e) {
         res.status(500).json({

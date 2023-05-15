@@ -2,17 +2,18 @@
 import express from "express"
 import dotenv from "dotenv"
 import morgan from "morgan"
-import bodyParser from "body-parser";
 import passport from "passport"
 import passportConfig from "./config/passport.js";
-import swaggerUi from 'swagger-ui-express';
-import YAML from 'yamljs';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import * as path from "path";
 import connectDB from "./config/database.js";
 import { errorHandler, notFound } from "./middleware/globalErrorHandler.js";
 import redisClient from "./config/redis.js";
+
+// Swagger
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
+import * as path from "path";
 
 // Express application 생성
 const app = express()
@@ -21,6 +22,8 @@ const app = express()
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const swaggerSpec = YAML.load(path.join(__dirname, './build/swagger.yaml'));
+
+// Swagger UI 미들웨어 등록
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // 환경 변수 설정

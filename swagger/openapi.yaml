@@ -83,10 +83,10 @@ components:
           description: 유저 닉네임
           example: seongik
         phoneNumber:
-          type: number
+          type: string
           description: 휴대폰 번호
           required: true
-          example: 01012347890
+          example: '010-7777-9999, enter only numbers except hyphens'
         birth:
           type: date
           description: 생년월일
@@ -354,6 +354,11 @@ components:
         {
           "message": "Please check your email"
         }
+    findEmail:
+      value:
+        {
+          "message": "Your email address is [imlogic20@gmail.com]"
+        }
 
 # Responses 재사용 되는 코드
   responses:
@@ -416,14 +421,19 @@ components:
 
 #Paths api 경로 지정
 paths:
+  # Product
   /product:
     $ref: './product.yaml#/~1product'
   /product/{id}:
     $ref: './product.yaml#/~1product~1{id}'
+
+  # Order
   /order:
     $ref: './order.yaml#/~1order'
   /order/{id}:
     $ref: './order.yaml#/~1order~1{id}'
+
+  # User
   /user:
     $ref: './user.yaml#/~1user'
   /user/list:
@@ -434,3 +444,5 @@ paths:
     $ref: './user.yaml#/~1user/~1login'
   /user/find/password:
     $ref: './user.yaml#/~1user/~1find/~1password'
+  /user/find/email:
+    $ref: './user.yaml#/~1user/~1find/~1email'
