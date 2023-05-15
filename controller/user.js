@@ -228,12 +228,12 @@ const getAllUsers = async (req, res) => {
             })
         }
         res.json({
-            msg: 'successful get all users from DB',
+            message: `successful get all users from DB`,
             users: usersFromDB
         })
     } catch (e) {
         res.status(500).json({
-            msg: e.message
+            message: e.message
         })
     }
 }

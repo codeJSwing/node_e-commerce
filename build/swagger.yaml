@@ -242,6 +242,32 @@ components:
           updatedAt: '2023-04-21T14:33:42.503Z'
           profileImg: 'https://s.gravatar.com/avatar/8514e2835b97194ffe16b21bf723e420?s=200&r=pg&d=mm'
           __v: 0
+    getAllUsers:
+      value:
+        message: successful get all users from DB
+        users:
+          - _id: 64429ec62ea5616cfe5fe437
+            email: imlogic20@gmail.com
+            password: $2b$10$MmLsSwKzVgnYeccAUOH6Q.ftj1gqKzp3H/y2B25SY.vwaD6AISB6K
+            username: imlogic20
+            phoneNumber: 1095627719
+            role: admin
+            isEmailConfirm: false
+            createdAt: '2023-04-21T14:33:42.503Z'
+            updatedAt: '2023-04-21T14:33:42.503Z'
+            profileImg: 'https://s.gravatar.com/avatar/8514e2835b97194ffe16b21bf723e420?s=200&r=pg&d=mm'
+            __v: 0
+          - _id: 644357525c9f7581c747eb06
+            email: imlogic@naver.com
+            password: $2b$10$kgbsn3vRiewjipcLCkdKsexLtNrtMhnCENRcfge6R77Ar20CJ4MNa
+            username: imlogic
+            phoneNumber: 1095627719
+            role: admin
+            isEmailConfirm: false
+            createdAt: '2023-04-22T03:41:06.923Z'
+            updatedAt: '2023-04-22T03:41:06.923Z'
+            profileImg: 'https://s.gravatar.com/avatar/97d4e35bcd645ff51cc8fc74dbe752dc?s=200&r=pg&d=mm'
+            __v: 0
   responses:
     successResponse:
       description: successful request with no data
@@ -644,6 +670,28 @@ paths:
               examples:
                 user:
                   $ref: '#/components/examples/getProfile'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /user/list:
+    get:
+      tags:
+        - User
+      summary: 모든 유저 프로필 조회
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+              examples:
+                user:
+                  $ref: '#/components/examples/getAllUsers'
         '400':
           $ref: '#/components/responses/BadRequest'
         '500':

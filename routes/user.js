@@ -23,7 +23,7 @@ const router = express.Router()
 // profile 정보 가져오기
 router.get("/", checkAuth, getProfile)
 
-// 유저 전체 프로필 조회
+// 모든 유저 프로필 조회
 router.get("/list", checkAuth, isAdmin, getAllUsers)
 
 // 회원가입
