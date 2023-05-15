@@ -29,6 +29,6 @@ router.put("/:id", updateOrder)
 router.delete("/", deleteAllOrders)
 
 // 한 제품에 대한 주문만 삭제 - 고객
-router.delete("/:id", deleteOrder)
+router.delete("/:id", checkAuth, deleteOrder)
 
 export default router

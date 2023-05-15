@@ -141,22 +141,35 @@ const deleteAllOrders = async (req, res) => {
     }
 }
 
+/*
+* todo
+*  1. 삭제하려는 주문이 없을 때 - O
+*  2. 등록된 주문의 사용자(구매자)와 삭제하려는 사용자의 id가 다를 때 - O
+*  3. finally 를 사용한 방식
+* */
 const deleteOrder = async (req, res) => {
-    const { id } = req.params
+    const {id} = req.params
     try {
-        const order = await OrderModel.findByIdAndDelete(id)
+        const order = await OrderModel.findById(id)
         if (!order) {
-            return res.status(410).json({
-                msg: 'There is no order to delete'
+            return res.status(404).json({
+                message: 'There is no order to delete'
             })
         }
+
+        if (!(lodash.isEqual(req.user._id, order.user._id))) {
+            return res.status(403).json({
+                message: `User information is different`
+            })
+        }
+
+        await OrderModel.findByIdAndDelete(id)
         res.json({
-            msg: `successfully deleted data by ${id}`,
-            order
+            message: `successfully deleted data by ${id}`
         })
     } catch (e) {
         res.status(500).json({
-            msg: e.message
+            message: e.message
         })
     }
 }

@@ -235,6 +235,11 @@ components:
         {
           "message": "successfully deleted all Orders"
         }
+    deleteOrder:
+      value:
+        {
+          "message": "successfully deleted data by 6461beeeace9cd8297757759"
+        }
 
 # Responses 재사용 되는 코드
   responses:
@@ -245,8 +250,10 @@ components:
             schema:
               type: object
               example: {"status": 200, "success": true, "message": "message"}
+
+    # 4xx
     BadRequest:
-      description: 잘못된 요청
+      description: 400
       content:
         application/json:
           schema:
@@ -254,6 +261,35 @@ components:
           example:
             success: false
             message: 잘못된 요청
+    Unauthorized:
+      description: 401
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            success: false
+            message: 인증되지 않음
+    Forbidden:
+      description: 403
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            success: false
+            message: 접근 금지
+    Not found:
+      description: 404
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            success: false
+            message: 찾을 수 없음
+
+    # 500
     InternalServerError:
       description: 서버 에러
       content:

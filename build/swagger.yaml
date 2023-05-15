@@ -195,6 +195,9 @@ components:
     deleteAllOrders:
       value:
         message: successfully deleted all Orders
+    deleteOrder:
+      value:
+        message: successfully deleted data by 6461beeeace9cd8297757759
   responses:
     successResponse:
       description: successful request with no data
@@ -207,7 +210,7 @@ components:
               success: true
               message: message
     BadRequest:
-      description: 잘못된 요청
+      description: 400
       content:
         application/json:
           schema:
@@ -215,6 +218,33 @@ components:
           example:
             success: false
             message: 잘못된 요청
+    Unauthorized:
+      description: 401
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            message: 인증되지 않음
+    Forbidden:
+      description: 403
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            message: 접근 금지
+    Not found:
+      description: 404
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            message: 찾을 수 없음
     InternalServerError:
       description: 서버 에러
       content:
@@ -525,6 +555,29 @@ paths:
               examples:
                 product:
                   $ref: '#/components/examples/updateOrder'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+        - Order
+      summary: 특정 주문 삭제
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/components/parameters/orderId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/order'
+              examples:
+                product:
+                  $ref: '#/components/examples/deleteOrder'
         '400':
           $ref: '#/components/responses/BadRequest'
         '500':
