@@ -30,7 +30,7 @@ components:
       name: Authorization
       description: JWT 토큰
   schemas:
-    product:
+    products:
       properties:
         name:
           type: string
@@ -44,7 +44,7 @@ components:
           type: string
           description: 제품 정보
           example: Apple이 디자인한 이 MagSafe형 실리콘 케이스는 iPhone 14에 멋을 한층 더하는 동시에 폰을 든든하게 보호해줍니다.
-    reply:
+    replies:
       properties:
         memo:
           type: string
@@ -373,7 +373,7 @@ components:
             success: false
             message: 서버 내부 오류
 paths:
-  /product:
+  /products:
     get:
       tags:
         - Product
@@ -387,7 +387,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/product'
+                $ref: '#/components/schemas/products'
               examples:
                 products:
                   $ref: '#/components/examples/getAllProducts'
@@ -411,13 +411,13 @@ paths:
         content:
           x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/product'
+              $ref: '#/components/schemas/products'
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/product'
+                $ref: '#/components/schemas/products'
               examples:
                 productExample:
                   $ref: '#/components/examples/getProduct'
@@ -438,7 +438,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/product'
+                $ref: '#/components/schemas/products'
               examples:
                 deleteAllProducts:
                   $ref: '#/components/examples/deleteAllProducts'
@@ -446,7 +446,7 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  '/product/{id}':
+  '/products/{id}':
     get:
       tags:
         - Product
@@ -462,7 +462,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/product'
+                $ref: '#/components/schemas/products'
               examples:
                 product:
                   $ref: '#/components/examples/getProduct'
@@ -486,13 +486,13 @@ paths:
         content:
           x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/product'
+              $ref: '#/components/schemas/products'
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/product'
+                $ref: '#/components/schemas/products'
               examples:
                 product:
                   $ref: '#/components/examples/updateProduct'
@@ -515,7 +515,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/product'
+                $ref: '#/components/schemas/products'
               examples:
                 deleteAllProducts:
                   $ref: '#/components/examples/deleteProduct'
@@ -538,13 +538,13 @@ paths:
         content:
           x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/reply'
+              $ref: '#/components/schemas/replies'
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/reply'
+                $ref: '#/components/schemas/replies'
               examples:
                 deleteAllProducts:
                   $ref: '#/components/examples/createReplyToProduct'

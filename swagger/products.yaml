@@ -1,4 +1,4 @@
-/product:
+/products:
   # getAllProducts
   get:
     tags:
@@ -13,7 +13,7 @@
         content:
           application/json:
             schema:
-              $ref: './openapi.yaml#/components/schemas/product'
+              $ref: './openapi.yaml#/components/schemas/products'
             examples:
               products:
                 $ref: './openapi.yaml#/components/examples/getAllProducts'
@@ -33,20 +33,19 @@
       - application/json
     security:
       - $ref: './openapi.yaml#/components/securitySchemes/jwt'
-#        https://m.blog.naver.com/wonieie/222121678725
     requestBody:
       x-name: body
       required: true
       content:
         x-www-form-urlencoded:
           schema:
-            $ref: './openapi.yaml#/components/schemas/product'
+            $ref: './openapi.yaml#/components/schemas/products'
     responses:
       '200':
         content:
           application/json:
             schema:
-              $ref: './openapi.yaml#/components/schemas/product'
+              $ref: './openapi.yaml#/components/schemas/products'
             examples:
               productExample:
                 $ref: './openapi.yaml#/components/examples/getProduct'
@@ -69,7 +68,7 @@
         content:
           application/json:
             schema:
-              $ref: './openapi.yaml#/components/schemas/product'
+              $ref: './openapi.yaml#/components/schemas/products'
             examples:
               deleteAllProducts:
                 $ref: './openapi.yaml#/components/examples/deleteAllProducts'
@@ -78,7 +77,7 @@
       '500':
         $ref: './openapi.yaml#/components/responses/InternalServerError'
 
-/product/{id}:
+/products/{id}:
   # getProduct
   get:
     tags:
@@ -95,7 +94,7 @@
         content:
           application/json:
             schema:
-              $ref: './openapi.yaml#/components/schemas/product'
+              $ref: './openapi.yaml#/components/schemas/products'
             examples:
               product:
                 $ref: './openapi.yaml#/components/examples/getProduct'
@@ -121,13 +120,13 @@
       content:
         x-www-form-urlencoded:
           schema:
-            $ref: './openapi.yaml#/components/schemas/product'
+            $ref: './openapi.yaml#/components/schemas/products'
     responses:
       '200':
         content:
           application/json:
             schema:
-              $ref: './openapi.yaml#/components/schemas/product'
+              $ref: './openapi.yaml#/components/schemas/products'
             examples:
               product:
                 $ref: './openapi.yaml#/components/examples/updateProduct'
@@ -152,7 +151,7 @@
         content:
           application/json:
             schema:
-              $ref: './openapi.yaml#/components/schemas/product'
+              $ref: './openapi.yaml#/components/schemas/products'
             examples:
               deleteAllProducts:
                 $ref: './openapi.yaml#/components/examples/deleteProduct'
@@ -177,13 +176,13 @@
       content:
         x-www-form-urlencoded:
           schema:
-            $ref: './openapi.yaml#/components/schemas/reply'
+            $ref: './openapi.yaml#/components/schemas/replies'
     responses:
       '200':
         content:
           application/json:
             schema:
-              $ref: './openapi.yaml#/components/schemas/reply'
+              $ref: './openapi.yaml#/components/schemas/replies'
             examples:
               deleteAllProducts:
                 $ref: './openapi.yaml#/components/examples/createReplyToProduct'
