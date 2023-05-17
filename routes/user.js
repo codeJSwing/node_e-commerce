@@ -20,32 +20,31 @@ const checkAuth = passport.authenticate('jwt', {session: false})
 
 const router = express.Router()
 
-// profile 정보 가져오기
-router.get("/", checkAuth, getProfile)
+// 회원가입 - O
+router.post("/registration", signupHandler)
 
-// 모든 유저 프로필 조회
-router.get("/list", checkAuth, isAdmin, getAllUsers)
-
-// 회원가입
-// todo: 이미 등록된 전화번호가 있으면 회원가입 되면 안돼. 비밀번호 찾을 때 문제가 생겨
-router.post("/signup", signupHandler)
-
-// 로그인
+// 로그인 - O
 router.post("/login", loginHandler)
 
+// 내 profile 정보 가져오기
+router.get("/me", checkAuth, getProfile)
+
+// 모든 유저 프로필 조회
+router.get("/", checkAuth, isAdmin, getAllUsers)
+
 // 비밀번호 찾기(로그인 전)
-router.post("/find/password", findPassword)
+router.post("/password-recovery", findPassword)
 
 // 이메일 찾기
-router.post("/find/email", findEmail)
+router.post("/email-recovery", findEmail)
 
 // 패스워드 변경 (로그인 전)
-router.put("/reset/password", resetPassword)
+router.put("/password-reset", resetPassword)
 
-// 패스워드 변경 (로그인 후)
+// 패스워드 변경 (로그인 후) - O
 router.put("/password", checkAuth, updatePassword)
 
-// emailConfirm(isEmailConfirmed false -> true)
-router.put("/confirm/email", emailConfirm)
+// 이메일 확인 (isEmailConfirmed false -> true)
+router.put("/email-confirmation", emailConfirm)
 
 export default router

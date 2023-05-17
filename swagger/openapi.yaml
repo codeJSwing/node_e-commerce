@@ -66,27 +66,27 @@ components:
           type: user
           description: 구매자
           example: "64429ec62ea5616cfe5fe437"
-    user:
+    users:
       properties:
         email:
           type: string
           description: 이메일 주소
           required: true
-          example: imlogic20@gmail.com
+          example: "imlogic20@gmail.com"
         password:
           type: string
           description: 비밀번호
           required: true
-          example: asdf1234!@#$
+          example: "asdf1234!@#$"
         username:
           type: string
           description: 유저 닉네임
-          example: seongik
+          example: "seongik"
         phoneNumber:
           type: string
           description: 휴대폰 번호
           required: true
-          example: '010-7777-9999, enter only numbers except hyphens'
+          example: "010-7777-9999, enter only numbers except hyphens"
         birth:
           type: date
           description: 생년월일
@@ -94,8 +94,7 @@ components:
         role:
           type: string
           description: 사용자 권한
-          example: user / admin
-
+          example: "admin"
 
     # Error
     Error:
@@ -369,9 +368,15 @@ components:
         {
           "msg": "successfully updated password"
         }
+    confirmEmail:
+      value:
+        {
+          "message": "successfully updated email confirm"
+        }
 
 # Responses 재사용 되는 코드
   responses:
+    # 2xx
     successResponse:
         description: successful request with no data
         content:
@@ -379,6 +384,13 @@ components:
             schema:
               type: object
               example: {"status": 200, "success": true, "message": "message"}
+    No content:
+      description: 204
+      content:
+        application/json:
+          schema:
+            type: object
+            example: { "status": 204, "success": true, "message": "No content" }
 
     # 4xx
     BadRequest:
@@ -388,8 +400,7 @@ components:
           schema:
             $ref: "#/components/schemas/Error"
           example:
-            success: false
-            message: 잘못된 요청
+            { "status": 400, "success": true, "message": "잘못된 요청" }
     Unauthorized:
       description: 401
       content:
@@ -397,8 +408,7 @@ components:
           schema:
             $ref: "#/components/schemas/Error"
           example:
-            success: false
-            message: 인증되지 않음
+            { "status": 401, "success": true, "message": "인증되지 않음" }
     Forbidden:
       description: 403
       content:
@@ -406,8 +416,7 @@ components:
           schema:
             $ref: "#/components/schemas/Error"
           example:
-            success: false
-            message: 접근 금지
+            { "status": 403, "success": true, "message": "접근 금지" }
     Not found:
       description: 404
       content:
@@ -415,8 +424,7 @@ components:
           schema:
             $ref: "#/components/schemas/Error"
           example:
-            success: false
-            message: 찾을 수 없음
+            { "status": 404, "success": true, "message": "찾을 수 없음" }
 
     # 500
     InternalServerError:
@@ -444,19 +452,21 @@ paths:
     $ref: './order.yaml#/~1order~1{id}'
 
   # User
-  /user:
-    $ref: './user.yaml#/~1user'
-  /user/list:
-    $ref: './user.yaml#/~1user/~1list'
-  /user/signup:
-    $ref: './user.yaml#/~1user/~1signup'
-  /user/login:
-    $ref: './user.yaml#/~1user/~1login'
-  /user/password:
-    $ref: './user.yaml#/~1user/~1password'
-  /user/find/password:
-    $ref: './user.yaml#/~1user/~1find/~1password'
-  /user/find/email:
-    $ref: './user.yaml#/~1user/~1find/~1email'
-  /user/reset/password:
-    $ref: './user.yaml#/~1user/~1reset/~1password'
+  /users/me:
+    $ref: './users.yaml#/~1users/~1me'
+  /users:
+    $ref: './users.yaml#/~1users'
+  /users/registration:
+    $ref: './users.yaml#/~1users/~1registration'
+  /users/login:
+    $ref: './users.yaml#/~1users/~1login'
+  /users/password:
+    $ref: './users.yaml#/~1users/~1password'
+  /users/password-recovery:
+    $ref: './users.yaml#/~1users/~1password-recovery'
+  /users/email-recovery:
+    $ref: './users.yaml#/~1users/~1email-recovery'
+  /users/password-reset:
+    $ref: './users.yaml#/~1users/~1password-reset'
+#  /users/email-confirmation:
+#    $ref: './users.yaml#/~1users/~1email-confirmation'

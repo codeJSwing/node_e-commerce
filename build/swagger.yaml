@@ -64,7 +64,7 @@ components:
           type: user
           description: 구매자
           example: 64429ec62ea5616cfe5fe437
-    user:
+    users:
       properties:
         email:
           type: string
@@ -92,7 +92,7 @@ components:
         role:
           type: string
           description: 사용자 권한
-          example: user / admin
+          example: admin
     Error:
       type: object
       properties:
@@ -299,6 +299,9 @@ components:
     updatePassword:
       value:
         msg: successfully updated password
+    confirmEmail:
+      value:
+        message: successfully updated email confirm
   responses:
     successResponse:
       description: successful request with no data
@@ -310,6 +313,16 @@ components:
               status: 200
               success: true
               message: message
+    No content:
+      description: 204
+      content:
+        application/json:
+          schema:
+            type: object
+            example:
+              status: 204
+              success: true
+              message: No content
     BadRequest:
       description: 400
       content:
@@ -317,7 +330,8 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
           example:
-            success: false
+            status: 400
+            success: true
             message: 잘못된 요청
     Unauthorized:
       description: 401
@@ -326,7 +340,8 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
           example:
-            success: false
+            status: 401
+            success: true
             message: 인증되지 않음
     Forbidden:
       description: 403
@@ -335,7 +350,8 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
           example:
-            success: false
+            status: 403
+            success: true
             message: 접근 금지
     Not found:
       description: 404
@@ -344,7 +360,8 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
           example:
-            success: false
+            status: 404
+            success: true
             message: 찾을 수 없음
     InternalServerError:
       description: 서버 에러
@@ -683,29 +700,32 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /user:
-    get:
-      tags:
-        - User
-      summary: 프로필 정보 가져오기
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/user'
-              examples:
-                user:
-                  $ref: '#/components/examples/getProfile'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-    /list:
+  /users/me:
+    $ref: '#/paths/~1users/~1me'
+  /users:
+    /me:
+      get:
+        tags:
+          - User
+        summary: 내 프로필 정보 가져오기
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        responses:
+          '200':
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/users'
+                examples:
+                  users:
+                    $ref: '#/components/examples/getProfile'
+          '400':
+            $ref: '#/components/responses/BadRequest'
+          '500':
+            $ref: '#/components/responses/InternalServerError'
+    /:
       get:
         tags:
           - User
@@ -719,15 +739,15 @@ paths:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/user'
+                  $ref: '#/components/schemas/users'
                 examples:
-                  user:
+                  users:
                     $ref: '#/components/examples/getAllUsers'
           '400':
             $ref: '#/components/responses/BadRequest'
           '500':
             $ref: '#/components/responses/InternalServerError'
-    /signup:
+    /registration:
       post:
         tags:
           - User
@@ -741,15 +761,15 @@ paths:
           content:
             x-www-form-urlencoded:
               schema:
-                $ref: '#/components/schemas/user'
+                $ref: '#/components/schemas/users'
         responses:
           '200':
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/user'
+                  $ref: '#/components/schemas/users'
                 examples:
-                  user:
+                  users:
                     $ref: '#/components/examples/signupHandler'
           '400':
             $ref: '#/components/responses/BadRequest'
@@ -772,17 +792,17 @@ paths:
                 type: object
                 properties:
                   email:
-                    $ref: '#/components/schemas/user/properties/email'
+                    $ref: '#/components/schemas/users/properties/email'
                   password:
-                    $ref: '#/components/schemas/user/properties/password'
+                    $ref: '#/components/schemas/users/properties/password'
         responses:
           '200':
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/user'
+                  $ref: '#/components/schemas/users'
                 examples:
-                  user:
+                  users:
                     $ref: '#/components/examples/loginHandler'
           '400':
             $ref: '#/components/responses/BadRequest'
@@ -815,127 +835,123 @@ paths:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/user'
+                  $ref: '#/components/schemas/users'
                 examples:
-                  user:
+                  users:
                     $ref: '#/components/examples/updatePassword'
           '400':
             $ref: '#/components/responses/BadRequest'
           '500':
             $ref: '#/components/responses/InternalServerError'
-    /find:
-      /password:
-        post:
-          tags:
-            - User
-          summary: 등록된 이메일 주소로 비밀번호 찾기
-          consumes:
-            - application/json
-          produces:
-            - application/json
-          requestBody:
-            required: true
+    /password-recovery:
+      post:
+        tags:
+          - User
+        summary: 등록된 이메일 주소로 비밀번호 찾기
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        requestBody:
+          required: true
+          content:
+            x-www-form-urlencoded:
+              schema:
+                type: object
+                properties:
+                  email:
+                    $ref: '#/components/schemas/users/properties/email'
+        responses:
+          '200':
             content:
-              x-www-form-urlencoded:
+              application/json:
                 schema:
-                  type: object
-                  properties:
-                    email:
-                      $ref: '#/components/schemas/user/properties/email'
-          responses:
-            '200':
-              content:
-                application/json:
-                  schema:
-                    $ref: '#/components/schemas/user'
-                  examples:
-                    user:
-                      $ref: '#/components/examples/findPassword'
-            '400':
-              $ref: '#/components/responses/BadRequest'
-            '500':
-              $ref: '#/components/responses/InternalServerError'
-      /email:
-        post:
-          tags:
-            - User
-          summary: 휴대폰 번호로 이메일 찾기
-          consumes:
-            - application/json
-          produces:
-            - application/json
-          requestBody:
-            required: true
+                  $ref: '#/components/schemas/users'
+                examples:
+                  users:
+                    $ref: '#/components/examples/findPassword'
+          '400':
+            $ref: '#/components/responses/BadRequest'
+          '500':
+            $ref: '#/components/responses/InternalServerError'
+    /email-recovery:
+      post:
+        tags:
+          - User
+        summary: 휴대폰 번호로 이메일 찾기
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        requestBody:
+          required: true
+          content:
+            x-www-form-urlencoded:
+              schema:
+                properties:
+                  phoneNumber:
+                    $ref: '#/components/schemas/users/properties/phoneNumber'
+        responses:
+          '200':
             content:
-              x-www-form-urlencoded:
+              application/json:
                 schema:
-                  properties:
-                    phoneNumber:
-                      $ref: '#/components/schemas/user/properties/phoneNumber'
-          responses:
-            '200':
-              content:
-                application/json:
-                  schema:
-                    $ref: '#/components/schemas/user'
-                  examples:
-                    user:
-                      $ref: '#/components/examples/findEmail'
-            '400':
-              $ref: '#/components/responses/BadRequest'
-            '500':
-              $ref: '#/components/responses/InternalServerError'
-    /reset:
-      /password:
-        put:
-          tags:
-            - User
-          summary: 비밀번호 초기화 (로그인 전)
-          consumes:
-            - application/json
-          produces:
-            - application/json
-          requestBody:
-            required: true
+                  $ref: '#/components/schemas/users'
+                examples:
+                  users:
+                    $ref: '#/components/examples/findEmail'
+          '400':
+            $ref: '#/components/responses/BadRequest'
+          '500':
+            $ref: '#/components/responses/InternalServerError'
+    /password-reset:
+      put:
+        tags:
+          - User
+        summary: 비밀번호 초기화 (로그인 전)
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        requestBody:
+          required: true
+          content:
+            x-www-form-urlencoded:
+              schema:
+                type: object
+                properties:
+                  password1:
+                    type: string
+                    example: c12uic1i2uc1
+                  password2:
+                    type: string
+                    example: c12uic1i2uc1
+                  token:
+                    type: string
+                    format: jwt
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDQyOWVjNjJlYTU2MTZjZmU1ZmU0MzciLCJpYXQiOjE2ODQxMzAzMzYsImV4cCI6MTY4NDEzMzkzNn0.fr4IV5MSYNkR24GU_HOtImh372AtfGDEnvEgmCA9wnc
+        responses:
+          '200':
             content:
-              x-www-form-urlencoded:
+              application/json:
                 schema:
-                  type: object
-                  properties:
-                    password1:
-                      type: string
-                      example: c12uic1i2uc1
-                    password2:
-                      type: string
-                      example: c12uic1i2uc1
-                    token:
-                      type: string
-                      format: jwt
-                      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDQyOWVjNjJlYTU2MTZjZmU1ZmU0MzciLCJpYXQiOjE2ODQxMzAzMzYsImV4cCI6MTY4NDEzMzkzNn0.fr4IV5MSYNkR24GU_HOtImh372AtfGDEnvEgmCA9wnc
-          responses:
-            '200':
-              content:
-                application/json:
-                  schema:
-                    $ref: '#/components/schemas/user'
-                  examples:
-                    user:
-                      $ref: '#/components/examples/resetPassword'
-            '400':
-              $ref: '#/components/responses/BadRequest'
-            '500':
-              $ref: '#/components/responses/InternalServerError'
-  /user/list:
-    $ref: '#/paths/~1user/~1list'
-  /user/signup:
-    $ref: '#/paths/~1user/~1signup'
-  /user/login:
-    $ref: '#/paths/~1user/~1login'
-  /user/password:
-    $ref: '#/paths/~1user/~1password'
-  /user/find/password:
-    $ref: '#/paths/~1user/~1find/~1password'
-  /user/find/email:
-    $ref: '#/paths/~1user/~1find/~1email'
-  /user/reset/password:
-    $ref: '#/paths/~1user/~1reset/~1password'
+                  $ref: '#/components/schemas/users'
+                examples:
+                  users:
+                    $ref: '#/components/examples/resetPassword'
+          '400':
+            $ref: '#/components/responses/BadRequest'
+          '500':
+            $ref: '#/components/responses/InternalServerError'
+  /users/registration:
+    $ref: '#/paths/~1users/~1registration'
+  /users/login:
+    $ref: '#/paths/~1users/~1login'
+  /users/password:
+    $ref: '#/paths/~1users/~1password'
+  /users/password-recovery:
+    $ref: '#/paths/~1users/~1password-recovery'
+  /users/email-recovery:
+    $ref: '#/paths/~1users/~1email-recovery'
+  /users/password-reset:
+    $ref: '#/paths/~1users/~1password-reset'

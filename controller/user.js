@@ -10,6 +10,10 @@ import {
 import redisClient from "../config/redis.js";
 import ProductModel from "../model/product.js";
 
+/*
+* todo
+*  1. 이미 등록된 전화번호가 있으면 회원가입이 되지 않도록
+* */
 const signupHandler = async (req, res) => {
     const {email, username, password, birth, phoneNumber, role} = req.body
     try {
@@ -100,6 +104,28 @@ const getProfile = async (req, res) => {
         res.json({
             message: `successfully get userInfo`,
             user: req.user
+        })
+    } catch (e) {
+        res.status(500).json({
+            message: e.message
+        })
+    }
+}
+
+const getAllUsers = async (req, res) => {
+    try {
+        const usersFromDB = await UserModel.find()
+        const usersFromRedis = await redisClient.get('users')
+        await redisClient.set('users', JSON.stringify(usersFromDB))
+        if (usersFromRedis !== null) {
+            console.log('redis')
+            return res.json({
+                users: JSON.parse(usersFromRedis)
+            })
+        }
+        res.json({
+            message: `successful get all users from DB`,
+            users: usersFromDB
         })
     } catch (e) {
         res.status(500).json({
@@ -207,41 +233,33 @@ const updatePassword = async (req, res) => {
     }
 }
 
+/*
+* todo
+*  1. api 의 역할이 모호해.
+*  2. 이메일이 존재하지 않을 때 - O
+*  3. 권한이 이미 true 일 때 - O
+* */
 const emailConfirm = async (req, res) => {
     const {token, email} = req.body
     try {
         await jwt.verify(token, process.env.LOGIN_ACCESS_KEY)
         const user = await UserModel.findOne({email})
-        if (user.isEmailConfirm === true) {
-            return res.status(410).json({
-                msg: 'already isEmailConfirmed true'
-            })
-        }
-        await UserModel.findOneAndUpdate(email, {isEmailConfirm: true})
-        res.json({
-            msg: 'successful updated email confirm'
-        })
-    } catch (e) {
-        res.status(500).json({
-            msg: e.message
-        })
-    }
-}
 
-const getAllUsers = async (req, res) => {
-    try {
-        const usersFromDB = await UserModel.find()
-        const usersFromRedis = await redisClient.get('users')
-        await redisClient.set('users', JSON.stringify(usersFromDB))
-        if (usersFromRedis !== null) {
-            console.log('redis')
-            return res.json({
-                users: JSON.parse(usersFromRedis)
+        if (!user) {
+            res.status(400).json({
+                message: `${email} does not exist, check your email address`
             })
         }
+
+        if (user.isEmailConfirm === true) {
+            return res.status(204).json({
+                message: 'already isEmailConfirmed true'
+            })
+        }
+
+        await UserModel.findOneAndUpdate({email}, {isEmailConfirm: true})
         res.json({
-            message: `successful get all users from DB`,
-            users: usersFromDB
+            message: `successful updated email confirm`
         })
     } catch (e) {
         res.status(500).json({
