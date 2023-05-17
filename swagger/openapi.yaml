@@ -52,7 +52,7 @@ components:
           type: string
           description: 제품에 대한 후기
           example: "저렴하게 잘 샀습니다. 다음에 또 주문할게요."
-    order:
+    orders:
       properties:
         product:
           type: product
@@ -446,10 +446,10 @@ paths:
     $ref: './product.yaml#/~1product~1{id}'
 
   # Order
-  /order:
-    $ref: './order.yaml#/~1order'
-  /order/{id}:
-    $ref: './order.yaml#/~1order~1{id}'
+  /orders:
+    $ref: './orders.yaml#/~1orders'
+  /orders/{id}:
+    $ref: './orders.yaml#/~1orders~1{id}'
 
   # User
   /users/me:

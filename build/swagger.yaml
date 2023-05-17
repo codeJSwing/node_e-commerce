@@ -50,7 +50,7 @@ components:
           type: string
           description: 제품에 대한 후기
           example: 저렴하게 잘 샀습니다. 다음에 또 주문할게요.
-    order:
+    orders:
       properties:
         product:
           type: product
@@ -552,7 +552,7 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /order:
+  /orders:
     get:
       tags:
         - Order
@@ -566,7 +566,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/order'
+                $ref: '#/components/schemas/orders'
               examples:
                 order:
                   $ref: '#/components/examples/getAllOrders'
@@ -588,13 +588,13 @@ paths:
         content:
           x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/order'
+              $ref: '#/components/schemas/orders'
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/order'
+                $ref: '#/components/schemas/orders'
               examples:
                 order:
                   $ref: '#/components/examples/createOrder'
@@ -615,7 +615,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/order'
+                $ref: '#/components/schemas/orders'
               examples:
                 order:
                   $ref: '#/components/examples/deleteAllOrders'
@@ -623,7 +623,7 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  '/order/{id}':
+  '/orders/{id}':
     get:
       tags:
         - Order
@@ -639,7 +639,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/order'
+                $ref: '#/components/schemas/orders'
               examples:
                 order:
                   $ref: '#/components/examples/getOrder'
@@ -663,13 +663,13 @@ paths:
         content:
           x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/order'
+              $ref: '#/components/schemas/orders'
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/order'
+                $ref: '#/components/schemas/orders'
               examples:
                 order:
                   $ref: '#/components/examples/updateOrder'
@@ -692,7 +692,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/order'
+                $ref: '#/components/schemas/orders'
               examples:
                 order:
                   $ref: '#/components/examples/deleteOrder'

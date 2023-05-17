@@ -1,4 +1,4 @@
-/order:
+/orders:
   # getAllOrders
   get:
     tags:
@@ -13,7 +13,7 @@
         content:
           application/json:
             schema:
-              $ref: './openapi.yaml#/components/schemas/order'
+              $ref: './openapi.yaml#/components/schemas/orders'
             examples:
               order:
                 $ref: './openapi.yaml#/components/examples/getAllOrders'
@@ -37,13 +37,13 @@
       content:
         x-www-form-urlencoded:
           schema:
-            $ref: './openapi.yaml#/components/schemas/order'
+            $ref: './openapi.yaml#/components/schemas/orders'
     responses:
       '200':
         content:
           application/json:
             schema:
-              $ref: './openapi.yaml#/components/schemas/order'
+              $ref: './openapi.yaml#/components/schemas/orders'
             examples:
               order:
                 $ref: './openapi.yaml#/components/examples/createOrder'
@@ -66,7 +66,7 @@
         content:
           application/json:
             schema:
-              $ref: './openapi.yaml#/components/schemas/order'
+              $ref: './openapi.yaml#/components/schemas/orders'
             examples:
               order:
                 $ref: './openapi.yaml#/components/examples/deleteAllOrders'
@@ -75,7 +75,7 @@
       '500':
         $ref: './openapi.yaml#/components/responses/InternalServerError'
 
-/order/{id}:
+/orders/{id}:
   # getOrder
   get:
     tags:
@@ -92,7 +92,7 @@
         content:
           application/json:
             schema:
-              $ref: './openapi.yaml#/components/schemas/order'
+              $ref: './openapi.yaml#/components/schemas/orders'
             examples:
               order:
                 $ref: './openapi.yaml#/components/examples/getOrder'
@@ -118,13 +118,13 @@
       content:
         x-www-form-urlencoded:
           schema:
-            $ref: './openapi.yaml#/components/schemas/order'
+            $ref: './openapi.yaml#/components/schemas/orders'
     responses:
       '200':
         content:
           application/json:
             schema:
-              $ref: './openapi.yaml#/components/schemas/order'
+              $ref: './openapi.yaml#/components/schemas/orders'
             examples:
               order:
                 $ref: './openapi.yaml#/components/examples/updateOrder'
@@ -149,7 +149,7 @@
         content:
           application/json:
             schema:
-              $ref: './openapi.yaml#/components/schemas/order'
+              $ref: './openapi.yaml#/components/schemas/orders'
             examples:
               order:
                 $ref: './openapi.yaml#/components/examples/deleteOrder'
