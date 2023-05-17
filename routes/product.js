@@ -32,6 +32,6 @@ router.delete("/", checkAuth, deleteAllProducts)
 router.delete("/:id", checkAuth, deleteProduct)
 
 // 제품의 후기 등록 - 고객 / 인증 필요
-router.post("/reply/:productId", checkAuth, createReplyToProduct)
+router.post("/replies/:productId", checkAuth, createReplyToProduct)
 
 export default router
