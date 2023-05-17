@@ -468,5 +468,5 @@ paths:
     $ref: './users.yaml#/~1users/~1email-recovery'
   /users/password-reset:
     $ref: './users.yaml#/~1users/~1password-reset'
-#  /users/email-confirmation:
-#    $ref: './users.yaml#/~1users/~1email-confirmation'
+  /users/email-confirmation:
+    $ref: './users.yaml#/~1users/~1email-confirmation'

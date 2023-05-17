@@ -943,6 +943,41 @@ paths:
             $ref: '#/components/responses/BadRequest'
           '500':
             $ref: '#/components/responses/InternalServerError'
+    /email-confirmation:
+      put:
+        tags:
+          - User
+        summary: 이메일 확인 (false -> true)
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        requestBody:
+          required: true
+          content:
+            x-www-form-urlencoded:
+              schema:
+                type: object
+                properties:
+                  email:
+                    $ref: '#/components/schemas/users/properties/email'
+                  token:
+                    type: string
+                    format: jwt
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDQyOWVjNjJlYTU2MTZjZmU1ZmU0MzciLCJpYXQiOjE2ODQxMzAzMzYsImV4cCI6MTY4NDEzMzkzNn0.fr4IV5MSYNkR24GU_HOtImh372AtfGDEnvEgmCA9wnc
+        responses:
+          '200':
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/users'
+                examples:
+                  users:
+                    $ref: '#/components/examples/confirmEmail'
+          '400':
+            $ref: '#/components/responses/BadRequest'
+          '500':
+            $ref: '#/components/responses/InternalServerError'
   /users/registration:
     $ref: '#/paths/~1users/~1registration'
   /users/login:
@@ -955,3 +990,5 @@ paths:
     $ref: '#/paths/~1users/~1email-recovery'
   /users/password-reset:
     $ref: '#/paths/~1users/~1password-reset'
+  /users/email-confirmation:
+    $ref: '#/paths/~1users/~1email-confirmation'

@@ -257,38 +257,42 @@
         '500':
           $ref: './openapi.yaml#/components/responses/InternalServerError'
 
-#  /email-confirmation:
-#    # confirmEmail
-#    put:
-#      tags:
-#        - User
-#      summary: 이메일 확인 (false -> true)
-#      consumes:
-#        - application/json
-#      produces:
-#        - application/json
-#      requestBody:
-#        required: true
-#        content:
-#          x-www-form-urlencoded:
-#            schema:
-#              properties:
-#                email:
-#                  $ref: './openapi.yaml#/components/schemas/users/email'
-#
-#      responses:
-#        '200':
-#          content:
-#            application/json:
-#              schema:
-#                $ref: './openapi.yaml#/components/schemas/users'
-#              examples:
-#                users:
-#                  $ref: './openapi.yaml#/components/examples/confirmEmail'
-#        '400':
-#          $ref: './openapi.yaml#/components/responses/BadRequest'
-#        '500':
-#          $ref: './openapi.yaml#/components/responses/InternalServerError'
+  /email-confirmation:
+    # confirmEmail
+    put:
+      tags:
+        - User
+      summary: 이메일 확인 (false -> true)
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      requestBody:
+        required: true
+        content:
+          x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                email:
+                  $ref: './openapi.yaml#/components/schemas/users/properties/email'
+                token:
+                  type: string
+                  format: jwt
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDQyOWVjNjJlYTU2MTZjZmU1ZmU0MzciLCJpYXQiOjE2ODQxMzAzMzYsImV4cCI6MTY4NDEzMzkzNn0.fr4IV5MSYNkR24GU_HOtImh372AtfGDEnvEgmCA9wnc"
 
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: './openapi.yaml#/components/schemas/users'
+              examples:
+                users:
+                  $ref: './openapi.yaml#/components/examples/confirmEmail'
+        '400':
+          $ref: './openapi.yaml#/components/responses/BadRequest'
+        '500':
+          $ref: './openapi.yaml#/components/responses/InternalServerError'
 
 # todo: REST API, confirm email swagger

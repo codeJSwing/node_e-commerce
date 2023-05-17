@@ -238,6 +238,7 @@ const updatePassword = async (req, res) => {
 *  1. api 의 역할이 모호해.
 *  2. 이메일이 존재하지 않을 때 - O
 *  3. 권한이 이미 true 일 때 - O
+*  4. token을 body로 직접 전달하는 것은 좋지 않다고 생각해
 * */
 const emailConfirm = async (req, res) => {
     const {token, email} = req.body
