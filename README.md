@@ -16,7 +16,6 @@
 |   `-- key.pem
 |-- config
 |   |-- database.js
-|   |-- jest.config.js
 |   |-- passport.js
 |   |-- redis.js
 |   `-- sendEmail.js
@@ -25,11 +24,6 @@
 |   |-- product.js
 |   `-- user.js
 |-- docker-compose.yml
-|-- image
-|   |-- img.png
-|   |-- img_1.png
-|   |-- img_2.png
-|   `-- img_3.png
 |-- index.js
 |-- middleware
 |   |-- check-admin.js
@@ -48,20 +42,16 @@
 |   |-- order.js
 |   |-- product.js
 |   `-- user.js
-|-- signup.html
 |-- swagger
 |   |-- openapi.yaml
 |   |-- orders.yaml
 |   |-- products.yaml
 |   `-- users.yaml
-`-- test
-|-- product.test.js
-`-- server.js
 ````
 
 ## Stack
 ### Front
-<img src="https://img.shields.io/badge/html5-E34F26?style=for-the-badge&logo=html5&logoColor=white"> 
+<img src="https://img.shields.io/badge/html5-E34F26?style=for-the-badge&logo=html5&logoColor=white">
 <img src="https://img.shields.io/badge/css-1572B6?style=for-the-badge&logo=css3&logoColor=white">
 <img src="https://img.shields.io/badge/bootstrap-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white">
 
