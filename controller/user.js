@@ -1,14 +1,29 @@
-import UserModel from "../model/user.js";
-import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
-
 import {
     findPasswordTemplete,
     sendEmail,
     signupTemplete
 } from "../config/sendEmail.js";
+import UserModel from "../model/user.js";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 import redisClient from "../config/redis.js";
-import ProductModel from "../model/product.js";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const signupPage = async (req, res) => {
+    try {
+        console.log('enter')
+        const filePath = path.join(__dirname, "../signup.html");
+        res.sendFile(filePath);
+    } catch (e) {
+        res.status(500).json({
+            message: e.message
+        })
+    }
+}
 
 /*
 * todo
@@ -270,6 +285,7 @@ const emailConfirm = async (req, res) => {
 }
 
 export {
+    signupPage,
     signupHandler,
     loginHandler,
     getProfile,

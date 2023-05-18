@@ -9,7 +9,7 @@ import {
     resetPassword,
     updatePassword,
     findEmail,
-    getAllUsers
+    getAllUsers, signupPage
 } from "../controller/user.js";
 
 import jwt from "jsonwebtoken"
@@ -19,6 +19,9 @@ import isAdmin from "../middleware/check-admin.js";
 const checkAuth = passport.authenticate('jwt', {session: false})
 
 const router = express.Router()
+
+// 회원가입 폼에 접근하는 엔드포인트
+router.get("/registration", signupPage)
 
 // 회원가입 - O
 router.post("/registration", signupHandler)
