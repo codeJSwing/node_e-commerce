@@ -5,34 +5,84 @@
 
 *2023.03.04 ~*
 
+프로젝트 구조
+````
+|-- Dockerfile
+|-- README.md
+|-- build
+|   `-- swagger.yaml
+|-- cert
+|   |-- cert.pem
+|   `-- key.pem
+|-- config
+|   |-- database.js
+|   |-- jest.config.js
+|   |-- passport.js
+|   |-- redis.js
+|   `-- sendEmail.js
+|-- controller
+|   |-- order.js
+|   |-- product.js
+|   `-- user.js
+|-- docker-compose.yml
+|-- image
+|   |-- img.png
+|   |-- img_1.png
+|   |-- img_2.png
+|   `-- img_3.png
+|-- index.js
+|-- middleware
+|   |-- check-admin.js
+|   `-- globalErrorHandler.js
+|-- model
+|   |-- like.js
+|   |-- order.js
+|   |-- product.js
+|   |-- reply.js
+|   `-- user.js
+|-- nginx
+|   `-- nginx.conf
+|-- package-lock.json
+|-- package.json
+|-- routes
+|   |-- order.js
+|   |-- product.js
+|   `-- user.js
+|-- signup.html
+|-- swagger
+|   |-- openapi.yaml
+|   |-- orders.yaml
+|   |-- products.yaml
+|   `-- users.yaml
+`-- test
+|-- product.test.js
+`-- server.js
+````
+
 ## Stack
 ### Front
-  <img src="https://img.shields.io/badge/html5-E34F26?style=for-the-badge&logo=html5&logoColor=white"> 
-  <img src="https://img.shields.io/badge/css-1572B6?style=for-the-badge&logo=css3&logoColor=white">
-  <img src="https://img.shields.io/badge/bootstrap-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white">
+<img src="https://img.shields.io/badge/html5-E34F26?style=for-the-badge&logo=html5&logoColor=white"> 
+<img src="https://img.shields.io/badge/css-1572B6?style=for-the-badge&logo=css3&logoColor=white">
+<img src="https://img.shields.io/badge/bootstrap-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white">
 
 ### Server
-  <img src="https://img.shields.io/badge/node.js-339933?style=for-the-badge&logo=Node.js&logoColor=white">
-  <img src="https://img.shields.io/badge/express-000000?style=for-the-badge&logo=express&logoColor=white">
-<br>
-  <img src="https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=Redis&logoColor=white">
-  <img src="https://img.shields.io/badge/mongoDB-47A248?style=for-the-badge&logo=MongoDB&logoColor=white">
+<img src="https://img.shields.io/badge/node.js-339933?style=for-the-badge&logo=Node.js&logoColor=white">
+<img src="https://img.shields.io/badge/express-000000?style=for-the-badge&logo=express&logoColor=white">
+<img src="https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=Redis&logoColor=white">
+<img src="https://img.shields.io/badge/mongoDB-47A248?style=for-the-badge&logo=MongoDB&logoColor=white">
 
 ### Collaboration & Tools
-  <img src="https://img.shields.io/badge/Webstorm-181717?style=for-the-badge&logo=Webstorm&logoColor=white">
-<br>
-  <img src="https://img.shields.io/badge/Postman-FF6c38?style=for-the-badge&logo=postman&logoColor=white">
-  <img src="https://img.shields.io/badge/DataGrip-181717?style=for-the-badge&logo=datagrip&logoColor=white">
-<br>
-  <img src="https://img.shields.io/badge/git-F05032?style=for-the-badge&logo=git&logoColor=white">
-  <img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white">
-  <img src="https://img.shields.io/badge/gitkraken-179287?style=for-the-badge&logo=gitkraken&logoColor=white">
+<img src="https://img.shields.io/badge/Webstorm-181717?style=for-the-badge&logo=Webstorm&logoColor=white">
+<img src="https://img.shields.io/badge/Postman-FF6c38?style=for-the-badge&logo=postman&logoColor=white">
+<img src="https://img.shields.io/badge/DataGrip-181717?style=for-the-badge&logo=datagrip&logoColor=white">
+<img src="https://img.shields.io/badge/git-F05032?style=for-the-badge&logo=git&logoColor=white">
+<img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white">
+<img src="https://img.shields.io/badge/gitkraken-179287?style=for-the-badge&logo=gitkraken&logoColor=white">
 
 # REST API
 아래 버튼을 눌러 API에 대해 자세히 확인하세요.
-
 [![Swagger API Documentation](https://img.shields.io/badge/View%20API%20Documentation-Swagger-%23ff5722)](https://app.swaggerhub.com/apis/IMLOGIC20_1/e-commerce/1.0.0)
-<img src="image/img.png" alt="img.png" style="width: 80%; height: 80%;">
+
 <img src="image/img_1.png" alt="img_1.png" style="width: 80%; height: 80%;">
 <img src="image/img_2.png" alt="img_2.png" style="width: 80%; height: 80%;">
 <img src="image/img_3.png" alt="img_3.png" style="width: 80%; height: 80%;">
