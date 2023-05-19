@@ -10,6 +10,10 @@ import redisClient from "../config/redis.js";
 import path from "path";
 import {fileURLToPath} from "url";
 
+// ES 모듈에서 파일의 경로에 접근하기 위한 함수
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const signupPage = async (req, res) => {
     try {
         console.log('enter')
