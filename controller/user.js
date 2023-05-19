@@ -10,9 +10,6 @@ import redisClient from "../config/redis.js";
 import path from "path";
 import {fileURLToPath} from "url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 const signupPage = async (req, res) => {
     try {
         console.log('enter')
@@ -27,20 +24,16 @@ const signupPage = async (req, res) => {
 
 /*
 * todo
-*  1. 이미 등록된 전화번호가 있으면 회원가입이 되지 않도록
-*  2. 스키마에서 걸리는 것을 프런트에 나타낼 수 있도록
-*  3. username이 중복되지 않도록 - 스키마에서 처리
+*  1. 중복에 대한 처리를 스키마에서 - O
+*   email, 전화번호, username
+*  2. 비밀번호 1개 -> 2개 - O
+*  3. 스키마에서 걸리는 것을 프런트에 나타낼 수 있도록 - O
 * */
 const signupHandler = async (req, res) => {
-    const {email, username, password, phoneNumber, role} = req.body
+    const {
+        email, username, password, password2, phoneNumber, role
+    } = req.body
     try {
-        // const user = await UserModel.findOne({email})
-        // if (user) {
-        //     return res.status(401).json({
-        //         msg: 'exists user'
-        //     })
-        // }
-
         const newUser = new UserModel({
             email,
             password,
@@ -49,9 +42,13 @@ const signupHandler = async (req, res) => {
             role
         })
 
-        const createUser = await newUser.save()
+        if (password !== password2) {
+            return res.status(400).json({
+                message: `Password does not match`
+            })
+        }
 
-        console.log('createUser------------', createUser)
+        const createUser = await newUser.save()
 
         const confirmToken = await jwt.sign(
             {email: createUser.email},
@@ -61,8 +58,7 @@ const signupHandler = async (req, res) => {
 
         await sendEmail(createUser.email, '가입확인메일', signupTemplete(confirmToken))
         res.json({
-            message: `successful new User`,
-            user: createUser
+            message: `successfully singed up new User`
         })
     } catch (err) {
         if (err.name === 'MongoServerError') {
@@ -70,10 +66,8 @@ const signupHandler = async (req, res) => {
             const duplicateValue = err.keyValue[duplicateKey]
 
             res.status(400).json({
-                message: `Duplicate Key Error`,
-                error: `${duplicateKey}: ${duplicateValue} already exists`,
+                message: `${duplicateKey} (${duplicateValue}) already exists`
             })
-            console.log(`${duplicateKey}: ${duplicateValue} already exists`)
         } else {
             res.status(500).json({
                 message: `Internal server error`,

@@ -58,6 +58,11 @@
 		button[type="submit"]:hover {
 			background-color: #45a049;
 		}
+		
+		.error-message {
+			color: red;
+			margin-top: 10px;
+		}
 	</style>
 </head>
 <body>
@@ -72,6 +77,9 @@
 		<label for="password">Password:</label>
 		<input type="password" id="password" required><br>
 		
+		<label for="password2">Password:</label>
+		<input type="password" id="password2" required><br>
+		
 		<label for="phoneNumber">Phone Number:</label>
 		<input type="text" id="phoneNumber" required><br>
 		
@@ -85,9 +93,12 @@
 		
 		<button type="submit">Sign Up</button>
 	</form>
+	
+	<div id="message" class="error-message"></div>
 
 	<script>
 		const form = document.getElementById('signup-form')
+		const messageDiv = document.getElementById('message')
 		
 		form.addEventListener('submit', async (event) => {
 			event.preventDefault()
@@ -95,6 +106,7 @@
 			const email = document.getElementById('email').value
 			const username = document.getElementById('username').value
 			const password = document.getElementById('password').value
+			const password2 = document.getElementById('password2').value
 			const phoneNumber = document.getElementById('phoneNumber').value
 			const role = document.getElementById('role').value
 			
@@ -104,16 +116,16 @@
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify({
-					username, password, email, phoneNumber, role
+					email, username, password, password2, phoneNumber, role
 				})
 			})
 			
 			const data = await response.json()
 			
-			if (response.status(200)) {
-				alert(data.message);
+			if (response.ok) {
+				messageDiv.innerText = data.message;
 			} else {
-				alert(data.message);
+				messageDiv.innerText = data.message;
 			}
 		})
 	</script>
