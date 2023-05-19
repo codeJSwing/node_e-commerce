@@ -23,10 +23,10 @@ const router = express.Router()
 // 회원가입 폼에 접근하는 엔드포인트
 router.get("/registration", signupPage)
 
-// 회원가입 - O
+// 회원가입
 router.post("/registration", signupHandler)
 
-// 로그인 - O
+// 로그인
 router.post("/login", loginHandler)
 
 // 내 profile 정보 가져오기
@@ -44,7 +44,7 @@ router.post("/email-recovery", findEmail)
 // 패스워드 변경 (로그인 전)
 router.put("/password-reset", resetPassword)
 
-// 패스워드 변경 (로그인 후) - O
+// 패스워드 변경 (로그인 후)
 router.put("/password", checkAuth, updatePassword)
 
 // 이메일 확인 (isEmailConfirmed false -> true)

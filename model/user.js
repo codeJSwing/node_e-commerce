@@ -9,7 +9,7 @@ const userSchema = mongoose.Schema(
         email: {
             type: String,
             required: true,
-            unique: true,
+            unique: [true, 'Email is already registered'],
             lowercase: true,
             trim: true,
             validate: [validator.isEmail, 'Please provide a valid email address']
@@ -24,18 +24,20 @@ const userSchema = mongoose.Schema(
                     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+={}[\]\\|:;'<>,.?/])[a-zA-Z\d!@#$%^&*()_\-+={}[\]\\|:;'<>,.?/]{8,}$/;
                     return regex.test(value)
                 },
-                msg: 'Password must contain at least one uppercase letter, one lowercase letter, one special character and one number'
+                message: 'Password must contain at least one uppercase letter, one lowercase letter, one special character and one number'
             }
         },
         username: {
             type: String,
+            unique: true,
             minLength: [2, 'username is at least 2 characters long'],
             maxLength: [10, 'username is less than 10 characters long']
             // todo: model에서 default로 처리하는 방법 생각해보자
             // todo: 자동으로 겹치지 않게 생성해주는 방법
         },
         phoneNumber: {
-            type: Number,
+            type: String,
+            unique: [true, 'already have an email subscribed to your phoneNumber'],
             length: [11, 'Please enter your phoneNumber in 11 digits without a hyphen'],
             required: true
         },

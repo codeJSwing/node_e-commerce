@@ -58,10 +58,6 @@ app.get("/", (req, res) => {
     res.send('api is running')
 })
 
-// app.get('/users/registration-form', (req, res) => {
-//     res.sendFile(__dirname + '/signup.html');
-// });
-
 // 오류 처리를 위한 미들웨어
 app.use(notFound)
 app.use(errorHandler)

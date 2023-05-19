@@ -8,7 +8,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import redisClient from "../config/redis.js";
 import path from "path";
-import { fileURLToPath } from "url";
+import {fileURLToPath} from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,39 +28,57 @@ const signupPage = async (req, res) => {
 /*
 * todo
 *  1. 이미 등록된 전화번호가 있으면 회원가입이 되지 않도록
+*  2. 스키마에서 걸리는 것을 프런트에 나타낼 수 있도록
+*  3. username이 중복되지 않도록 - 스키마에서 처리
 * */
 const signupHandler = async (req, res) => {
-    const {email, username, password, birth, phoneNumber, role} = req.body
+    const {email, username, password, phoneNumber, role} = req.body
     try {
-        const user = await UserModel.findOne({email})
-        if (user) {
-            return res.status(401).json({
-                msg: 'exists user'
-            })
-        }
+        // const user = await UserModel.findOne({email})
+        // if (user) {
+        //     return res.status(401).json({
+        //         msg: 'exists user'
+        //     })
+        // }
+
         const newUser = new UserModel({
             email,
             password,
             username: username ? username : email.split('@')[0],
-            birth,
             phoneNumber,
             role
         })
+
         const createUser = await newUser.save()
+
+        console.log('createUser------------', createUser)
+
         const confirmToken = await jwt.sign(
             {email: createUser.email},
             process.env.EMAIL_CONFIRM_ACCESS_KEY,
             {expiresIn: '10m'}
         )
+
         await sendEmail(createUser.email, '가입확인메일', signupTemplete(confirmToken))
         res.json({
             message: `successful new User`,
             user: createUser
         })
     } catch (err) {
-        res.status(500).json({
-            message: err.message
-        })
+        if (err.name === 'MongoServerError') {
+            const duplicateKey = Object.keys(err.keyPattern)[0]
+            const duplicateValue = err.keyValue[duplicateKey]
+
+            res.status(400).json({
+                message: `Duplicate Key Error`,
+                error: `${duplicateKey}: ${duplicateValue} already exists`,
+            })
+            console.log(`${duplicateKey}: ${duplicateValue} already exists`)
+        } else {
+            res.status(500).json({
+                message: `Internal server error`,
+            })
+        }
     }
 }
 
