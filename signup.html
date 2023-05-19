@@ -58,11 +58,6 @@
 		button[type="submit"]:hover {
 			background-color: #45a049;
 		}
-		
-		.error-message {
-			color: red;
-			margin-top: 10px;
-		}
 	</style>
 </head>
 <body>
@@ -94,11 +89,10 @@
 		<button type="submit">Sign Up</button>
 	</form>
 	
-	<div id="message" class="error-message"></div>
+<!--	<div id="message" class="error-message"></div>-->
 
 	<script>
 		const form = document.getElementById('signup-form')
-		const messageDiv = document.getElementById('message')
 		
 		form.addEventListener('submit', async (event) => {
 			event.preventDefault()
@@ -123,9 +117,9 @@
 			const data = await response.json()
 			
 			if (response.ok) {
-				messageDiv.innerText = data.message;
+				alert(data.message)
 			} else {
-				messageDiv.innerText = data.message;
+				alert(data.message)
 			}
 		})
 	</script>
