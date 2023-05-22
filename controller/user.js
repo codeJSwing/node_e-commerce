@@ -31,6 +31,7 @@ const signupPage = async (req, res) => {
 *   email, 전화번호, username
 *  2. 비밀번호 1개 -> 2개 - O
 *  3. 스키마에서 걸리는 것을 프런트에 나타낼 수 있도록 - O
+*  4. 스키마에서 username을 자동으로 생성할 수 있을까?
 * */
 const signupHandler = async (req, res) => {
     const {
@@ -47,7 +48,7 @@ const signupHandler = async (req, res) => {
 
         if (password !== password2) {
             return res.status(400).json({
-                message: `Password does not match`
+                message: `비밀번호가 일치하지 않습니다.`
             })
         }
 
@@ -61,7 +62,7 @@ const signupHandler = async (req, res) => {
 
         await sendEmail(createUser.email, '가입확인메일', signupTemplete(confirmToken))
         res.json({
-            message: `successfully singed up new User`
+            message: `회원가입이 완료되었습니다.`
         })
     } catch (err) {
         if (err.name === 'MongoServerError') {
@@ -69,7 +70,7 @@ const signupHandler = async (req, res) => {
             const duplicateValue = err.keyValue[duplicateKey]
 
             res.status(400).json({
-                message: `${duplicateKey} (${duplicateValue}) already exists`
+                message: `이미 존재하는 ${duplicateKey} (${duplicateValue})입니다.`
             })
         } else {
             res.status(500).json({

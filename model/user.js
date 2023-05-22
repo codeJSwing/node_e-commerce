@@ -9,36 +9,33 @@ const userSchema = mongoose.Schema(
         email: {
             type: String,
             required: true,
-            unique: [true, 'Email is already registered'],
+            unique: [true, '이미 존재하는 이메일 주소입니다.'],
             lowercase: true,
             trim: true,
-            validate: [validator.isEmail, 'Please provide a valid email address']
+            validate: [validator.isEmail, '사용할 수 없는 이메일 주소 형식입니다.']
         },
         password: {
             type: String,
             required: true,
-            minLength: [8, 'Password must be at least 8 characters long'],
-            maxLength: [128, 'Password must be less than 128 characters long'],
+            minLength: [8, '비밀번호는 최소 8자 이상으로 작성이 가능합니다.'],
+            maxLength: [128, '비밀번호는 최대 128자까지 작성이 가능합니다.'],
             validate: {
                 validator: function (value) {
                     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+={}[\]\\|:;'<>,.?/])[a-zA-Z\d!@#$%^&*()_\-+={}[\]\\|:;'<>,.?/]{8,}$/;
                     return regex.test(value)
                 },
-                message: 'Password must contain at least one uppercase letter, one lowercase letter, one special character and one number'
+                message: '비밀번호는 대문자, 소문자, 특수문자, 숫자 각각 최소 1자 이상 작성하셔야 합니다.'
             }
         },
         username: {
             type: String,
             unique: true,
-            minLength: [2, 'username is at least 2 characters long'],
-            maxLength: [10, 'username is less than 10 characters long']
-            // todo: model에서 default로 처리하는 방법 생각해보자
-            // todo: 자동으로 겹치지 않게 생성해주는 방법
+            length: [2 - 10, '닉네임은 최소 2자, 최대 10자까지 작성이 가능합니다.']
         },
         phoneNumber: {
             type: String,
-            unique: [true, 'already have an email subscribed to your phoneNumber'],
-            length: [11, 'Please enter your phoneNumber in 11 digits without a hyphen'],
+            unique: [true, '이미 휴대폰 번호로 가입한 이메일 주소가 존재합니다.'],
+            length: [11, '하이픈(-)을 제외한 숫자 11자로 입력해주세요.'],
             required: true
         },
         birth: {
