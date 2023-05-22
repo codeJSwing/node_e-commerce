@@ -60,6 +60,17 @@ app.get("/", (req, res) => {
     res.send('api is running')
 })
 
+app.get("/home", async (req, res) => {
+    try {
+        const filePath = path.join(__dirname, "./public/components/home.html")
+        res.sendFile(filePath)
+    } catch (e) {
+        res.status(500).json({
+            message: e.message
+        })
+    }
+})
+
 // 오류 처리를 위한 미들웨어
 app.use(notFound)
 app.use(errorHandler)

@@ -16,7 +16,7 @@ const __dirname = path.dirname(__filename);
 
 const signupPage = async (req, res) => {
     try {
-        const filePath = path.join(__dirname, "../components/signup.html");
+        const filePath = path.join(__dirname, "../public/components/signup.html");
         res.sendFile(filePath);
     } catch (e) {
         res.status(500).json({
