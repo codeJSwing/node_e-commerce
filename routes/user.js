@@ -9,7 +9,8 @@ import {
     resetPassword,
     updatePassword,
     findEmail,
-    getAllUsers, signupPage
+    getAllUsers,
+    signupPage
 } from "../controller/user.js";
 
 import jwt from "jsonwebtoken"

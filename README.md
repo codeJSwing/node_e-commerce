@@ -60,9 +60,9 @@
 아래 버튼을 눌러 API에 대해 자세히 확인하세요.
 [![Swagger API Documentation](https://img.shields.io/badge/View%20API%20Documentation-Swagger-%23ff5722)](https://app.swaggerhub.com/apis/IMLOGIC20_1/e-commerce/1.0.0)
 
-<img src="image/img_1.png" alt="img_1.png" style="width: 80%; height: 80%;">
-<img src="image/img_2.png" alt="img_2.png" style="width: 80%; height: 80%;">
-<img src="image/img_3.png" alt="img_3.png" style="width: 80%; height: 80%;">
+<img src="public/styles/image/img_1.png" alt="img_1.png" style="width: 80%; height: 80%;">
+<img src="public/styles/image/img_2.png" alt="img_2.png" style="width: 80%; height: 80%;">
+<img src="public/styles/image/img_3.png" alt="img_3.png" style="width: 80%; height: 80%;">
 
 # Trouble shooting
 프로젝트를 진행하면서 발생했던 문제, 해결방법, 문제해결을 위한 과정 들을 작성하였습니다.

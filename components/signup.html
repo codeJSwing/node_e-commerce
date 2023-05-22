@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>회원가입</title>
+	<link rel="stylesheet" type="text/css" href="/styles/signup.css">
+</head>
+<body>
+<h1>회원가입</h1>
+<form id="signup-form">
+	<label for="email">이메일</label>
+	<input type="email" id="email" required><br>
+	
+	<label for="username">닉네임</label>
+	<input type="text" id="username"><br>
+	
+	<label for="password">비밀번호</label>
+	<input type="password" id="password" required><br>
+	
+	<label for="password2">비밀번호 확인</label>
+	<input type="password" id="password2" required><br>
+	
+	<label for="phoneNumber">휴대폰 번호</label>
+	<input type="text" id="phoneNumber" required><br>
+	
+	<label for="role">권한</label>
+	<select id="role">
+		<option value="user">User</option>
+		<option value="admin">Admin</option>
+		<option value="superUser">Super User</option>
+	</select>
+	<br>
+	<button type="submit">등록</button>
+</form>
+<!--<script src="../scripts/signup.js"></script>-->
+</body>
+</html>
+

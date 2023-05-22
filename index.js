@@ -44,6 +44,8 @@ app.use(express.json());
 app.use(passport.initialize())
 passportConfig(passport)
 
+app.use(express.static("public"))
+
 // router 설정
 import productRouter from "./routes/product.js"
 import orderRouter from "./routes/order.js"
