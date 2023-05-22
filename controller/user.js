@@ -97,13 +97,13 @@ const loginHandler = async (req, res) => {
         const user = await UserModel.findOne({email})
         if (!user) {
             return res.status(401).json({
-                msg: `This email does not exists`
+                msg: `입력하신 이메일이 존재하지 않습니다.`
             })
         }
         const isMatching = await user.matchPassword(password)
         if (!isMatching) {
             return res.status(401).json({
-                message: `This password does not match, check your password`
+                message: `비밀번호가 일치하지 않습니다.`
             })
         }
         const token = await jwt.sign(
@@ -112,7 +112,7 @@ const loginHandler = async (req, res) => {
             {expiresIn: '1h'}
         )
         res.json({
-            message: 'successful login.html',
+            message: `successful login`,
             token
         })
     } catch (err) {
