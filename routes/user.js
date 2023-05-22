@@ -10,7 +10,8 @@ import {
     updatePassword,
     findEmail,
     getAllUsers,
-    signupPage
+    signupPage,
+    loginPage
 } from "../controller/user.js";
 
 import jwt from "jsonwebtoken"
@@ -23,6 +24,9 @@ const router = express.Router()
 
 // 회원가입 폼에 접근하는 엔드포인트
 router.get("/registration", signupPage)
+
+// 로그인 폼에 접근하는 엔드포인트
+router.get("/login", loginPage)
 
 // 회원가입
 router.post("/registration", signupHandler)

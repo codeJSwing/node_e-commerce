@@ -25,6 +25,17 @@ const signupPage = async (req, res) => {
     }
 }
 
+const loginPage = async (req, res) => {
+    try {
+        const filePath = path.join(__dirname, "../public/components/login.html")
+        res.sendFile(filePath)
+    } catch (e) {
+        res.status(500).json({
+            message: e.message
+        })
+    }
+}
+
 /*
 * todo
 *  1. 중복에 대한 처리를 스키마에서 - O
@@ -101,7 +112,7 @@ const loginHandler = async (req, res) => {
             {expiresIn: '1h'}
         )
         res.json({
-            message: 'successful login',
+            message: 'successful login.html',
             token
         })
     } catch (err) {
@@ -302,6 +313,7 @@ const emailConfirm = async (req, res) => {
 
 export {
     signupPage,
+    loginPage,
     signupHandler,
     loginHandler,
     getProfile,
