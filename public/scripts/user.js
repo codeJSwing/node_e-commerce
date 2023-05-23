@@ -75,7 +75,14 @@ async function responseHandler(url, formData) {
     const responseData = await response.json()
 
     if (response.ok) {
+        const token = responseData.token
+
+        if (token) {
+            localStorage.setItem('token', token)
+        }
+
         alert(responseData.message)
+
         if (url !== 'users/login') {
             window.location.href = '/users/login'
         }
