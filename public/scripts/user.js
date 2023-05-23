@@ -80,11 +80,16 @@ async function responseHandler(url, formData) {
             localStorage.setItem('token', token)
         }
 
-        alert(responseData.message)
+        switch (url) {
+            case '/users/login':
+                window.location.href = '/home'
+                break
 
-        if (url !== 'users/login') {
-            window.location.href = '/users/login'
+            default:
+                window.location.href = '/users/login'
+                break
         }
+        alert(responseData.message)
     } else {
         alert(responseData.message)
     }
