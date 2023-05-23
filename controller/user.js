@@ -47,6 +47,17 @@ const emailRecoveryPage = async (req, res) => {
     }
 }
 
+const passwordRecoveryPage = async (req, res) => {
+    try {
+        const filePath = path.join(__dirname, "../public/components/password-recovery.html")
+        res.sendFile(filePath)
+    } catch (e) {
+        res.status(500).json({
+            message: e.message
+        })
+    }
+}
+
 /*
 * todo
 *  1. 중복에 대한 처리를 스키마에서 - O
@@ -194,7 +205,7 @@ const findPassword = async (req, res) => {
         const user = await UserModel.findOne({email})
         if (!user) {
             return res.status(404).json({
-                message: `${email} does not exist`
+                message: `${email}은 등록되지 않은 계정입니다.`
             })
         }
         const findPasswordToken = await jwt.sign(
@@ -204,7 +215,7 @@ const findPassword = async (req, res) => {
         )
         await sendEmail(email, '비밀번호 변경', findPasswordTemplete(findPasswordToken))
         res.json({
-            message: `Please check your email`
+            message: `이메일을 확인해주세요.`
         })
     } catch (e) {
         res.status(500).json({
@@ -330,6 +341,7 @@ export {
     signupPage,
     loginPage,
     emailRecoveryPage,
+    passwordRecoveryPage,
     signupHandler,
     loginHandler,
     getProfile,

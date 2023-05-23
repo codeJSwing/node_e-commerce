@@ -1,18 +1,17 @@
-const form = document.getElementById('email-recovery-form')
+const form = document.getElementById('password-recovery-form')
 
 form.addEventListener('submit', async (event) => {
     event.preventDefault()
 
-    const phoneNumber = document.getElementById('phoneNumber').value
-    const name = document.getElementById('name').value
+    const email = document.getElementById('email').value
 
-    const response = await fetch('/users/email-recovery', {
+    const response = await fetch('/users/password-recovery', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            phoneNumber, name
+            email
         })
     })
 
