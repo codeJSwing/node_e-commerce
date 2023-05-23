@@ -63,4 +63,9 @@ button[type="submit"]:hover {
     border: none;
     font-size: 16px;
     cursor: pointer;
+    text-decoration: none;
+}
+
+.button-section a {
+    text-decoration: none;
 }
