@@ -26,13 +26,12 @@ forms.forEach((formItem) => {
         let formData
 
         switch (formDataId) {
-            case 'signup-form' :
+            case 'registration-form' :
                 formData = {
                     email: document.getElementById('email').value,
                     name: document.getElementById('name').value,
                     password: document.getElementById('password').value,
                     password2: document.getElementById('password2').value,
-                    username: document.getElementById('username').value,
                     phoneNumber: document.getElementById('phoneNumber').value,
                     role: document.getElementById('role').value
                 }
