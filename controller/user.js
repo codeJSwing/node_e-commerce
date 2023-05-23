@@ -36,6 +36,17 @@ const loginPage = async (req, res) => {
     }
 }
 
+const emailRecoveryPage = async (req, res) => {
+    try {
+        const filePath = path.join(__dirname, "../public/components/email-recovery.html")
+        res.sendFile(filePath)
+    } catch (e) {
+        res.status(500).json({
+            message: e.message
+        })
+    }
+}
+
 /*
 * todo
 *  1. 중복에 대한 처리를 스키마에서 - O
@@ -46,12 +57,13 @@ const loginPage = async (req, res) => {
 * */
 const signupHandler = async (req, res) => {
     const {
-        email, username, password, password2, phoneNumber, role
+        email, name, username, password, password2, phoneNumber, role
     } = req.body
     try {
         const newUser = new UserModel({
             email,
             password,
+            name,
             username: username ? username : email.split('@')[0],
             phoneNumber,
             role
@@ -202,17 +214,20 @@ const findPassword = async (req, res) => {
 }
 
 const findEmail = async (req, res) => {
-    const {phoneNumber} = req.body
+    const {name, phoneNumber} = req.body
     try {
-        const {email} = await UserModel.findOne({phoneNumber})
-        if (!email) {
+        const user = await UserModel.findOne({phoneNumber})
+        if (!user) {
             return res.status(404).json({
-                message: `${phoneNumber} does not exists`
+                message: `[${phoneNumber}]으로 등록된 계정이 없습니다.`
             })
         }
-        res.json({
-            message: `Your email address is [${email}]`
-        })
+
+        if (name === user.name && phoneNumber === user.phoneNumber) {
+            res.json({
+                message: `이메일 주소는 [${user.email}]입니다.`
+            })
+        }
     } catch (e) {
         res.status(500).json({
             message: e.message
@@ -314,6 +329,7 @@ const emailConfirm = async (req, res) => {
 export {
     signupPage,
     loginPage,
+    emailRecoveryPage,
     signupHandler,
     loginHandler,
     getProfile,

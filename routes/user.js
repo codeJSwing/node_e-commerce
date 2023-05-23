@@ -11,7 +11,7 @@ import {
     findEmail,
     getAllUsers,
     signupPage,
-    loginPage
+    loginPage, emailRecoveryPage
 } from "../controller/user.js";
 
 import jwt from "jsonwebtoken"
@@ -27,6 +27,9 @@ router.get("/registration", signupPage)
 
 // 로그인 폼에 접근하는 엔드포인트
 router.get("/login", loginPage)
+
+// 이메일 찾기 폼에 접근하는 엔드포인트
+router.get("/email-recovery", emailRecoveryPage)
 
 // 회원가입
 router.post("/registration", signupHandler)

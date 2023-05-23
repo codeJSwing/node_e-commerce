@@ -27,6 +27,10 @@ const userSchema = mongoose.Schema(
                 message: '비밀번호는 대문자, 소문자, 특수문자, 숫자 각각 최소 1자 이상 작성하셔야 합니다.'
             }
         },
+        name: {
+            type: String,
+            required: [true, '이름을 작성해주세요.']
+        },
         username: {
             type: String,
             unique: true,
