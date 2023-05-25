@@ -13,7 +13,8 @@ import {
     signupPage,
     loginPage,
     emailRecoveryPage,
-    passwordRecoveryPage
+    passwordRecoveryPage,
+    myProfilePage
 } from "../controller/user.js";
 
 import jwt from "jsonwebtoken"
@@ -36,6 +37,9 @@ router.get("/email-recovery", emailRecoveryPage)
 // 비밀번호 찾기 폼에 접근하는 엔드포인트
 router.get("/password-recovery", passwordRecoveryPage)
 
+// 내 프로필 조회에 접근하는 엔드포인트
+router.get("/profile", myProfilePage)
+
 // 회원가입
 router.post("/registration", signupHandler)
 
@@ -43,10 +47,10 @@ router.post("/registration", signupHandler)
 router.post("/login", loginHandler)
 
 // 내 profile 정보 가져오기
-router.get("/me", checkAuth, getProfile)
+router.get("/profile/me", checkAuth, getProfile)
 
 // 모든 유저 프로필 조회
-router.get("/", checkAuth, isAdmin, getAllUsers)
+router.get("/profile/all", checkAuth, isAdmin, getAllUsers)
 
 // 비밀번호 찾기(로그인 전)
 router.post("/password-recovery", findPassword)

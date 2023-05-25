@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>내 프로필 조회</title>
+	<link rel="stylesheet" type="text/css" href="/styles/user.css">
+</head>
+<body>
+	<h1>프로필</h1>
+	<div id="profile-container"></div>
+
+	<script>
+		const token = localStorage.getItem('token')
+		console.log(token)
+		
+		fetch('/users/profile/me', {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${token}`
+			}
+		})
+				.then(response => response.json())
+				.then(data => {
+					if (data.user) {
+						displayUserProfile(data.user)
+					} else {
+						displayErrorMessage(data.msg || data.message)
+					}
+				})
+				.catch(err => {
+					displayErrorMessage(err.message)
+				})
+		
+		function displayUserProfile(user) {
+			const userDetails = [
+				{ key: 'email', label: '이메일' },
+				{ key: 'name', label: '이름' },
+				{ key: 'phoneNumber', label: '휴대폰 번호' },
+				{ key: 'username', label: '닉네임' },
+				{ key: 'role', label: '권한' },
+				{ key: 'createdAt', label: '생성일자' }
+			];
+			
+			userDetails.forEach(detail => {
+				const element = document.createElement('p');
+				element.textContent = `${detail.label}: ${user[detail.key]}`;
+				document.getElementById('profile-container').appendChild(element);
+			});
+			
+		}
+		
+		function displayErrorMessage(message) {
+			const profileContainer = document.getElementById('profile-container')
+			
+			const errorElement = document.createElement('p')
+			errorElement.style.color = 'red'
+			errorElement.textContent = `오류: ${message}`
+			
+			profileContainer.appendChild(errorElement)
+		}
+		
+	</script>
+</body>
+</html>
+

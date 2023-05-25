@@ -163,6 +163,7 @@ const loginHandler = async (req, res) => {
 * todo
 *  1. db 와 redis 모두 데이터가 없는 경우 - O
 *  2. db 데이터만 존재하는 경우 - O
+*  3. redis 데이터가 존재하는 경우 - O
 * */
 const getProfile = async (req, res) => {
     const {_id} = req.user

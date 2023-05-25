@@ -62,22 +62,31 @@ forms.forEach((formItem) => {
     })
 })
 
+
 async function responseHandler(url, formData) {
+    const token = localStorage.getItem('token')
+
+    const headers = {
+        'Content-Type': 'application/json'
+    }
+
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+    }
+
     const response = await fetch(url, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: headers,
         body: JSON.stringify(formData)
     })
 
     const responseData = await response.json()
 
     if (response.ok) {
-        const token = responseData.token
+        const newToken = responseData.token
 
-        if (token) {
-            localStorage.setItem('token', token)
+        if (newToken) {
+            localStorage.setItem('token', newToken)
         }
 
         switch (url) {
