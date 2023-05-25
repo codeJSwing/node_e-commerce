@@ -9,6 +9,7 @@ import bcrypt from "bcrypt";
 import redisClient from "../config/redis.js";
 import path from "path";
 import {fileURLToPath} from "url";
+import lodash from "lodash"
 
 // ES 모듈에서 파일의 경로에 접근하기 위한 함수
 const __filename = fileURLToPath(import.meta.url);
@@ -50,6 +51,17 @@ const emailRecoveryPage = async (req, res) => {
 const passwordRecoveryPage = async (req, res) => {
     try {
         const filePath = path.join(__dirname, "../public/components/password-recovery.html")
+        res.sendFile(filePath)
+    } catch (e) {
+        res.status(500).json({
+            message: e.message
+        })
+    }
+}
+
+const myProfilePage = async (req, res) => {
+    try {
+        const filePath = path.join(__dirname, "../public/components/myProfile.html")
         res.sendFile(filePath)
     } catch (e) {
         res.status(500).json({
@@ -147,28 +159,45 @@ const loginHandler = async (req, res) => {
     }
 }
 
+/*
+* todo
+*  1. db 와 redis 모두 데이터가 없는 경우 - O
+*  2. db 데이터만 존재하는 경우 - O
+* */
 const getProfile = async (req, res) => {
     const {_id} = req.user
     try {
-        const user = await UserModel.findById(_id)
-        if (!user) {
-            return res.status(400).json({
-                msg: 'There is no user to get'
-            })
+        const promiseAll = await Promise.all([
+            UserModel.findById(_id),
+            redisClient.get(`${_id}`)
+        ])
+
+        const [userFromDB, userFromRedis] = promiseAll
+
+        let user, message
+
+        switch (true) {
+            case lodash.size(userFromRedis) === 0 && !userFromDB :
+                return res.status(400).json({
+                    message: 'This user does not exist'
+                })
+
+            case lodash.size(userFromRedis) === 0 && lodash.size(userFromDB) > 0:
+                await redisClient.set(`${_id}`, JSON.stringify(userFromDB))
+                await redisClient.expire(`${_id}`, 3600)
+                user = userFromDB
+                message = `successfully get user info from DB`
+                break
+
+            case lodash.size(userFromRedis) > 0:
+                user = JSON.parse(userFromRedis)
+                message = `successfully get user info from Redis`
+                break
         }
-        const usersFromRedis = await redisClient.get('users')
-        if (usersFromRedis !== null) {
-            const parsedRedis = JSON.parse(usersFromRedis)
-            const userFromRedis = parsedRedis.find(user => user._id === _id.toString());
-            console.log('redis')
-            return res.json({
-                user: userFromRedis
-            })
-        }
-        console.log('mongo')
+
         res.json({
-            message: `successfully get userInfo`,
-            user: req.user
+            message,
+            user
         })
     } catch (e) {
         res.status(500).json({
@@ -342,6 +371,7 @@ export {
     loginPage,
     emailRecoveryPage,
     passwordRecoveryPage,
+    myProfilePage,
     signupHandler,
     loginHandler,
     getProfile,
