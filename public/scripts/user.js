@@ -14,6 +14,10 @@ const forms = [
     {
         form: document.getElementById('password-recovery-form'),
         url: '/users/password-recovery'
+    },
+    {
+        form: document.getElementById('password-modification-form'),
+        url: '/users/password'
     }
 ]
 
@@ -56,6 +60,12 @@ forms.forEach((formItem) => {
                     email: document.getElementById('email').value
                 }
                 break
+
+            case 'password-modification-form':
+                formData = {
+                    password: document.getElementById('password').value,
+                    password2: document.getElementById('password2').value
+                }
         }
 
         await responseHandler(formItem.url, formData)
@@ -65,6 +75,7 @@ forms.forEach((formItem) => {
 
 async function responseHandler(url, formData) {
     const token = localStorage.getItem('token')
+    console.log(token)
 
     const headers = {
         'Content-Type': 'application/json'
@@ -74,16 +85,33 @@ async function responseHandler(url, formData) {
         headers['Authorization'] = `Bearer ${token}`
     }
 
-    const response = await fetch(url, {
+    const postResponse = await fetch(url, {
         method: 'POST',
         headers: headers,
         body: JSON.stringify(formData)
     })
 
-    const responseData = await response.json()
+    const putResponse = await fetch(url, {
+        method: 'PUT',
+        headers: headers,
+        body: JSON.stringify(formData)
+    })
+
+    let response, responseData;
+
+    if (postResponse.ok) {
+        responseData = await postResponse.json()
+        response = postResponse
+    }
+
+    if (putResponse.ok) {
+        responseData = await putResponse.json()
+        response = putResponse
+    }
 
     if (response.ok) {
         const newToken = responseData.token
+        console.log('enter')
 
         if (newToken) {
             localStorage.setItem('token', newToken)
