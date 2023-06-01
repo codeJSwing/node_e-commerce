@@ -14,7 +14,7 @@ import {
     loginPage,
     emailRecoveryPage,
     passwordRecoveryPage,
-    myProfilePage
+    myProfilePage, updatePasswordPage
 } from "../controller/user.js";
 
 import jwt from "jsonwebtoken"
@@ -36,6 +36,9 @@ router.get("/email-recovery", emailRecoveryPage)
 
 // 비밀번호 찾기 폼에 접근하는 엔드포인트
 router.get("/password-recovery", passwordRecoveryPage)
+
+// 비밀번호 변경 폼에 접근하는 엔드포인트
+router.get("/password", checkAuth, updatePasswordPage)
 
 // 내 프로필 조회에 접근하는 엔드포인트
 router.get("/profile", myProfilePage)

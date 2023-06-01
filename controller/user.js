@@ -143,7 +143,7 @@ const loginHandler = async (req, res) => {
         const user = await UserModel.findOne({email})
         if (!user) {
             return res.status(401).json({
-                msg: `입력하신 이메일이 존재하지 않습니다.`
+                message: `입력하신 이메일이 존재하지 않습니다.`
             })
         }
         const isMatching = await user.matchPassword(password)
@@ -158,7 +158,7 @@ const loginHandler = async (req, res) => {
             {expiresIn: '1h'}
         )
         res.json({
-            message: `successful login`,
+            message: `로그인이 완료되었습니다.`,
             token
         })
     } catch (err) {

@@ -8,59 +8,12 @@
 <body>
 	<h1>프로필</h1>
 	<div id="profile-container"></div>
+	
+	<button type="submit">
+		<a href="/users/password">비밀번호 변경</a>
+	</button>
 
-	<script>
-		const token = localStorage.getItem('token')
-		console.log(token)
-		
-		fetch('/users/profile/me', {
-			method: 'GET',
-			headers: {
-				'Content-Type': 'application/json',
-				'Authorization': `Bearer ${token}`
-			}
-		})
-				.then(response => response.json())
-				.then(data => {
-					if (data.user) {
-						displayUserProfile(data.user)
-					} else {
-						displayErrorMessage(data.msg || data.message)
-					}
-				})
-				.catch(err => {
-					displayErrorMessage(err.message)
-				})
-		
-		function displayUserProfile(user) {
-			const userDetails = [
-				{ key: 'email', label: '이메일' },
-				{ key: 'name', label: '이름' },
-				{ key: 'phoneNumber', label: '휴대폰 번호' },
-				{ key: 'username', label: '닉네임' },
-				{ key: 'role', label: '권한' },
-				{ key: 'createdAt', label: '생성일자' }
-			];
-			
-			userDetails.forEach(detail => {
-				const element = document.createElement('p');
-				element.textContent = `${detail.label}: ${user[detail.key]}`;
-				document.getElementById('profile-container').appendChild(element);
-			});
-			
-		}
-		
-		function displayErrorMessage(message) {
-			const profileContainer = document.getElementById('profile-container')
-			
-			const errorElement = document.createElement('p')
-			errorElement.style.color = 'red'
-			errorElement.textContent = `오류: ${message}`
-			
-			profileContainer.appendChild(errorElement)
-		}
-		
-	</script>
+	<script src="../scripts/user.js"></script>
 </body>
 </html>
 
