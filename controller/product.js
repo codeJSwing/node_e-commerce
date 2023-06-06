@@ -202,9 +202,8 @@ const createProduct = async (req, res) => {
 
 /*
 * todo
-* 1. DB의 데이터가 없는 경우 - O
-* 2. redis 데이터 덮어씌우기 - O
-* 3. product key 는 어떻게 할 것인지?
+*   DB의 데이터가 없는 경우 - O
+*   redis 데이터 덮어씌우기 - O
 * */
 const updateProduct = async (req, res) => {
     const {id} = req.params
@@ -219,6 +218,7 @@ const updateProduct = async (req, res) => {
         }
 
         await redisClient.set(id, JSON.stringify(product))
+        await redisClient.expire(id, 3600)
 
         res.json({
             msg: `successfully updated product by ${id}`,
