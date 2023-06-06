@@ -255,23 +255,33 @@ const deleteAllProducts = async (req, res) => {
     }
 }
 
-// todo: products key 의 데이터는 자동으로 삭제되도록
+/*
+* todo
+*   데이터가 없는 경우 - O
+*   [DB, 'product' key, 'products' key] 데이터는 한번에 삭제 - O
+* */
 const deleteProduct = async (req, res) => {
     const {id} = req.params
     try {
-        // db 데이터 삭제
-        const productFromDB = await ProductModel.findByIdAndDelete(id)
+        const promiseProduct = Promise.all([
+            ProductModel.findByIdAndDelete(id),
+            ProductModel.find()
+        ])
+        const [productFromDB, products] = await promiseProduct
+
         if (!productFromDB) {
             return res.status(400).json({
-                message: 'There is no product to delete from DB'
+                message: `There is no product to delete from DB`
             })
         }
 
-        // redis 데이터 삭제 - 동일한 key
-        const productFromRedis = await redisClient.get(id)
-        if (productFromRedis !== null) {
-            await redisClient.del(id)
-        }
+        const setRedis = Promise.all([
+            redisClient.del(id),
+            redisClient.set('products', JSON.stringify(products)),
+            redisClient.expire('products', 3600)
+        ])
+
+        await setRedis
 
         res.json({
             message: `successfully deleted data by ${id}`
