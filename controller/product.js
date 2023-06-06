@@ -231,12 +231,20 @@ const updateProduct = async (req, res) => {
     }
 }
 
-// todo: id 값을 키로 가진 데이터들은 자연스럽게 만료되서 사라지도록 구성하자.
-// todo: key 앞에 product 를 붙여서 필터링해서 삭제할까?
+/*
+* todo
+*   db, redis 데이터 동시 삭제 - O
+*   'product' key redis 데이터는 이 API 에서는 삭제하지 않는다.
+*   (만료기한을 따로 설정해뒀기 때문에)*
+* */
 const deleteAllProducts = async (req, res) => {
     try {
-        await ProductModel.deleteMany()
-        await redisClient.del('products')
+        const promiseDelete = Promise.all([
+            ProductModel.deleteMany(),
+            redisClient.del('products')
+        ])
+        await promiseDelete
+
         res.json({
             message: 'successfully deleted all data in DB & Redis'
         })
