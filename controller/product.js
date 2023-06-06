@@ -6,11 +6,11 @@ import lodash from "lodash";
 /*
 * todo
 *  1. 병렬 처리 (promise all) - O
-*  2. 예외 처리
+*  2. 예외 처리 (if -> switch - O)
 *   데이터 자체가 없는 경우 - O
 *   redis 데이터가 있고, db 데이터와 같을 때 - O
-*   DB 에서 가져온 데이터와 Redis 데이터를 비교하여 일치하지 않는 경우 - O
-*   redis 'products' key 가 없지만, db 에는 데이터가 있는 경우 - O
+*   DB 에서 가져온 데이터와 Redis 데이터가 일치하지 않는 경우 - O
+*   redis 데이터가 없지만, db 데이터가 있는 경우 - O
 */
 const getAllProducts = async (req, res) => {
     try {
@@ -65,46 +65,71 @@ const getAllProducts = async (req, res) => {
     }
 }
 
+/*
+* todo
+*   promise all 로 한번에 선언 - O
+*   예외 처리 (제품) (if -> switch - O)
+*       데이터 자체가 없는 경우 - O
+*       redis 데이터가 db 데이터와 일치하는 경우 - O
+*       redis 데이터가 없고, db 데이터는 있는 경우 - O
+*       (product 는 하나이기 때문에 개수를 비교할 필요가 없다)
+*   예외 처리 (후기) (if -> switch - O)
+*       데이터 자체가 없는 경우 - O
+*       redis 데이터가 db 데이터와 일치하는 경우 - O
+*       redis 데이터가 없고, db 데이터는 있는 경우 - O
+*       DB 에서 가져온 데이터와 Redis 데이터가 일치하지 않는 경우 - O
+* */
 const getProduct = async (req, res) => {
     const {id} = req.params
     try {
-        // redis key(id) 를 읽어서 상수에 대입
-        const productFromRedis = await redisClient.get(id)
-        const repliesFromRedis = await redisClient.get(`${id} replies`)
-
-        const productFromDB = await ProductModel.findById(id)
-        const repliesFromDB = await ReplyModel.find({product: id})
+        const productPromise = Promise.all([
+            redisClient.get(id),
+            redisClient.get(`${id} replies`),
+            ProductModel.findById(id),
+            ReplyModel.find({product: id})
+        ])
+        const [productFromRedis, repliesFromRedis, productFromDB, repliesFromDB] = await productPromise
         let message, product, replies
 
-        // redis 데이터와 db 데이터 모두 없는 경우
-        if (lodash.size(productFromRedis) === 0 && lodash.size(productFromDB) === 0) {
-            return res.status(400).json({
-                message: `There is no product to get any DB`
-            })
+        product = JSON.parse(productFromRedis)
+        replies = JSON.parse(repliesFromRedis)
+
+        console.log('replies length', lodash.size(replies))
+        console.log('replies', replies)
+
+        switch (true) {
+            case lodash.isEmpty(productFromDB):
+                return res.status(400).json({
+                    message: `There is no product to get any DB`
+                })
+
+            case !lodash.isEmpty(product) && !lodash.isEmpty(productFromDB):
+                message = `successfully get product by ${id} from Redis`
+                product = JSON.parse(productFromRedis)
+                break
+
+            case (lodash.isEmpty(product) && !lodash.isEmpty(productFromDB)):
+                await redisClient.set(id, JSON.stringify(productFromDB))
+                await redisClient.expire(id, 3600)
+                message = `successfully get product by ${id} from DB and set Redis`
+                product = productFromDB
+                break
         }
 
-        // redis 데이터가 없고, db 데이터는 있는 경우
-        if (lodash.size(productFromRedis) === 0 && lodash.size(productFromDB) > 1) {
-            await redisClient.set(id, JSON.stringify(productFromDB))
-            await redisClient.expire(id, 3600)
-            message = `successfully get product from DB`
-            product = productFromDB
-        }
+        switch (true) {
+            case !lodash.isEmpty(replies) && lodash.size(replies) === lodash.size(repliesFromDB):
+                replies = JSON.parse(repliesFromRedis)
+                break
 
-        // 입력한 id 값에 해당하는 redis key 가 있는 경우
-        if (lodash.size(productFromRedis) > 0) {
-            message = `successfully get product by ${id} from Redis`
-            product = JSON.parse(productFromRedis)
-        }
+            case lodash.isEmpty(repliesFromDB):
+                break
 
-        // replies Redis data 가 있는 경우
-        if (lodash.size(repliesFromRedis) > 0) {
-            replies = JSON.parse(repliesFromRedis)
-        }
-
-        // replies Redis data 가 없는 경우
-        if (lodash.size(repliesFromRedis) === 0 && lodash.size(repliesFromDB) > 1) {
-            replies = repliesFromDB
+            case (lodash.isEmpty(replies) && !lodash.isEmpty(repliesFromDB))
+            || (!lodash.isEmpty(replies) && lodash.size(replies) !== lodash.size(repliesFromDB)):
+                await redisClient.set(`${id} replies`, JSON.stringify(repliesFromDB))
+                await redisClient.expire(`${id} replies`, 3600)
+                replies = repliesFromDB
+                break
         }
 
         res.json({
@@ -119,10 +144,24 @@ const getProduct = async (req, res) => {
     }
 }
 
+/*
+* todo
+*   예외처리
+*       1. 데이터가 없는 경우 - O
+*       2. 데이터가 존재하는 경우, 역순으로 데이터를 삽입 - O
+*       3. 만료기한으로 redis 데이터가 삭제된 경우 - O
+*       (조회할 때 응답속도를 더 높이기 위해서 생성할 때마다 레디스에 데이터를 갱신한다.)
+* */
 const createProduct = async (req, res) => {
     const {name, price, desc} = req.body
     try {
+        const promiseProducts = Promise.all([
+            redisClient.get('products'),
+            ProductModel.find()
+        ])
+        const [productsFromRedis, productsFromMongo] = await promiseProducts
         let products;
+
         const newProduct = new ProductModel({
             name,
             price,
@@ -130,16 +169,21 @@ const createProduct = async (req, res) => {
         })
         const createdProduct = await newProduct.save()
 
-        // redis 에 'products' 키가 있는 경우
-        const productsFromRedis = await redisClient.get('products')
-        if (lodash.size(productsFromRedis) > 0) {
-            products = JSON.parse(productsFromRedis)
-            products.unshift(createdProduct)
-        }
+        products = JSON.parse(productsFromRedis)
 
-        // redis 에 'products' 키가 없는 경우
-        if (lodash.size(productsFromRedis) === 0) {
-            products = [createdProduct]
+        switch (true) {
+            case lodash.isEmpty(products) && lodash.isEmpty(productsFromMongo):
+                products = [createdProduct]
+                break
+
+            case !lodash.isEmpty(products) && !lodash.isEmpty(productsFromMongo):
+                products.unshift(createdProduct)
+                break
+
+            case lodash.isEmpty(products) && !lodash.isEmpty(productsFromMongo):
+                products = productsFromMongo
+                products.unshift(createdProduct)
+                break
         }
 
         await redisClient.set('products', JSON.stringify(products))
