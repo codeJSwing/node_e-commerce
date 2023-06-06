@@ -5,14 +5,13 @@ import lodash from "lodash";
 
 /*
 * todo
-* 1. 병렬 처리 (promise all) - O
-*
-* 예외 처리
-* 1. 데이터 자체가 없는 경우 - O
-* 2. redis 데이터가 있고, db 데이터와 같을 때 - O
-* 3. DB 에서 가져온 데이터와 Redis 데이터를 비교하여 일치하지 않는 경우 - O
-* 4. redis 'products' key 가 없지만, db 에는 데이터가 있는 경우 - O
-* */
+*  1. 병렬 처리 (promise all) - O
+*  2. 예외 처리
+*   데이터 자체가 없는 경우 - O
+*   redis 데이터가 있고, db 데이터와 같을 때 - O
+*   DB 에서 가져온 데이터와 Redis 데이터를 비교하여 일치하지 않는 경우 - O
+*   redis 'products' key 가 없지만, db 에는 데이터가 있는 경우 - O
+*/
 const getAllProducts = async (req, res) => {
     try {
         const productPromise = Promise.all([
@@ -25,26 +24,29 @@ const getAllProducts = async (req, res) => {
 
         products = JSON.parse(productsFromRedis)
 
-        if (lodash.size(products) === 0 && lodash.size(productsFromMongo) === 0) {
-            return res.status(400).json({
-                message: `There is no product to get from any DB`
-            })
-        }
+        switch (true) {
+            case lodash.isEmpty(products) && lodash.isEmpty(productsFromMongo):
+                return res.status(400).json({
+                    message: `There is no product to get from any DB`
+                })
 
-        if (productsFromRedis !== null && products.length === lodash.size(productsFromMongo)) {
-            message = `successfully get all products from Redis`
-        }
+            case !lodash.isEmpty(products) && lodash.size(products) === lodash.size(productsFromMongo):
+                message = `successfully get all products from Redis`
+                break
 
-        if (productsFromRedis !== null && lodash.size(productsFromMongo) !== products.length) {
-            await redisClient.set('products', JSON.stringify(productsFromMongo))
-            products = productsFromMongo
-            message = `successfully get all products from Mongo and set Redis 'products'`
-        }
+            case lodash.isEmpty(products) && !lodash.isEmpty(productsFromMongo):
+                await redisClient.set('products', JSON.stringify(productsFromMongo))
+                await redisClient.expire('products', 3600)
+                products = productsFromMongo
+                message = `successfully get all products from Mongo and set Redis 'products'`
+                break
 
-        if (productsFromRedis === null && !lodash.isEmpty(productsFromMongo)) {
-            await redisClient.set('products', JSON.stringify(productsFromMongo))
-            products = productsFromMongo
-            message = `successfully get all products from Mongo and set Redis 'products'`
+            case !lodash.isEmpty(products) && lodash.size(products) !== lodash.size(productsFromMongo):
+                await redisClient.set('products', JSON.stringify(productsFromMongo))
+                await redisClient.expire('products', 3600)
+                products = productsFromMongo
+                message = `successfully get all products from Mongo and set Redis 'products'`
+                break
         }
 
         res.json({
