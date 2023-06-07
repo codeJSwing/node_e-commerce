@@ -293,14 +293,26 @@ const deleteProduct = async (req, res) => {
     }
 }
 
-// todo: user 를 id 대신 username 으로 표시
-// todo: 후기를 작성한 제품이 삭제되면 자동으로 삭제되도록
+/*
+* todo
+*   후기를 작성한 제품이 삭제되면 같이(제품과 후기) 삭제되도록
+*   예외 처리
+*       후기를 작성하고 싶은 제품이 없는 경우 - O
+*       key 가 없을 때 - productId 가 일치하는 데이터만 삽입 - O
+*       key 가 있을 때 역순으로 삽입 - O
+* */
 const createReplyToProduct = async (req, res) => {
     const {memo} = req.body
     const {productId} = req.params
     try {
-        const findProduct = await ProductModel.findById(productId)
-        if (!findProduct) {
+        const promiseData = Promise.all([
+            ProductModel.findById(productId),
+            ReplyModel.find({product: productId})
+        ])
+        const [productFromDB, repliesFromDB] = await promiseData
+        let replies
+
+        if (lodash.isEmpty(productFromDB)) {
             return res.status(400).json({
                 message: `The product to reply does not exist`
             })
@@ -311,29 +323,26 @@ const createReplyToProduct = async (req, res) => {
             user: req.user._id,
             memo
         })
-        const reply = await newReply.save()
+        const createReply = await newReply.save()
 
-        // key 가 없을 때 - productId 가 일치하는 데이터만 삽입
-        const repliesFromRedis = await redisClient.get(`${productId} replies`)
-        if (lodash.size(repliesFromRedis) === 0) {
-            const repliesFromDB = await ReplyModel.find({product: productId})
-            await redisClient.set(`${productId} replies`, JSON.stringify([repliesFromDB]))
-        }
+        switch (true) {
+            case lodash.isEmpty(repliesFromDB):
+                await redisClient.set(`${productId} replies`, JSON.stringify([createReply]))
+                await redisClient.expire(`${productId} replies`, 3600)
+                replies = createReply
+                break
 
-        // key 가 있을 때 (push)
-        if (lodash.size(repliesFromRedis) > 0) {
-            const replies = JSON.parse(repliesFromRedis)
-            replies.unshift(reply)
-            await redisClient.set(`${productId} replies`, JSON.stringify(replies))
+            case !lodash.isEmpty(repliesFromDB):
+                replies = JSON.parse(await redisClient.get(`${productId} replies`))
+                replies.unshift(createReply)
+                await redisClient.set(`${productId} replies`, JSON.stringify(replies))
+                await redisClient.expire(`${productId} replies`, 3600)
+                break
         }
 
         res.json({
             message: 'successfully created new reply',
-            reply: {
-                user: reply.user,
-                memo: reply.memo,
-                reply_id: reply._id
-            }
+            replies
         })
     } catch (e) {
         res.status(500).json({
