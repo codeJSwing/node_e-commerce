@@ -2,35 +2,44 @@ import OrderModel from "../model/order.js";
 import lodash from "lodash"
 import redisClient from "../config/redis.js";
 
+/*
+* todo
+*   조회하려는 데이터가 없는 경우 (DB) - O
+*   redis 데이터와 db 데이터가 일치하는 경우 - O
+*   DB 데이터는 존재하지만, redis 데이터가 없는 경우 - O
+*   redis 데이터와 DB 데이터가 일치 하지 않는 경우 - O
+* */
 const getAllOrders = async (req, res) => {
     try {
+        const promiseOrder = Promise.all([
+            OrderModel
+                .find()
+                .populate('product', ['name', 'price'])
+                .populate('user', ['email', 'username', 'phoneNumber']),
+            redisClient.get('orders'),
+        ])
+        const [ordersFromDB, ordersFromRedis] = await promiseOrder
         let orders, message;
-        const ordersFromDB = await OrderModel
-            .find()
-            .populate('product', ['name', 'price'])
-            .populate('user', ['email', 'username', 'phoneNumber'])
-        const ordersFromRedis = await redisClient.get('orders')
-        const parsedRedis = await JSON.parse(ordersFromRedis)
 
-        // 데이터가 없는 경우 or db 데이터가 없지만, redis 데이터가 남아있는 경우
-        if (lodash.size(ordersFromDB) === 0 || (lodash.size(ordersFromRedis) > 1 && lodash.size(ordersFromDB) === 0)) {
-            return res.status(200).json({
-                message: `There is no order to get from any DB`
-            })
-        }
+        orders = await JSON.parse(ordersFromRedis)
 
-        // redis data 와 db data 가 일치하는 경우
-        if (lodash.size(parsedRedis) > 0 && (lodash.size(ordersFromDB) === lodash.size(parsedRedis))) {
-            orders = parsedRedis
-            message = `successfully get all orders from Redis`
-        }
+        switch (true) {
+            case lodash.isEmpty(ordersFromDB):
+                return res.status(404).json({
+                    message: `There is no order to get`
+                })
 
-        // redis 데이터가 만료된 경우 (없는 경우)
-        if (lodash.size(parsedRedis) === 0) {
-            await redisClient.set('orders', JSON.stringify(ordersFromDB))
-            await redisClient.expire('orders', 1800)
-            orders = ordersFromDB
-            message = `successfully get all orders from DB`
+            case !lodash.isEmpty(orders) && lodash.size(orders) === lodash.size(ordersFromDB):
+                message = `successfully get all orders from Redis`
+                break
+
+            case lodash.isEmpty(orders) && !lodash.isEmpty(ordersFromDB)
+            || !lodash.isEmpty(orders) && lodash.size(orders) !== lodash.size(ordersFromDB):
+                await redisClient.set('orders', JSON.stringify(ordersFromDB))
+                await redisClient.expire('orders', 1800)
+                orders = ordersFromDB
+                message = `successfully get all orders from DB and set Redis`
+                break
         }
 
         res.json({
