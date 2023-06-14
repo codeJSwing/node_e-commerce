@@ -4,8 +4,8 @@ import {
     getProduct,
     createProduct,
     updateProduct,
-    deleteAllProducts,
-    deleteProduct, createReplyToProduct
+    deleteProduct,
+    createReplyToProduct
 } from "../controller/product.js"
 import passport from "passport";
 
@@ -24,9 +24,6 @@ router.post("/", checkAuth, createProduct)
 
 // 등록한 판매 제품 수정 - 판매자
 router.put("/:id", updateProduct)
-
-// 등록된 모든 제품 삭제 - 판매자
-router.delete("/", checkAuth, deleteAllProducts)
 
 // 한가지 상품 삭제 - 판매자
 router.delete("/:id", checkAuth, deleteProduct)

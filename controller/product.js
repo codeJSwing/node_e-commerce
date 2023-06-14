@@ -25,8 +25,8 @@ const getAllProducts = async (req, res) => {
         products = JSON.parse(productsFromRedis)
 
         switch (true) {
-            case lodash.isEmpty(products) && lodash.isEmpty(productsFromMongo):
-                return res.status(400).json({
+            case lodash.isEmpty(productsFromMongo):
+                return res.status(404).json({
                     message: `There is no product to get from any DB`
                 })
 
@@ -34,14 +34,8 @@ const getAllProducts = async (req, res) => {
                 message = `successfully get all products from Redis`
                 break
 
-            case lodash.isEmpty(products) && !lodash.isEmpty(productsFromMongo):
-                await redisClient.set('products', JSON.stringify(productsFromMongo))
-                await redisClient.expire('products', 3600)
-                products = productsFromMongo
-                message = `successfully get all products from Mongo and set Redis 'products'`
-                break
-
             case !lodash.isEmpty(products) && lodash.size(products) !== lodash.size(productsFromMongo):
+            default:
                 await redisClient.set('products', JSON.stringify(productsFromMongo))
                 await redisClient.expire('products', 3600)
                 products = productsFromMongo
@@ -94,21 +88,23 @@ const getProduct = async (req, res) => {
         product = JSON.parse(productFromRedis)
         replies = JSON.parse(repliesFromRedis)
 
-        console.log('replies length', lodash.size(replies))
-        console.log('replies', replies)
+        // if (lodash.isEmpty(productFromDB)) {
+        //     return res.status(404).json({
+        //         message: `There is no product to get any DB`
+        //     })
+        // }
 
         switch (true) {
             case lodash.isEmpty(productFromDB):
-                return res.status(400).json({
+                return res.status(404).json({
                     message: `There is no product to get any DB`
                 })
 
-            case !lodash.isEmpty(product) && !lodash.isEmpty(productFromDB):
+            case !lodash.isEmpty(product) && lodash.size(product) === lodash.size(productFromDB):
                 message = `successfully get product by ${id} from Redis`
-                product = JSON.parse(productFromRedis)
                 break
 
-            case (lodash.isEmpty(product) && !lodash.isEmpty(productFromDB)):
+            default:
                 await redisClient.set(id, JSON.stringify(productFromDB))
                 await redisClient.expire(id, 3600)
                 message = `successfully get product by ${id} from DB and set Redis`
@@ -118,14 +114,12 @@ const getProduct = async (req, res) => {
 
         switch (true) {
             case !lodash.isEmpty(replies) && lodash.size(replies) === lodash.size(repliesFromDB):
-                replies = JSON.parse(repliesFromRedis)
                 break
 
             case lodash.isEmpty(repliesFromDB):
                 break
 
-            case (lodash.isEmpty(replies) && !lodash.isEmpty(repliesFromDB))
-            || (!lodash.isEmpty(replies) && lodash.size(replies) !== lodash.size(repliesFromDB)):
+            default:
                 await redisClient.set(`${id} replies`, JSON.stringify(repliesFromDB))
                 await redisClient.expire(`${id} replies`, 3600)
                 replies = repliesFromDB
@@ -144,24 +138,9 @@ const getProduct = async (req, res) => {
     }
 }
 
-/*
-* todo
-*   예외처리
-*       1. 데이터가 없는 경우 - O
-*       2. 데이터가 존재하는 경우, 역순으로 데이터를 삽입 - O
-*       3. 만료기한으로 redis 데이터가 삭제된 경우 - O
-*       (조회할 때 응답속도를 더 높이기 위해서 생성할 때마다 레디스에 데이터를 갱신한다.)
-* */
 const createProduct = async (req, res) => {
     const {name, price, desc} = req.body
     try {
-        const promiseProducts = Promise.all([
-            redisClient.get('products'),
-            ProductModel.find()
-        ])
-        const [productsFromRedis, productsFromMongo] = await promiseProducts
-        let products;
-
         const newProduct = new ProductModel({
             name,
             price,
@@ -169,25 +148,8 @@ const createProduct = async (req, res) => {
         })
         const createdProduct = await newProduct.save()
 
-        products = JSON.parse(productsFromRedis)
-
-        switch (true) {
-            case lodash.isEmpty(products) && lodash.isEmpty(productsFromMongo):
-                products = [createdProduct]
-                break
-
-            case !lodash.isEmpty(products) && !lodash.isEmpty(productsFromMongo):
-                products.unshift(createdProduct)
-                break
-
-            case lodash.isEmpty(products) && !lodash.isEmpty(productsFromMongo):
-                products = productsFromMongo
-                products.unshift(createdProduct)
-                break
-        }
-
-        await redisClient.set('products', JSON.stringify(products))
-        await redisClient.expire('products', 3600)
+        await redisClient.set(`${createdProduct._id}`, JSON.stringify(createdProduct))
+        await redisClient.expire(`${createdProduct._id}`, 3600)
 
         res.json({
             message: `successfully created new product`,
@@ -200,29 +162,27 @@ const createProduct = async (req, res) => {
     }
 }
 
-/*
-* todo
-*   DB의 데이터가 없는 경우 - O
-*   redis 데이터 덮어씌우기 - O
-* */
 const updateProduct = async (req, res) => {
     const {id} = req.params
     try {
-        const updateOps = req.body
-        const product = await ProductModel.findByIdAndUpdate(id, {$set: updateOps})
-
+        const product = await ProductModel.findById(id)
         if (!product) {
-            return res.status(400).json({
+            return res.status(404).json({
                 message: `There is no product to update`
             })
         }
 
-        await redisClient.set(id, JSON.stringify(product))
+        const updateOps = req.body
+        await ProductModel.updateOne({_id: id}, {$set: updateOps})
+
+        const newProduct = await ProductModel.findById(id)
+
+        await redisClient.set(id, JSON.stringify(newProduct))
         await redisClient.expire(id, 3600)
 
         res.json({
             msg: `successfully updated product by ${id}`,
-            product
+            product: newProduct
         })
     } catch (err) {
         res.status(500).json({
@@ -231,57 +191,22 @@ const updateProduct = async (req, res) => {
     }
 }
 
-/*
-* todo
-*   db, redis 데이터 동시 삭제 - O
-*   'product' key redis 데이터는 이 API 에서는 삭제하지 않는다.
-*   (만료기한을 따로 설정해뒀기 때문에)*
-* */
-const deleteAllProducts = async (req, res) => {
-    try {
-        const promiseDelete = Promise.all([
-            ProductModel.deleteMany(),
-            redisClient.del('products')
-        ])
-        await promiseDelete
-
-        res.json({
-            message: 'successfully deleted all data in DB & Redis'
-        })
-    } catch (e) {
-        res.status(500).json({
-            message: e.message
-        })
-    }
-}
-
-/*
-* todo
-*   데이터가 없는 경우 - O
-*   [DB, 'product' key, 'products' key] 데이터는 한번에 삭제 - O
-* */
 const deleteProduct = async (req, res) => {
     const {id} = req.params
     try {
-        const promiseProduct = Promise.all([
-            ProductModel.findByIdAndDelete(id),
-            ProductModel.find()
-        ])
-        const [productFromDB, products] = await promiseProduct
-
-        if (!productFromDB) {
-            return res.status(400).json({
+        const product = await ProductModel.findById(id)
+        if (!product) {
+            return res.status(404).json({
                 message: `There is no product to delete from DB`
             })
         }
 
-        const setRedis = Promise.all([
-            redisClient.del(id),
-            redisClient.set('products', JSON.stringify(products)),
-            redisClient.expire('products', 3600)
+        const deleteProduct = Promise.all([
+            ProductModel.deleteOne({_id: id}),
+            redisClient.del(id)
         ])
 
-        await setRedis
+        await deleteProduct
 
         res.json({
             message: `successfully deleted data by ${id}`
@@ -313,7 +238,7 @@ const createReplyToProduct = async (req, res) => {
         let replies
 
         if (lodash.isEmpty(productFromDB)) {
-            return res.status(400).json({
+            return res.status(404).json({
                 message: `The product to reply does not exist`
             })
         }
@@ -356,7 +281,6 @@ export {
     getProduct,
     createProduct,
     updateProduct,
-    deleteAllProducts,
     deleteProduct,
     createReplyToProduct
 }
