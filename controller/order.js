@@ -1,9 +1,11 @@
 import OrderModel from "../model/order.js";
 import lodash from "lodash"
 import redisClient from "../config/redis.js";
+import ProductModel from "../model/product.js";
 
 /*
 * todo
+*   promise all 로 선언 - O
 *   조회하려는 데이터가 없는 경우 (DB) - O
 *   redis 데이터와 db 데이터가 일치하는 경우 - O
 *   DB 데이터는 존재하지만, redis 데이터가 없는 경우 - O
@@ -54,44 +56,33 @@ const getAllOrders = async (req, res) => {
 }
 
 const getOrder = async (req, res) => {
-    const { id } = req.params
+    const {id} = req.params
     try {
-        let order, message;
-        const orderFromDB = await OrderModel
-            .findById(id)
-            .populate('product', ['name', 'price', 'desc'])
-            .populate('user')
-        const orderFromRedis = await redisClient.get(id)
+        const promiseOrder = Promise.all([
+            OrderModel
+                .findById(id)
+                .populate('product', ['name', 'price', 'desc'])
+                .populate('user'),
+            redisClient.get(id)
+        ])
+        const [orderFromDB, orderFromRedis] = await promiseOrder
+        let order
 
-        // 조회하려는 주문이 없을 때
-        if (!orderFromDB) {
-            return res.status(400).json({
-                msg: 'There is no order to get'
+        if (lodash.isEmpty(orderFromDB)) {
+            return res.status(404).json({
+                message: `There is no order to get`
             })
         }
 
-        // 등록된 주문의 사용자와 조회하려는 사용자가 다를 때
-        if (!lodash.isEqual(orderFromDB.user._id, req.user._id)) {
-            return res.status(401).json({
-                msg: 'This is not your order'
-            })
-        }
-
-        // redis data 와 db 데이터가 일치할 때
-        if (lodash.size(orderFromRedis) > 0 && (lodash.size(orderFromDB) === lodash.size(orderFromRedis))) {
-            order = orderFromRedis
-            message = `successfully get order by ${id} from Redis`
-        }
-
-        // redis data 가 없거나, redis data 와 db 데이터가 일치하지 않을 때
-        if ((lodash.size(orderFromRedis) === 0 && lodash.size(orderFromDB) > 1) || (lodash.size(orderFromRedis) > 0 && (lodash.size(orderFromDB) !== lodash.size(orderFromRedis)))) {
+        if (lodash.isEmpty(orderFromRedis)) {
             await redisClient.set(id, JSON.stringify(orderFromDB))
             order = orderFromDB
-            message = `successfully get order by ${id} from DB`
+        } else {
+            order = JSON.parse(orderFromRedis)
         }
 
         res.json({
-            message,
+            message: `successfully get order by ${id}`,
             order
         })
     } catch (e) {
@@ -102,18 +93,22 @@ const getOrder = async (req, res) => {
 }
 
 const createOrder = async (req, res) => {
-    const { _id } = req.user
-    const { product, quantity } = req.body
+    const {_id} = req.user
+    const {product, quantity} = req.body
     try {
         const newOrder = new OrderModel({
             product,
             quantity,
             user: _id
         })
-        const order = await newOrder.save()
+        const createOrder = await newOrder.save()
+
+        await redisClient.set(`${createOrder._id}`, JSON.stringify(createOrder))
+        await redisClient.expire(`${createOrder._id}`, 3600)
+
         res.json({
             message: 'successfully created new order',
-            order
+            order: createOrder
         })
     } catch (e) {
         res.status(500).json({
@@ -123,10 +118,24 @@ const createOrder = async (req, res) => {
 }
 
 const updateOrder = async (req, res) => {
+    const {id} = req.params
     try {
-        const { id } = req.params
+        const order = await OrderModel.findById(id)
+
+        if (!order) {
+            return res.status(404).json({
+                message: `There is no order to update`
+            })
+        }
+
         const updateOps = req.body
-        await OrderModel.findByIdAndUpdate(id, { $set: updateOps })
+        await OrderModel.updateOne({_id: id}, {$set: updateOps})
+
+        const newOrder = await OrderModel.findById(id)
+
+        await redisClient.set(id, JSON.stringify(newOrder))
+        await redisClient.expire(id, 3600)
+
         res.json({
             message: `successfully updated data by ${id}`
         })
@@ -137,25 +146,6 @@ const updateOrder = async (req, res) => {
     }
 }
 
-const deleteAllOrders = async (req, res) => {
-    try {
-        await OrderModel.deleteMany()
-        res.json({
-            message: 'successfully deleted all Orders'
-        })
-    } catch (e) {
-        res.status(500).json({
-            message: e.message
-        })
-    }
-}
-
-/*
-* todo
-*  1. 삭제하려는 주문이 없을 때 - O
-*  2. 등록된 주문의 사용자(구매자)와 삭제하려는 사용자의 id가 다를 때 - O
-*  3. finally 를 사용한 방식
-* */
 const deleteOrder = async (req, res) => {
     const {id} = req.params
     try {
@@ -172,7 +162,12 @@ const deleteOrder = async (req, res) => {
             })
         }
 
-        await OrderModel.findByIdAndDelete(id)
+        const deletePromise = Promise.all([
+            OrderModel.findByIdAndDelete(id),
+            redisClient.del(id)
+        ])
+        await deletePromise
+
         res.json({
             message: `successfully deleted data by ${id}`
         })
@@ -188,6 +183,5 @@ export {
     getOrder,
     createOrder,
     updateOrder,
-    deleteAllOrders,
     deleteOrder
 }
