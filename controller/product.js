@@ -4,30 +4,46 @@ import redisClient from "../config/redis.js";
 import lodash from "lodash";
 
 /*
-* todo
-*  1. 병렬 처리 (promise all) - O
-*  2. 예외 처리 (if -> switch - O)
-*   데이터 자체가 없는 경우 - O
-*   redis 데이터가 있고, db 데이터와 같을 때 - O
-*   DB 에서 가져온 데이터와 Redis 데이터가 일치하지 않는 경우 - O
-*   redis 데이터가 없지만, db 데이터가 있는 경우 - O
-*/
+        * todo
+        *   1. scan 으로 redis 에 저장된 데이터를 찾는다.
+        *   2. filter 를 통해 'products/' 문자열이 포함된 키를 찾는다.
+        *       1) * 다른 추가적인 제약 조건을 넣어야 한다. -> products 의 하위 계층을 두지 않는 방향으로
+        *   3. 찾은 데이터를 넣을 공간을 만든다.
+        *   4. 만든 공간에 하나씩 데이터를 넣는다.
+        *       1) * Scan 으로 찾은 데이터는 순서가 일정하지 않다.
+        * */
 const getAllProducts = async (req, res) => {
     try {
-        const result = await redisClient.scan('0')
+        const promiseAll = Promise.all([
+            redisClient.scan(0),
+            []
+        ])
+        const [findRedisData, productsBase] = await promiseAll
 
-        const productPromises = []
+        const filterRedisKey = findRedisData.keys.filter((key) => key.includes('products/'))
 
-        for (const product of result.keys) {
-            productPromises.push(getProduct(req, res, product))
+        if (lodash.isEmpty(filterRedisKey)) {
+            const productsFromDB = await ProductModel.find()
+            if (lodash.isEmpty(productsFromDB)) {
+                return res.status(204).json({
+                    message: `There is no any product`
+                })
+            } else {
+                return res.json({
+                    message: `successfully get all products from DB`,
+                    products: productsFromDB
+                })
+            }
         }
 
-        const products = await Promise.all(productPromises)
-
-        console.log(products)
+        for (let i = 0; i < filterRedisKey.length; i++) {
+            const product = await redisClient.get(filterRedisKey[i])
+            productsBase.push(JSON.parse(product))
+        }
 
         res.json({
-            message: `Successfully retrieved all products`
+            message: `Successfully get all products`,
+            products: productsBase
         })
     } catch (err) {
         res.status(500).json({
@@ -36,32 +52,33 @@ const getAllProducts = async (req, res) => {
     }
 }
 
-/*
-* todo
-*   후기를 일단은 따로 두자.
-* */
 const getProduct = async (req, res) => {
     const {id} = req.params
     try {
         const productPromise = Promise.all([
             ProductModel.findById(id),
-            redisClient.get(id)
+            redisClient.get(`products/${id}`)
         ])
-        const [product, productFromRedis] = await productPromise
+        const [productFromDB, productFromRedis] = await productPromise
 
-        if (!product) {
+        if (!lodash.isEmpty(productFromRedis)) {
+            return res.json({
+                message: `successfully get product by ${id}`,
+                product: productFromRedis
+            })
+        }
+
+        if (lodash.isEmpty(productFromDB)) {
             return res.status(404).json({
                 message: `There is no product to get`
             })
         }
 
-        if (lodash.isEmpty(productFromRedis)) {
-            await redisClient.set(id, JSON.stringify(product))
-        }
+        await redisClient.set(`products/${id}`, JSON.stringify(productFromDB))
 
         res.json({
-            message: `successfully get product and Reply by ${id}`,
-            product
+            message: `successfully get product by ${id}`,
+            product: productFromDB
         })
     } catch (err) {
         res.status(500).json({
@@ -80,8 +97,8 @@ const createProduct = async (req, res) => {
         })
         const createdProduct = await newProduct.save()
 
-        await redisClient.set(`${createdProduct._id}`, JSON.stringify(createdProduct))
-        await redisClient.expire(`${createdProduct._id}`, 3600)
+        await redisClient.set(`products/${createdProduct._id}`, JSON.stringify(createdProduct))
+        await redisClient.expire(`products/${createdProduct._id}`, 3600)
 
         res.json({
             message: `successfully created new product`,
@@ -109,8 +126,8 @@ const updateProduct = async (req, res) => {
 
         const newProduct = await ProductModel.findById(id)
 
-        await redisClient.set(id, JSON.stringify(newProduct))
-        await redisClient.expire(id, 3600)
+        await redisClient.set(`products/${id}`, JSON.stringify(newProduct))
+        await redisClient.expire(`products/${id}`, 3600)
 
         res.json({
             msg: `successfully updated product by ${id}`,
@@ -135,13 +152,49 @@ const deleteProduct = async (req, res) => {
 
         const deleteProduct = Promise.all([
             ProductModel.deleteOne({_id: id}),
-            redisClient.del(id)
+            redisClient.del(`products/${id}`)
         ])
 
         await deleteProduct
 
         res.json({
             message: `successfully deleted data by ${id}`
+        })
+    } catch (e) {
+        res.status(500).json({
+            message: e.message
+        })
+    }
+}
+
+const getReplyToProduct = async (req, res) => {
+    const {productId, id} = req.params
+    try {
+        const replyFromRedis = await redisClient.get(`${productId}/replies/${id}`)
+        if (!lodash.isEmpty(replyFromRedis)) {
+            return res.json({
+                message: `successfully get reply by ${id}`,
+                reply: JSON.parse(replyFromRedis)
+            })
+        }
+
+        let reply
+
+        if (lodash.isEmpty(replyFromRedis)) {
+            const replyFromDB = await ReplyModel.findById(id)
+            if (lodash.isEmpty(replyFromDB)) {
+                return res.status(204).json({
+                    message: `There is no reply from any DB`
+                })
+            }
+            reply = replyFromDB
+            await redisClient.set(`${productId}/replies/${id}`, JSON.stringify(replyFromDB))
+            await redisClient.expire(`${productId}/replies/${id}`, 3600)
+        }
+
+        res.json({
+            message: `successfully get reply by ${id}`,
+            reply
         })
     } catch (e) {
         res.status(500).json({
@@ -169,8 +222,8 @@ const createReplyToProduct = async (req, res) => {
         })
         const createReply = await newReply.save()
 
-        await redisClient.LPUSH(`${productId} replies`, JSON.stringify(createReply))
-        await redisClient.expire(`${productId} replies`, 3600)
+        await redisClient.set(`${productId}/replies/${createReply._id}`, JSON.stringify(createReply))
+        await redisClient.expire(`${productId}/replies/${createReply._id}`, 3600)
 
         res.json({
             message: 'successfully created new reply',
@@ -189,5 +242,6 @@ export {
     createProduct,
     updateProduct,
     deleteProduct,
-    createReplyToProduct
+    createReplyToProduct,
+    getReplyToProduct
 }
