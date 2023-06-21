@@ -5,7 +5,7 @@ import {
     createProduct,
     updateProduct,
     deleteProduct,
-    createReplyToProduct, getReplyToProduct
+    createReplyToProduct, getReplyToProduct, deleteReplyToProduct, updateReplyToProduct
 } from "../controller/product.js"
 import passport from "passport";
 
@@ -33,5 +33,11 @@ router.post("/:productId/replies", checkAuth, createReplyToProduct)
 
 // 제품의 후기 조회
 router.get("/:productId/replies/:id", checkAuth, getReplyToProduct)
+
+// 제품의 후기 삭제
+router.delete("/:productId/replies/:id", checkAuth, deleteReplyToProduct)
+
+// 제품의 후기 수정
+router.put("/:productId/replies/:id", checkAuth, updateReplyToProduct)
 
 export default router

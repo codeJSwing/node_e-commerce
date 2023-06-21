@@ -236,6 +236,61 @@ const createReplyToProduct = async (req, res) => {
     }
 }
 
+const deleteReplyToProduct = async (req, res) => {
+    const {productId, id} = req.params
+    try {
+        const deletePromise = Promise.all([
+            redisClient.del(`${productId}/replies/${id}`),
+            ReplyModel.findByIdAndDelete(id)
+        ])
+        await deletePromise
+
+        res.json({
+            message: `successfully deleted reply by ${id}`
+        })
+    } catch (e) {
+        res.status(500).json({
+            message: e.message
+        })
+    }
+}
+
+const updateReplyToProduct = async (req, res) => {
+    const {productId, id} = req.params
+    try {
+        const promiseAll = Promise.all([
+            req.body,
+            ProductModel.findById(productId)
+        ])
+        const [updateOps, productFromDB] = await promiseAll
+
+        if (lodash.isEmpty(productFromDB)) {
+            return res.status(404).json({
+                message: `This product does not exist`
+            })
+        }
+
+        const updateReply = await ReplyModel.findByIdAndUpdate(id, {$set: updateOps}, {new: true})
+
+        if (lodash.isEmpty(updateReply)) {
+            return res.status(404).json({
+                message: `This reply does not exist`
+            })
+        }
+
+        await redisClient.set(`${productId}/replies/${id}`, JSON.stringify(updateReply))
+        await redisClient.expire(`${productId}/replies/${id}`, 3600)
+
+        res.json({
+            message: `successfully updated reply by ${id}`
+        })
+    } catch (e) {
+        res.status(500).json({
+            message: e.message
+        })
+    }
+}
+
 export {
     getAllProducts,
     getProduct,
@@ -243,5 +298,7 @@ export {
     updateProduct,
     deleteProduct,
     createReplyToProduct,
-    getReplyToProduct
+    getReplyToProduct,
+    deleteReplyToProduct,
+    updateReplyToProduct
 }
