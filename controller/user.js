@@ -1,8 +1,3 @@
-import {
-    findPasswordTemplete,
-    sendEmail,
-    signupTemplete
-} from "../config/sendEmail.js";
 import UserModel from "../model/user.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
@@ -10,6 +5,7 @@ import redisClient from "../config/redis.js";
 import path from "path";
 import {fileURLToPath} from "url";
 import lodash from "lodash"
+import {sendEmail, signupTemplete} from "../config/sendEmail.js";
 
 // ES 모듈에서 파일의 경로에 접근하기 위한 함수
 const __filename = fileURLToPath(import.meta.url);
@@ -90,9 +86,7 @@ const updatePasswordPage = async (req, res) => {
 *  4. 스키마에서 username을 자동으로 생성할 수 있을까?
 * */
 const signupHandler = async (req, res) => {
-    const {
-        email, name, username, password, password2, phoneNumber, role
-    } = req.body
+    const {email, name, username, password, password2, phoneNumber, role} = req.body
     try {
         const newUser = new UserModel({
             email,
@@ -110,6 +104,8 @@ const signupHandler = async (req, res) => {
         }
 
         const createUser = await newUser.save()
+
+        console.log('----------------------', createUser)
 
         const confirmToken = await jwt.sign(
             {email: createUser.email},
@@ -141,14 +137,15 @@ const loginHandler = async (req, res) => {
     const {email, password} = req.body
     try {
         const user = await UserModel.findOne({email})
-        if (!user) {
-            return res.status(401).json({
+        if (lodash.isEmpty(user)) {
+            return res.status(404).json({
                 message: `입력하신 이메일이 존재하지 않습니다.`
             })
         }
+
         const isMatching = await user.matchPassword(password)
         if (!isMatching) {
-            return res.status(401).json({
+            return res.status(400).json({
                 message: `비밀번호가 일치하지 않습니다.`
             })
         }
@@ -157,6 +154,7 @@ const loginHandler = async (req, res) => {
             process.env.LOGIN_ACCESS_KEY,
             {expiresIn: '1h'}
         )
+
         res.json({
             message: `로그인이 완료되었습니다.`,
             token
@@ -165,51 +163,44 @@ const loginHandler = async (req, res) => {
         res.status(500).json({
             message: err.message
         })
-        // res.status(500)
-        // throw new Error(err.message)
     }
 }
 
-/*
-* todo
-*  1. db 와 redis 모두 데이터가 없는 경우 - O
-*  2. db 데이터만 존재하는 경우 - O
-*  3. redis 데이터가 존재하는 경우 - O
-* */
 const getProfile = async (req, res) => {
     const {_id} = req.user
     try {
-        const promiseAll = await Promise.all([
-            UserModel.findById(_id),
-            redisClient.get(`${_id}`)
-        ])
+        const userFromRedis = await redisClient.get(`users/${_id}`)
 
-        const [userFromDB, userFromRedis] = promiseAll
+        if (!lodash.isEmpty(userFromRedis)) {
+            return res.json({
+                message: `successfully get user information`,
+                user: JSON.parse(userFromRedis)
+            })
+        }
 
-        let user, message
+        const userFromDB = await UserModel.findById(_id)
+        const mapUser = {
+            _id: userFromDB._id,
+            email: userFromDB.email,
+            name: userFromDB.name,
+            username: userFromDB.username,
+            role: userFromDB.role,
+            createAt: userFromDB.createAt,
+            profileImg: userFromDB.profileImg
+        }
 
-        switch (true) {
-            case lodash.size(userFromRedis) === 0 && !userFromDB :
-                return res.status(400).json({
-                    message: 'This user does not exist'
-                })
-
-            case lodash.size(userFromRedis) === 0 && lodash.size(userFromDB) > 0:
-                await redisClient.set(`${_id}`, JSON.stringify(userFromDB))
-                await redisClient.expire(`${_id}`, 3600)
-                user = userFromDB
-                message = `successfully get user info from DB`
-                break
-
-            case lodash.size(userFromRedis) > 0:
-                user = JSON.parse(userFromRedis)
-                message = `successfully get user info from Redis`
-                break
+        if (lodash.isEmpty(userFromDB)) {
+            res.status(404).json({
+                message: `존재하지 않는 계정입니다.`
+            })
+        } else {
+            await redisClient.set(`users/${_id}`, JSON.stringify(mapUser))
+            await redisClient.expire(`users/${_id}`, 3600)
         }
 
         res.json({
-            message,
-            user
+            message: `successfully get user information`,
+            user: mapUser
         })
     } catch (e) {
         res.status(500).json({
