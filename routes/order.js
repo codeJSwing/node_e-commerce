@@ -4,7 +4,6 @@ import {
     getOrder,
     createOrder,
     updateOrder,
-    deleteAllOrders,
     deleteOrder
 } from "../controller/order.js";
 import passport from "passport";
@@ -23,10 +22,7 @@ router.get("/:id", checkAuth, getOrder)
 router.post("/", checkAuth, createOrder)
 
 // 주문 수량 수정 - 고객
-router.put("/:id", updateOrder)
-
-// 주문 전체 삭제 - 고객
-router.delete("/", deleteAllOrders)
+router.put("/:id", checkAuth, updateOrder)
 
 // 한 제품에 대한 주문만 삭제 - 고객
 router.delete("/:id", checkAuth, deleteOrder)

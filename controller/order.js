@@ -1,6 +1,8 @@
 import OrderModel from "../model/order.js";
 import lodash from "lodash"
 import redisClient from "../config/redis.js";
+import ReplyModel from "../model/reply.js";
+import ProductModel from "../model/product.js";
 
 /*
 * todo
@@ -133,21 +135,32 @@ const createOrder = async (req, res) => {
 const updateOrder = async (req, res) => {
     const {id} = req.params
     try {
-        const order = await OrderModel.findById(id)
+        const orderFromDB = await OrderModel.findById(id)
 
-        if (!order) {
+        if (lodash.isEmpty(orderFromDB)) {
             return res.status(404).json({
                 message: `There is no order to update`
             })
         }
 
+        if (!lodash.isEqual(orderFromDB.user._id, req.user._id)) {
+            res.status(401).json({
+                message: `This is not your order. Couldn't update order`
+            })
+        }
+
         const updateOps = req.body
-        await OrderModel.updateOne({_id: id}, {$set: updateOps})
+        const productFromDB = await ProductModel.findById(req.body.product)
+        if (lodash.isEmpty(productFromDB)) {
+            res.status(404).json({
+                message: `This product does not exist`
+            })
+        }
 
-        const newOrder = await OrderModel.findById(id)
+        const updateOrder = await OrderModel.findByIdAndUpdate(id, {$set: updateOps}, {new: true})
 
-        await redisClient.set(id, JSON.stringify(newOrder))
-        await redisClient.expire(id, 3600)
+        await redisClient.set(`orders/${id}`, JSON.stringify(updateOrder))
+        await redisClient.expire(`orders/${id}`, 3600)
 
         res.json({
             message: `successfully updated data by ${id}`
