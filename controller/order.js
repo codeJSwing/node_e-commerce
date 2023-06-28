@@ -1,7 +1,6 @@
 import OrderModel from "../model/order.js";
 import lodash from "lodash"
 import redisClient from "../config/redis.js";
-import ProductModel from "../model/product.js";
 
 /*
 * todo
@@ -17,7 +16,7 @@ const getAllOrders = async (req, res) => {
             OrderModel
                 .find()
                 .populate('product', ['name', 'price'])
-                .populate('user', ['email', 'username', 'phoneNumber']),
+                .populate('user', ['email']),
             redisClient.get('orders'),
         ])
         const [ordersFromDB, ordersFromRedis] = await promiseOrder
@@ -58,32 +57,46 @@ const getAllOrders = async (req, res) => {
 const getOrder = async (req, res) => {
     const {id} = req.params
     try {
-        const promiseOrder = Promise.all([
-            OrderModel
-                .findById(id)
-                .populate('product', ['name', 'price', 'desc'])
-                .populate('user'),
-            redisClient.get(id)
-        ])
-        const [orderFromDB, orderFromRedis] = await promiseOrder
-        let order
+        const orderFromRedis = await redisClient.get(`orders/${id}`)
+        const parsedOrder = await JSON.parse(orderFromRedis)
 
+        if (!lodash.isEqual(req.user._id.toString(), parsedOrder.user._id)) {
+            return res.status(401).json({
+                message: `This is not your order`
+            })
+        }
+
+        if (!lodash.isEmpty(orderFromRedis) && lodash.isEqual(req.user._id.toString(), parsedOrder.user._id)) {
+            return res.json({
+                message: `successfully get order by ${id}`,
+                order: parsedOrder
+            })
+        }
+
+        const orderFromDB = await OrderModel
+            .findById(id)
+            .populate('product', ['name', 'price', 'desc'])
+            .populate('user', ['email', 'name', 'username'])
         if (lodash.isEmpty(orderFromDB)) {
             return res.status(404).json({
                 message: `There is no order to get`
             })
         }
 
-        if (lodash.isEmpty(orderFromRedis)) {
-            await redisClient.set(id, JSON.stringify(orderFromDB))
-            order = orderFromDB
-        } else {
-            order = JSON.parse(orderFromRedis)
+        if (!lodash.isEqual(req.user._id, orderFromDB.user._id)) {
+            return res.status(401).json({
+                message: `This order is not your order`
+            })
+        }
+
+        if (!lodash.isEmpty(orderFromDB)) {
+            await redisClient.set(`orders/${id}`, JSON.stringify(orderFromDB))
+            await redisClient.expire(`orders/${id}`, 3600)
         }
 
         res.json({
             message: `successfully get order by ${id}`,
-            order
+            order: orderFromDB
         })
     } catch (e) {
         res.status(500).json({
@@ -103,11 +116,11 @@ const createOrder = async (req, res) => {
         })
         const createOrder = await newOrder.save()
 
-        await redisClient.set(`${createOrder._id}`, JSON.stringify(createOrder))
-        await redisClient.expire(`${createOrder._id}`, 3600)
+        await redisClient.set(`orders/${createOrder._id}`, JSON.stringify(createOrder))
+        await redisClient.expire(`orders/${createOrder._id}`, 3600)
 
         res.json({
-            message: 'successfully created new order',
+            message: `successfully created new order(${createOrder._id})`,
             order: createOrder
         })
     } catch (e) {

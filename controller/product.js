@@ -64,7 +64,7 @@ const getProduct = async (req, res) => {
         if (!lodash.isEmpty(productFromRedis)) {
             return res.json({
                 message: `successfully get product by ${id}`,
-                product: productFromRedis
+                product: JSON.parse(productFromRedis)
             })
         }
 
