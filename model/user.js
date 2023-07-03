@@ -68,18 +68,19 @@ userSchema.pre('save', async function (next) {
     try {
         const avatar = await gravatar.url(
             this.email,
-            {s: '200', r: 'pg', d: 'mm'},
-            {protocol: 'https'}
-        )
+            { s: '200', r: 'pg', d: 'mm' },
+            { protocol: 'https' }
+        );
         this.profileImg = avatar
         const salt = await bcrypt.genSalt(10)
         const hash = await bcrypt.hash(this.password, salt)
         this.password = hash
-        next()
+        next();
     } catch (e) {
         next(e)
     }
 })
+
 
 userSchema.methods.matchPassword = async function (password) {
     return await bcrypt.compare(password, this.password)

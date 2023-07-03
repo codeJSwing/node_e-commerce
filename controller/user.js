@@ -5,7 +5,7 @@ import redisClient from "../config/redis.js";
 import path from "path";
 import {fileURLToPath} from "url";
 import lodash from "lodash"
-import {sendEmail, signupTemplete} from "../config/sendEmail.js";
+import {findPasswordTemplete, sendEmail, signupTemplete} from "../config/sendEmail.js";
 
 // ES 모듈에서 파일의 경로에 접근하기 위한 함수
 const __filename = fileURLToPath(import.meta.url);
@@ -77,14 +77,6 @@ const updatePasswordPage = async (req, res) => {
     }
 }
 
-/*
-* todo
-*  1. 중복에 대한 처리를 스키마에서 - O
-*   email, 전화번호, username
-*  2. 비밀번호 1개 -> 2개 - O
-*  3. 스키마에서 걸리는 것을 프런트에 나타낼 수 있도록 - O
-*  4. 스키마에서 username을 자동으로 생성할 수 있을까?
-* */
 const signupHandler = async (req, res) => {
     const {email, name, username, password, password2, phoneNumber, role} = req.body
     try {
@@ -104,16 +96,13 @@ const signupHandler = async (req, res) => {
         }
 
         const createUser = await newUser.save()
-
-        console.log('----------------------', createUser)
-
         const confirmToken = await jwt.sign(
             {email: createUser.email},
             process.env.EMAIL_CONFIRM_ACCESS_KEY,
             {expiresIn: '10m'}
         )
-
         await sendEmail(createUser.email, '가입확인메일', signupTemplete(confirmToken))
+
         res.json({
             message: `회원가입이 완료되었습니다.`
         })
@@ -121,13 +110,12 @@ const signupHandler = async (req, res) => {
         if (err.name === 'MongoServerError') {
             const duplicateKey = Object.keys(err.keyPattern)[0]
             const duplicateValue = err.keyValue[duplicateKey]
-
             res.status(400).json({
                 message: `이미 존재하는 ${duplicateKey} (${duplicateValue})입니다.`
             })
         } else {
             res.status(500).json({
-                message: `Internal server error`,
+                message: err.message
             })
         }
     }
@@ -278,7 +266,6 @@ const findEmail = async (req, res) => {
     }
 }
 
-// todo: 사용자는 패스워드만 입력해야 되는데 token을 어떻게 처리할까?
 const resetPassword = async (req, res) => {
     const {password1, password2, token} = req.body
     try {
@@ -300,12 +287,6 @@ const resetPassword = async (req, res) => {
     }
 }
 
-/*
-* todo
-*  1. 비밀번호 일치 여부 확인 - O
-*  2. 패스워드 암호화 - O
-*  3. DB에 저장된 패스워드 변경 - O
-* */
 const updatePassword = async (req, res) => {
     const {_id} = req.user
     const {password, password2} = req.body

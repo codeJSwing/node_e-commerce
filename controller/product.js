@@ -25,8 +25,8 @@ const getAllProducts = async (req, res) => {
         if (lodash.isEmpty(filterRedisKey)) {
             const productsFromDB = await ProductModel.find()
             if (lodash.isEmpty(productsFromDB)) {
-                return res.status(204).json({
-                    message: `There is no any product`
+                return res.status(200).json({
+                    message: `Successfully get all products but, there is no product`
                 })
             } else {
                 return res.json({

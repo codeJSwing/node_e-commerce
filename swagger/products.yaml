@@ -3,7 +3,7 @@
   get:
     tags:
       - Product
-    summary: 등록된 모든 제품 조회 - 관리자
+    summary: 모든 상품 조회
     consumes:
       - application/json
     produces:
@@ -17,8 +17,8 @@
             examples:
               products:
                 $ref: './openapi.yaml#/components/examples/getAllProducts'
-      '400':
-        $ref: './openapi.yaml#/components/responses/BadRequest'
+      '204':
+        $ref: './openapi.yaml#/components/responses/NoContent'
       '500':
         $ref: './openapi.yaml#/components/responses/InternalServerError'
 
@@ -26,7 +26,7 @@
   post:
     tags:
       - Product
-    summary: 판매 제품 등록 - 판매자
+    summary: 판매 상품 등록
     consumes:
       - application/json
     produces:
@@ -54,35 +54,12 @@
       '500':
         $ref: './openapi.yaml#/components/responses/InternalServerError'
 
-  # deleteAllProducts
-  delete:
-    tags:
-      - Product
-    summary: 등록된 모든 제품 삭제 - 판매자
-    consumes:
-      - application/json
-    produces:
-      - application/json
-    responses:
-      '200':
-        content:
-          application/json:
-            schema:
-              $ref: './openapi.yaml#/components/schemas/products'
-            examples:
-              deleteAllProducts:
-                $ref: './openapi.yaml#/components/examples/deleteAllProducts'
-      '400':
-        $ref: './openapi.yaml#/components/responses/BadRequest'
-      '500':
-        $ref: './openapi.yaml#/components/responses/InternalServerError'
-
 /products/{id}:
   # getProduct
   get:
     tags:
       - Product
-    summary: 제품의 상세 페이지 이동 - 모든 사용자
+    summary: 제품의 상세 페이지 이동
     consumes:
       - application/json
     produces:
@@ -98,8 +75,8 @@
             examples:
               product:
                 $ref: './openapi.yaml#/components/examples/getProduct'
-      '400':
-        $ref: './openapi.yaml#/components/responses/BadRequest'
+      '404':
+        $ref: './openapi.yaml#/components/responses/NotFound'
       '500':
         $ref: './openapi.yaml#/components/responses/InternalServerError'
 
@@ -107,7 +84,7 @@
   put:
     tags:
       - Product
-    summary: 등록한 판매 제품 수정 - 판매자
+    summary: 판매중인 상품 정보 수정
     consumes:
       - application/json
     produces:
@@ -132,6 +109,8 @@
                 $ref: './openapi.yaml#/components/examples/updateProduct'
       '400':
         $ref: './openapi.yaml#/components/responses/BadRequest'
+      '404':
+        $ref: './openapi.yaml#/components/responses/NotFound'
       '500':
         $ref: './openapi.yaml#/components/responses/InternalServerError'
 
@@ -139,7 +118,7 @@
   delete:
     tags:
       - Product
-    summary: 특정 제품 삭제 - 판매자
+    summary: 판매 상품 삭제
     consumes:
       - application/json
     produces:
@@ -153,10 +132,10 @@
             schema:
               $ref: './openapi.yaml#/components/schemas/products'
             examples:
-              deleteAllProducts:
+              deleteProducts:
                 $ref: './openapi.yaml#/components/examples/deleteProduct'
-      '400':
-        $ref: './openapi.yaml#/components/responses/BadRequest'
+      '404':
+        $ref: './openapi.yaml#/components/responses/NotFound'
       '500':
         $ref: './openapi.yaml#/components/responses/InternalServerError'
 
